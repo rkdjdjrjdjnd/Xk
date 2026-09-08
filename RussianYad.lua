@@ -1,4 +1,4 @@
--- // RUSSIAN YAD v30.1 // ДЛЯ ТЕЛЕФОНА (ИСПРАВЛЕН) //
+-- // RUSSIAN YAD v32.0 // FLY + НОКЛИП + СПИДХАК // УЛУЧШЕННЫЙ ОБХОД //
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
@@ -6,8 +6,9 @@ local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
 
--- // ========== ОБХОД АНТИЧИТА ========== //
+-- // ========== УЛУЧШЕННЫЙ ОБХОД АНТИЧИТА ========== //
 pcall(function()
+    -- Отключаем все скрипты с AntiCheat в названии
     for _, v in pairs(getgc(true)) do
         if type(v) == "function" and getfenv(v) then
             local env = getfenv(v)
@@ -15,6 +16,28 @@ pcall(function()
                 env.script.Disabled = true
             end
         end
+    end
+    
+    -- Перехватываем и блокируем функции проверки
+    for _, v in pairs(getgc()) do
+        if type(v) == "function" and tostring(v):find("check") then
+            v = function() return true end
+        end
+    end
+    
+    -- Блокируем удалённые события для античита
+    local oldSend = game:GetService("ReplicatedStorage"):FindFirstChild("RemoteEvent")
+    if oldSend then
+        oldSend.FireServer = function(...) 
+            local args = {...}
+            if tostring(args[1]):find("AntiCheat") then return end
+            return oldSend.FireServer(...)
+        end
+    end
+    
+    -- Отключаем обнаружение эксплуатации
+    if game:GetService("CoreGui"):FindFirstChild("AntiCheat") then
+        game:GetService("CoreGui"):FindFirstChild("AntiCheat"):Destroy()
     end
 end)
 
@@ -109,8 +132,8 @@ end)
 -- // ========== МЕНЮ ========== //
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 350, 0, 300)
-MainFrame.Position = UDim2.new(0.5, -175, 0.5, -150)
+MainFrame.Size = UDim2.new(0, 280, 0, 200)
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -100)
 MainFrame.BackgroundColor3 = Color3.fromRGB(8, 0, 18)
 MainFrame.BackgroundTransparency = 0.1
 MainFrame.BorderSizePixel = 0
@@ -199,21 +222,6 @@ local function createButton(text, x, y, color)
     local corner = Instance.new("UICorner")
     corner.Parent = btn
     corner.CornerRadius = UDim.new(0, 10)
-    
-    btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundTransparency = 0.1}):Play()
-        TweenService:Create(btn, TweenInfo.new(0.2), {BorderSizePixel = 2}):Play()
-    end)
-    btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundTransparency = 0.3}):Play()
-        TweenService:Create(btn, TweenInfo.new(0.2), {BorderSizePixel = 1}):Play()
-    end)
-    -- Для телефона: касание
-    btn.TouchTap:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundTransparency = 0.1}):Play()
-        wait(0.1)
-        TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundTransparency = 0.3}):Play()
-    end)
     return btn
 end
 
@@ -224,8 +232,7 @@ local FlyBtn = createButton("🚀 FLY", 0.05, yPos, Color3.fromRGB(30, 30, 80))
 local NoclipBtn = createButton("⬜ НОКЛИП", 0.53, yPos, Color3.fromRGB(80, 30, 30))
 yPos = yPos + btnH + 8
 
-local KillallBtn = createButton("💀 KILLALL", 0.05, yPos, Color3.fromRGB(80, 0, 0))
-local SpeedBtn = createButton("⚡ СПИДХАК", 0.53, yPos, Color3.fromRGB(50, 50, 30))
+local SpeedBtn = createButton("⚡ СПИДХАК", 0.05, yPos, Color3.fromRGB(50, 50, 30))
 
 -- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ ========== //
 local menuDragToggle, menuDragStart, menuStartPos = false
@@ -248,24 +255,17 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
--- // ========== ОТКРЫТИЕ МЕНЮ (ДЛЯ ТЕЛЕФОНА И ПК) ========== //
+-- // ========== ОТКРЫТИЕ МЕНЮ ========== //
 local function toggleMenu()
-    local newState = not MainFrame.Visible
-    MainFrame.Visible = newState
-    IconButton.Visible = not newState
+    MainFrame.Visible = not MainFrame.Visible
+    IconButton.Visible = not MainFrame.Visible
 end
 
--- Для ПК
 IconButton.MouseButton1Click:Connect(toggleMenu)
--- Для телефона
 IconButton.TouchTap:Connect(toggleMenu)
--- Также через InputBegan (на случай, если TouchTap не сработает)
 IconButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        -- Если это касание, но не перетаскивание
-        if not iconDragToggle then
-            toggleMenu()
-        end
+    if input.UserInputType == Enum.UserInputType.Touch and not iconDragToggle then
+        toggleMenu()
     end
 end)
 
@@ -273,25 +273,47 @@ end)
 local flyGuiInstance = nil
 local isFlyRunning = false
 local noclipActive = false
+local noclipConnection = nil
 local speedActive = false
 local currentSpeed = 16
 local speedConnection = nil
 
--- // ========== ФУНКЦИИ ========== //
-
--- KILLALL
-local function killAll()
-    local count = 0
-    for _, plr in pairs(Player:GetPlayers()) do
-        if plr ~= Player and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            plr.Character.Humanoid.Health = 0
-            count = count + 1
+-- // ========== НОКЛИП (ИСПРАВЛЕННЫЙ) ========== //
+local function toggleNoclip()
+    noclipActive = not noclipActive
+    NoclipBtn.BackgroundColor3 = noclipActive and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(80, 30, 30)
+    NoclipBtn.Text = noclipActive and "⬜ НОКЛИП ON" or "⬜ НОКЛИП"
+    
+    if noclipActive then
+        if noclipConnection then noclipConnection:Disconnect() end
+        noclipConnection = RunService.Stepped:Connect(function()
+            if noclipActive and Player.Character then
+                for _, part in ipairs(Player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+    else
+        if noclipConnection then
+            noclipConnection:Disconnect()
+            noclipConnection = nil
+        end
+        if Player.Character then
+            for _, part in ipairs(Player.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
         end
     end
-    print("☠ УБИТО: " .. count)
 end
 
--- СПИДХАК
+NoclipBtn.MouseButton1Click:Connect(toggleNoclip)
+NoclipBtn.TouchTap:Connect(toggleNoclip)
+
+-- // ========== СПИДХАК ========== //
 local function setupSpeedHack()
     local inputGui = Instance.new("ScreenGui")
     inputGui.Parent = CoreGui
@@ -345,7 +367,7 @@ local function setupSpeedHack()
     cornerApply.Parent = applyBtn
     cornerApply.CornerRadius = UDim.new(0, 8)
     
-    applyBtn.MouseButton1Click:Connect(function()
+    local function applySpeed()
         local speed = tonumber(input.Text)
         if speed and speed >= 16 and speed <= 500 then
             currentSpeed = speed
@@ -364,32 +386,46 @@ local function setupSpeedHack()
             wait(1)
             input.Text = ""
         end
-    end)
-    applyBtn.TouchTap:Connect(function()
-        local speed = tonumber(input.Text)
-        if speed and speed >= 16 and speed <= 500 then
-            currentSpeed = speed
-            SpeedBtn.Text = "⚡ СПИД: " .. speed
-            SpeedBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
-            speedActive = true
-            if speedConnection then speedConnection:Disconnect() end
-            speedConnection = RunService.Heartbeat:Connect(function()
-                if speedActive and Player.Character and Player.Character:FindFirstChild("Humanoid") then
-                    Player.Character.Humanoid.WalkSpeed = currentSpeed
-                end
-            end)
-            inputGui:Destroy()
-        else
-            input.Text = "ОШИБКА!"
-            wait(1)
-            input.Text = ""
-        end
-    end)
+    end
+    
+    applyBtn.MouseButton1Click:Connect(applySpeed)
+    applyBtn.TouchTap:Connect(applySpeed)
 end
 
--- // ========== ОБРАБОТЧИКИ КНОПОК ========== //
+SpeedBtn.MouseButton1Click:Connect(function()
+    if speedActive then
+        speedActive = false
+        if speedConnection then
+            speedConnection:Disconnect()
+            speedConnection = nil
+        end
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.WalkSpeed = 16
+        end
+        SpeedBtn.Text = "⚡ СПИДХАК"
+        SpeedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 30)
+    else
+        setupSpeedHack()
+    end
+end)
+SpeedBtn.TouchTap:Connect(function()
+    if speedActive then
+        speedActive = false
+        if speedConnection then
+            speedConnection:Disconnect()
+            speedConnection = nil
+        end
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.WalkSpeed = 16
+        end
+        SpeedBtn.Text = "⚡ СПИДХАК"
+        SpeedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 30)
+    else
+        setupSpeedHack()
+    end
+end)
 
--- FLY
+-- // ========== FLY ========== //
 FlyBtn.MouseButton1Click:Connect(function()
     if isFlyRunning then
         if flyGuiInstance then
@@ -437,85 +473,6 @@ FlyBtn.TouchTap:Connect(function()
     end
 end)
 
--- НОКЛИП
-NoclipBtn.MouseButton1Click:Connect(function()
-    noclipActive = not noclipActive
-    NoclipBtn.BackgroundColor3 = noclipActive and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(80, 30, 30)
-    NoclipBtn.Text = noclipActive and "⬜ НОКЛИП ON" or "⬜ НОКЛИП"
-    if noclipActive then
-        RunService.Stepped:Connect(function()
-            if noclipActive and Player.Character then
-                for _, part in ipairs(Player.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then part.CanCollide = false end
-                end
-            end
-        end)
-    else
-        if Player.Character then
-            for _, part in ipairs(Player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then part.CanCollide = true end
-            end
-        end
-    end
-end)
-NoclipBtn.TouchTap:Connect(function()
-    noclipActive = not noclipActive
-    NoclipBtn.BackgroundColor3 = noclipActive and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(80, 30, 30)
-    NoclipBtn.Text = noclipActive and "⬜ НОКЛИП ON" or "⬜ НОКЛИП"
-    if noclipActive then
-        RunService.Stepped:Connect(function()
-            if noclipActive and Player.Character then
-                for _, part in ipairs(Player.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then part.CanCollide = false end
-                end
-            end
-        end)
-    else
-        if Player.Character then
-            for _, part in ipairs(Player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then part.CanCollide = true end
-            end
-        end
-    end
-end)
-
--- KILLALL
-KillallBtn.MouseButton1Click:Connect(killAll)
-KillallBtn.TouchTap:Connect(killAll)
-
--- СПИДХАК
-SpeedBtn.MouseButton1Click:Connect(function()
-    if speedActive then
-        speedActive = false
-        if speedConnection then
-            speedConnection:Disconnect()
-            speedConnection = nil
-        end
-        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-            Player.Character.Humanoid.WalkSpeed = 16
-        end
-        SpeedBtn.Text = "⚡ СПИДХАК"
-        SpeedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 30)
-    else
-        setupSpeedHack()
-    end
-end)
-SpeedBtn.TouchTap:Connect(function()
-    if speedActive then
-        speedActive = false
-        if speedConnection then
-            speedConnection:Disconnect()
-            speedConnection = nil
-        end
-        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-            Player.Character.Humanoid.WalkSpeed = 16
-        end
-        SpeedBtn.Text = "⚡ СПИДХАК"
-        SpeedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 30)
-    else
-        setupSpeedHack()
-    end
-end)
-
-print("☠ RUSSIAN YAD v30.1 ЗАГРУЖЕН")
-print("📌 НАЖМИ НА ИКОНКУ ☠, ЧТОБЫ ОТКРЫТЬ МЕНЮ")
+print("☠ RUSSIAN YAD v32.0 ЗАГРУЖЕН")
+print("📌 FLY, НОКЛИП, СПИДХАК — РАБОТАЮТ")
+print("🛡️ УЛУЧШЕННЫЙ ОБХОД АНТИЧИТА")
