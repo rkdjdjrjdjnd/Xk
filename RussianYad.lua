@@ -1,9 +1,10 @@
--- // RUSSIAN YAD v8.0 // КОМПАКТНЫЙ + НОКЛИП //
+-- // RUSSIAN YAD v9.0 // КРАСИВОЕ МЕНЮ + ПЕРЕТАСКИВАНИЕ ИКОНКИ //
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
 
 -- // ========== ОБХОД АНТИЧИТА ========== //
 local function bypassAntiCheat()
@@ -26,168 +27,290 @@ ScreenGui.Parent = CoreGui
 ScreenGui.Name = "RussianYadGUI"
 ScreenGui.ResetOnSpawn = false
 
--- // ========== ИКОНКА ========== //
+-- // ========== КРАСИВАЯ ИКОНКА ========== //
 local IconButton = Instance.new("ImageButton")
 IconButton.Parent = ScreenGui
 IconButton.Size = UDim2.new(0, 70, 0, 70)
-IconButton.Position = UDim2.new(0.85, -35, 0.85, -35)
+IconButton.Position = UDim2.new(0.85, -35, 0.85, -35) -- начальная позиция
 IconButton.BackgroundColor3 = Color3.fromRGB(20, 0, 30)
-IconButton.BorderColor3 = Color3.fromRGB(255, 0, 80)
-IconButton.BorderSizePixel = 3
-IconButton.Image = "rbxassetid://123456789"
+IconButton.BorderSizePixel = 0
+IconButton.Image = "rbxassetid://123456789" -- можно заменить на свою иконку
 IconButton.ImageColor3 = Color3.fromRGB(255, 0, 80)
 IconButton.ScaleType = Enum.ScaleType.Fit
 IconButton.Name = "IconButton"
 IconButton.ZIndex = 10
+IconButton.ClipsDescendants = true
 
--- ПУЛЬСАЦИЯ
-spawn(function()
-    while IconButton and IconButton.Parent do
-        for i = 0.8, 1.2, 0.05 do
-            wait(0.02)
-            if IconButton then IconButton.Size = UDim2.new(0, 70 * i, 0, 70 * i) end
-        end
-        for i = 1.2, 0.8, -0.05 do
-            wait(0.02)
-            if IconButton then IconButton.Size = UDim2.new(0, 70 * i, 0, 70 * i) end
-        end
-    end
-end)
+-- Скругление иконки (круг)
+local cornerIcon = Instance.new("UICorner")
+cornerIcon.Parent = IconButton
+cornerIcon.CornerRadius = UDim.new(1, 0)
 
+-- Тень иконки
+local shadowIcon = Instance.new("ImageLabel")
+shadowIcon.Parent = IconButton
+shadowIcon.Size = UDim2.new(1, 10, 1, 10)
+shadowIcon.Position = UDim2.new(0, -5, 0, -5)
+shadowIcon.BackgroundTransparency = 1
+shadowIcon.Image = "rbxassetid://13158748277" -- тень
+shadowIcon.ImageTransparency = 0.7
+shadowIcon.ZIndex = 0
+
+-- Неоновое свечение
+local glowIcon = Instance.new("ImageLabel")
+glowIcon.Parent = IconButton
+glowIcon.Size = UDim2.new(1.4, 0, 1.4, 0)
+glowIcon.Position = UDim2.new(-0.2, 0, -0.2, 0)
+glowIcon.BackgroundTransparency = 1
+glowIcon.Image = "rbxassetid://13158748277"
+glowIcon.ImageColor3 = Color3.fromRGB(255, 0, 80)
+glowIcon.ImageTransparency = 0.8
+glowIcon.ZIndex = 0
+glowIcon.Name = "Glow"
+
+-- Текст внутри иконки
 local IconText = Instance.new("TextLabel")
 IconText.Parent = IconButton
 IconText.Size = UDim2.new(1, 0, 1, 0)
 IconText.BackgroundTransparency = 1
 IconText.Text = "☠"
-IconText.TextColor3 = Color3.fromRGB(255, 0, 80)
+IconText.TextColor3 = Color3.fromRGB(255, 255, 255)
 IconText.TextScaled = true
 IconText.Font = Enum.Font.GothamBold
 IconText.ZIndex = 11
 
--- // ========== КОМПАКТНОЕ МЕНЮ ========== //
+-- Анимация пульсации с TweenService
+spawn(function()
+    while IconButton and IconButton.Parent do
+        local tweenInfo = TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+        local tween = TweenService:Create(IconButton, tweenInfo, {Size = UDim2.new(0, 75, 0, 75)})
+        tween:Play()
+        wait(0.8)
+        local tween2 = TweenService:Create(IconButton, tweenInfo, {Size = UDim2.new(0, 65, 0, 65)})
+        tween2:Play()
+        wait(0.8)
+    end
+end)
+
+-- // ========== ПЕРЕТАСКИВАНИЕ ИКОНКИ ========== //
+local iconDragToggle = false
+local iconDragStart = nil
+local iconStartPos = nil
+
+IconButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        iconDragToggle = true
+        iconDragStart = input.Position
+        iconStartPos = IconButton.Position
+    end
+end)
+
+IconButton.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        iconDragToggle = false
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch and iconDragToggle then
+        local delta = input.Position - iconDragStart
+        local newX = iconStartPos.X.Offset + delta.X
+        local newY = iconStartPos.Y.Offset + delta.Y
+        -- Ограничиваем, чтобы иконка не выходила за экран
+        local maxX = UIS:GetMouseLocation().X - 70
+        local maxY = UIS:GetMouseLocation().Y - 70
+        newX = math.clamp(newX, 0, maxX)
+        newY = math.clamp(newY, 0, maxY)
+        IconButton.Position = UDim2.new(0, newX, 0, newY)
+    end
+end)
+
+-- // ========== КРАСИВОЕ КОМПАКТНОЕ МЕНЮ ========== //
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 200, 0, 180)
-MainFrame.Position = UDim2.new(0.5, -100, 0.5, -90)
-MainFrame.BackgroundColor3 = Color3.fromRGB(8, 0, 15)
-MainFrame.BorderSizePixel = 3
-MainFrame.BorderColor3 = Color3.fromRGB(255, 0, 60)
-MainFrame.BackgroundTransparency = 0.05
+MainFrame.Size = UDim2.new(0, 220, 0, 200)
+MainFrame.Position = UDim2.new(0.5, -110, 0.5, -100)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 0, 20)
+MainFrame.BorderSizePixel = 0
+MainFrame.BackgroundTransparency = 0.1
 MainFrame.Visible = false
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Name = "MainFrame"
+MainFrame.ClipsDescendants = true
 
--- ЗАГОЛОВОК
+-- Скругление меню
+local cornerMenu = Instance.new("UICorner")
+cornerMenu.Parent = MainFrame
+cornerMenu.CornerRadius = UDim.new(0, 15)
+
+-- Неоновая рамка (тень)
+local borderGlow = Instance.new("ImageLabel")
+borderGlow.Parent = MainFrame
+borderGlow.Size = UDim2.new(1.1, 0, 1.1, 0)
+borderGlow.Position = UDim2.new(-0.05, 0, -0.05, 0)
+borderGlow.BackgroundTransparency = 1
+borderGlow.Image = "rbxassetid://13158748277"
+borderGlow.ImageColor3 = Color3.fromRGB(255, 0, 80)
+borderGlow.ImageTransparency = 0.7
+borderGlow.ZIndex = 0
+
+-- Заголовок
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
-Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "☠ FLY"
-Title.TextScaled = true
+Title.Text = "☠ RUSSIAN YAD"
 Title.TextColor3 = Color3.fromRGB(255, 0, 80)
 Title.Font = Enum.Font.GothamBold
+Title.TextScaled = true
+Title.ZIndex = 2
 
--- КРЕСТИК
+-- Крестик закрытия
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = MainFrame
 CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -35, 0, 3)
+CloseBtn.Position = UDim2.new(1, -35, 0, 5)
 CloseBtn.Text = "✖"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
-CloseBtn.BorderColor3 = Color3.fromRGB(255, 0, 0)
-CloseBtn.BorderSizePixel = 1
+CloseBtn.BorderSizePixel = 0
 CloseBtn.TextScaled = true
 CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.ZIndex = 2
 CloseBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
     IconButton.Visible = true
 end)
 
--- // ========== КНОПКИ (ТОЛЬКО 3) ========== //
-local yPos = 40
+-- // ========== КНОПКИ ========== //
+local yPos = 45
 local btnH = 35
 
 -- FLY
 local FlyBtn = Instance.new("TextButton")
 FlyBtn.Parent = MainFrame
-FlyBtn.Size = UDim2.new(0, 170, 0, btnH)
+FlyBtn.Size = UDim2.new(0, 190, 0, btnH)
 FlyBtn.Position = UDim2.new(0.05, 0, 0, yPos)
 FlyBtn.Text = "🌀 FLY"
 FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
-FlyBtn.BorderColor3 = Color3.fromRGB(100, 100, 255)
-FlyBtn.BorderSizePixel = 2
+FlyBtn.BorderSizePixel = 0
 FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 FlyBtn.Font = Enum.Font.GothamBold
 FlyBtn.TextScaled = true
 FlyBtn.Name = "FlyBtn"
+-- Скругление кнопки
+local cornerFly = Instance.new("UICorner")
+cornerFly.Parent = FlyBtn
+cornerFly.CornerRadius = UDim.new(0, 8)
 
-yPos = yPos + btnH + 5
+yPos = yPos + btnH + 8
 
 -- НОКЛИП
 local NoclipBtn = Instance.new("TextButton")
 NoclipBtn.Parent = MainFrame
-NoclipBtn.Size = UDim2.new(0, 170, 0, btnH)
+NoclipBtn.Size = UDim2.new(0, 190, 0, btnH)
 NoclipBtn.Position = UDim2.new(0.05, 0, 0, yPos)
 NoclipBtn.Text = "⬜ НОКЛИП"
 NoclipBtn.BackgroundColor3 = Color3.fromRGB(80, 30, 30)
-NoclipBtn.BorderColor3 = Color3.fromRGB(255, 100, 100)
-NoclipBtn.BorderSizePixel = 2
+NoclipBtn.BorderSizePixel = 0
 NoclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 NoclipBtn.Font = Enum.Font.GothamBold
 NoclipBtn.TextScaled = true
 NoclipBtn.Name = "NoclipBtn"
+local cornerNoclip = Instance.new("UICorner")
+cornerNoclip.Parent = NoclipBtn
+cornerNoclip.CornerRadius = UDim.new(0, 8)
 
-yPos = yPos + btnH + 5
+yPos = yPos + btnH + 8
 
 -- СКОРОСТЬ
 local SpeedFrame = Instance.new("Frame")
 SpeedFrame.Parent = MainFrame
-SpeedFrame.Size = UDim2.new(0, 170, 0, btnH)
+SpeedFrame.Size = UDim2.new(0, 190, 0, btnH)
 SpeedFrame.Position = UDim2.new(0.05, 0, 0, yPos)
 SpeedFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-SpeedFrame.BorderColor3 = Color3.fromRGB(100, 100, 100)
-SpeedFrame.BorderSizePixel = 1
+SpeedFrame.BorderSizePixel = 0
+local cornerSpeed = Instance.new("UICorner")
+cornerSpeed.Parent = SpeedFrame
+cornerSpeed.CornerRadius = UDim.new(0, 8)
 
 local SpeedMinus = Instance.new("TextButton")
 SpeedMinus.Parent = SpeedFrame
-SpeedMinus.Size = UDim2.new(0, 40, 0, btnH)
+SpeedMinus.Size = UDim2.new(0, 45, 0, btnH)
 SpeedMinus.Position = UDim2.new(0, 0, 0, 0)
 SpeedMinus.Text = "-"
 SpeedMinus.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-SpeedMinus.BorderColor3 = Color3.fromRGB(255, 255, 255)
-SpeedMinus.BorderSizePixel = 1
+SpeedMinus.BorderSizePixel = 0
 SpeedMinus.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedMinus.Font = Enum.Font.GothamBold
 SpeedMinus.TextScaled = true
 SpeedMinus.Name = "SpeedMinus"
+local cornerMinus = Instance.new("UICorner")
+cornerMinus.Parent = SpeedMinus
+cornerMinus.CornerRadius = UDim.new(0, 8)
 
 local SpeedLabel = Instance.new("TextLabel")
 SpeedLabel.Parent = SpeedFrame
-SpeedLabel.Size = UDim2.new(0, 50, 0, btnH)
-SpeedLabel.Position = UDim2.new(0.35, 0, 0, 0)
+SpeedLabel.Size = UDim2.new(0, 60, 0, btnH)
+SpeedLabel.Position = UDim2.new(0.34, 0, 0, 0)
 SpeedLabel.Text = "5"
 SpeedLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-SpeedLabel.BorderColor3 = Color3.fromRGB(255, 255, 0)
-SpeedLabel.BorderSizePixel = 1
+SpeedLabel.BorderSizePixel = 0
 SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
 SpeedLabel.Font = Enum.Font.GothamBold
 SpeedLabel.TextScaled = true
 SpeedLabel.Name = "SpeedLabel"
+local cornerLabel = Instance.new("UICorner")
+cornerLabel.Parent = SpeedLabel
+cornerLabel.CornerRadius = UDim.new(0, 8)
 
 local SpeedPlus = Instance.new("TextButton")
 SpeedPlus.Parent = SpeedFrame
-SpeedPlus.Size = UDim2.new(0, 40, 0, btnH)
+SpeedPlus.Size = UDim2.new(0, 45, 0, btnH)
 SpeedPlus.Position = UDim2.new(0.76, 0, 0, 0)
 SpeedPlus.Text = "+"
 SpeedPlus.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-SpeedPlus.BorderColor3 = Color3.fromRGB(255, 255, 255)
-SpeedPlus.BorderSizePixel = 1
+SpeedPlus.BorderSizePixel = 0
 SpeedPlus.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedPlus.Font = Enum.Font.GothamBold
 SpeedPlus.TextScaled = true
 SpeedPlus.Name = "SpeedPlus"
+local cornerPlus = Instance.new("UICorner")
+cornerPlus.Parent = SpeedPlus
+cornerPlus.CornerRadius = UDim.new(0, 8)
+
+-- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ ========== //
+local menuDragToggle = false
+local menuDragStart = nil
+local menuStartPos = nil
+
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        menuDragToggle = true
+        menuDragStart = input.Position
+        menuStartPos = MainFrame.Position
+    end
+end)
+
+MainFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        menuDragToggle = false
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch and menuDragToggle then
+        local delta = input.Position - menuDragStart
+        MainFrame.Position = UDim2.new(
+            menuStartPos.X.Scale,
+            menuStartPos.X.Offset + delta.X,
+            menuStartPos.Y.Scale,
+            menuStartPos.Y.Offset + delta.Y
+        )
+    end
+end)
 
 -- // ========== ПЕРЕМЕННЫЕ ========== //
 local flying = false
@@ -206,6 +329,7 @@ local function toggleNoclip()
     NoclipBtn.Text = noclipActive and "⬜ НОКЛИП ON" or "⬜ НОКЛИП"
     
     if noclipActive then
+        -- Подключаем обновление ноклипа в цикле
         RunService.Stepped:Connect(function()
             if noclipActive and Player.Character then
                 for _, part in ipairs(Player.Character:GetDescendants()) do
@@ -315,7 +439,7 @@ SpeedMinus.MouseButton1Click:Connect(function()
     SpeedLabel.Text = tostring(flySpeed)
 end)
 
--- // ========== ДЖОЙСТИК ========== //
+-- // ========== УПРАВЛЕНИЕ ЧЕРЕЗ ДЖОЙСТИК (СЕНСОР) ========== //
 local function handleTouch(input)
     if not flying then return end
     if input.UserInputType == Enum.UserInputType.Touch then
@@ -349,7 +473,7 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- // ========== ОБНОВЛЕНИЕ ========== //
+-- // ========== ОБНОВЛЕНИЕ В ЦИКЛЕ ========== //
 RunService.Heartbeat:Connect(function()
     if flying then updateFly() end
 end)
@@ -361,43 +485,12 @@ Player.CharacterAdded:Connect(function()
     if noclipActive then toggleNoclip() end
 end)
 
--- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ ========== //
+-- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ ПО ИКОНКЕ ========== //
 local menuOpen = false
 IconButton.MouseButton1Click:Connect(function()
     menuOpen = not menuOpen
     MainFrame.Visible = menuOpen
     IconButton.Visible = not menuOpen
-end)
-
--- // ========== ПЕРЕТАСКИВАНИЕ ========== //
-local dragToggle = nil
-local dragStart = nil
-local startPos = nil
-
-MainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        dragToggle = true
-        dragStart = input.Position
-        startPos = MainFrame.Position
-    end
-end)
-
-MainFrame.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        dragToggle = false
-    end
-end)
-
-UIS.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch and dragToggle then
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(
-            startPos.X.Scale,
-            startPos.X.Offset + delta.X,
-            startPos.Y.Scale,
-            startPos.Y.Offset + delta.Y
-        )
-    end
 end)
 
 -- // ========== ПАНИКА ========== //
@@ -408,8 +501,8 @@ UIS.InputBegan:Connect(function(input)
     end
 end)
 
-print("☠ RUSSIAN YAD v8.0 ЗАГРУЖЕН")
-print("📌 ИКОНКА ☠ — ОТКРЫТЬ/ЗАКРЫТЬ")
+print("☠ RUSSIAN YAD v9.0 ЗАГРУЖЕН")
+print("📌 ПЕРЕТАСКИВАЙ ИКОНКУ ПАЛЬЦЕМ")
 print("🌀 FLY — ВКЛЮЧИТЬ ПОЛЁТ")
 print("⬜ НОКЛИП — ПРОХОД СКВОЗЬ СТЕНЫ")
-print("👆 ТЯНИ ПАЛЕЦ ПО ЭКРАНУ — ЛЕТИШЬ")
+print("👆 ТЯНИ ПАЛЕЦ ПО ЭКРАНУ — УПРАВЛЕНИЕ ПОЛЁТОМ")
