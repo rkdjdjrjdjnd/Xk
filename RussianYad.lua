@@ -1,10 +1,11 @@
--- // RUSSIAN YAD v9.0 // КРАСИВОЕ МЕНЮ + ПЕРЕТАСКИВАНИЕ ИКОНКИ //
+-- // RUSSIAN YAD v10.0 // УПРАВЛЕНИЕ ЧЕРЕЗ ВИРТУАЛЬНЫЙ ДЖОЙСТИК //
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
+local VirtualUser = game:GetService("VirtualUser")
 
 -- // ========== ОБХОД АНТИЧИТА ========== //
 local function bypassAntiCheat()
@@ -27,36 +28,24 @@ ScreenGui.Parent = CoreGui
 ScreenGui.Name = "RussianYadGUI"
 ScreenGui.ResetOnSpawn = false
 
--- // ========== КРАСИВАЯ ИКОНКА ========== //
+-- // ========== ИКОНКА ========== //
 local IconButton = Instance.new("ImageButton")
 IconButton.Parent = ScreenGui
 IconButton.Size = UDim2.new(0, 70, 0, 70)
-IconButton.Position = UDim2.new(0.85, -35, 0.85, -35) -- начальная позиция
+IconButton.Position = UDim2.new(0.85, -35, 0.85, -35)
 IconButton.BackgroundColor3 = Color3.fromRGB(20, 0, 30)
 IconButton.BorderSizePixel = 0
-IconButton.Image = "rbxassetid://123456789" -- можно заменить на свою иконку
+IconButton.Image = "rbxassetid://123456789"
 IconButton.ImageColor3 = Color3.fromRGB(255, 0, 80)
 IconButton.ScaleType = Enum.ScaleType.Fit
 IconButton.Name = "IconButton"
 IconButton.ZIndex = 10
 IconButton.ClipsDescendants = true
 
--- Скругление иконки (круг)
 local cornerIcon = Instance.new("UICorner")
 cornerIcon.Parent = IconButton
 cornerIcon.CornerRadius = UDim.new(1, 0)
 
--- Тень иконки
-local shadowIcon = Instance.new("ImageLabel")
-shadowIcon.Parent = IconButton
-shadowIcon.Size = UDim2.new(1, 10, 1, 10)
-shadowIcon.Position = UDim2.new(0, -5, 0, -5)
-shadowIcon.BackgroundTransparency = 1
-shadowIcon.Image = "rbxassetid://13158748277" -- тень
-shadowIcon.ImageTransparency = 0.7
-shadowIcon.ZIndex = 0
-
--- Неоновое свечение
 local glowIcon = Instance.new("ImageLabel")
 glowIcon.Parent = IconButton
 glowIcon.Size = UDim2.new(1.4, 0, 1.4, 0)
@@ -68,7 +57,6 @@ glowIcon.ImageTransparency = 0.8
 glowIcon.ZIndex = 0
 glowIcon.Name = "Glow"
 
--- Текст внутри иконки
 local IconText = Instance.new("TextLabel")
 IconText.Parent = IconButton
 IconText.Size = UDim2.new(1, 0, 1, 0)
@@ -79,7 +67,7 @@ IconText.TextScaled = true
 IconText.Font = Enum.Font.GothamBold
 IconText.ZIndex = 11
 
--- Анимация пульсации с TweenService
+-- ПУЛЬСАЦИЯ
 spawn(function()
     while IconButton and IconButton.Parent do
         local tweenInfo = TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
@@ -116,7 +104,6 @@ UIS.InputChanged:Connect(function(input)
         local delta = input.Position - iconDragStart
         local newX = iconStartPos.X.Offset + delta.X
         local newY = iconStartPos.Y.Offset + delta.Y
-        -- Ограничиваем, чтобы иконка не выходила за экран
         local maxX = UIS:GetMouseLocation().X - 70
         local maxY = UIS:GetMouseLocation().Y - 70
         newX = math.clamp(newX, 0, maxX)
@@ -125,7 +112,7 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
--- // ========== КРАСИВОЕ КОМПАКТНОЕ МЕНЮ ========== //
+-- // ========== МЕНЮ ========== //
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
 MainFrame.Size = UDim2.new(0, 220, 0, 200)
@@ -139,12 +126,10 @@ MainFrame.Draggable = true
 MainFrame.Name = "MainFrame"
 MainFrame.ClipsDescendants = true
 
--- Скругление меню
 local cornerMenu = Instance.new("UICorner")
 cornerMenu.Parent = MainFrame
 cornerMenu.CornerRadius = UDim.new(0, 15)
 
--- Неоновая рамка (тень)
 local borderGlow = Instance.new("ImageLabel")
 borderGlow.Parent = MainFrame
 borderGlow.Size = UDim2.new(1.1, 0, 1.1, 0)
@@ -155,7 +140,6 @@ borderGlow.ImageColor3 = Color3.fromRGB(255, 0, 80)
 borderGlow.ImageTransparency = 0.7
 borderGlow.ZIndex = 0
 
--- Заголовок
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
 Title.Size = UDim2.new(1, 0, 0, 40)
@@ -167,7 +151,6 @@ Title.Font = Enum.Font.GothamBold
 Title.TextScaled = true
 Title.ZIndex = 2
 
--- Крестик закрытия
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = MainFrame
 CloseBtn.Size = UDim2.new(0, 30, 0, 30)
@@ -200,7 +183,6 @@ FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 FlyBtn.Font = Enum.Font.GothamBold
 FlyBtn.TextScaled = true
 FlyBtn.Name = "FlyBtn"
--- Скругление кнопки
 local cornerFly = Instance.new("UICorner")
 cornerFly.Parent = FlyBtn
 cornerFly.CornerRadius = UDim.new(0, 8)
@@ -318,9 +300,16 @@ local flySpeed = 5
 local flyBV = nil
 local flyBG = nil
 local isR6 = false
-local moveDirection = Vector3.new(0, 0, 0)
-local joystickActive = false
 local noclipActive = false
+
+-- // ========== ДЖОЙСТИК (ВИРТУАЛЬНЫЙ ИЗ РОБЛОКСА) ========== //
+-- Получаем направление движения из MoveDirection персонажа
+local function getMoveDirection()
+    if not Player.Character then return Vector3.new(0, 0, 0) end
+    local hum = Player.Character:FindFirstChildWhichIsA("Humanoid")
+    if not hum then return Vector3.new(0, 0, 0) end
+    return hum.MoveDirection
+end
 
 -- // ========== НОКЛИП ========== //
 local function toggleNoclip()
@@ -329,7 +318,6 @@ local function toggleNoclip()
     NoclipBtn.Text = noclipActive and "⬜ НОКЛИП ON" or "⬜ НОКЛИП"
     
     if noclipActive then
-        -- Подключаем обновление ноклипа в цикле
         RunService.Stepped:Connect(function()
             if noclipActive and Player.Character then
                 for _, part in ipairs(Player.Character:GetDescendants()) do
@@ -410,15 +398,21 @@ local function updateFly()
     local camera = Workspace.CurrentCamera
     if not camera then return end
     
+    -- Получаем направление от джойстика
+    local moveDir = getMoveDirection()
     local speed = flySpeed * 2
-    local move = moveDirection * speed
     
-    if not joystickActive then
-        move = move * 0.9
-        if move.Magnitude < 0.1 then move = Vector3.new(0, 0, 0) end
+    -- Если джойстик не активен, останавливаемся
+    if moveDir.Magnitude < 0.1 then
+        flyBV.Velocity = Vector3.new(0, 0, 0)
+        return
     end
     
+    -- Движение в направлении джойстика
+    local move = moveDir * speed
     flyBV.Velocity = move
+    
+    -- Поворот персонажа в сторону движения
     if move.Magnitude > 0.1 then
         flyBG.CFrame = CFrame.new(torso.Position, torso.Position + move)
     end
@@ -439,40 +433,6 @@ SpeedMinus.MouseButton1Click:Connect(function()
     SpeedLabel.Text = tostring(flySpeed)
 end)
 
--- // ========== УПРАВЛЕНИЕ ЧЕРЕЗ ДЖОЙСТИК (СЕНСОР) ========== //
-local function handleTouch(input)
-    if not flying then return end
-    if input.UserInputType == Enum.UserInputType.Touch then
-        joystickActive = true
-        local screenSize = UIS:GetMouseLocation()
-        local center = Vector2.new(screenSize.X / 2, screenSize.Y / 2)
-        local delta = input.Position - center
-        local maxDist = 300
-        
-        local clamped = delta.Unit * math.min(delta.Magnitude, maxDist) / maxDist
-        moveDirection = Vector3.new(clamped.X, 0, -clamped.Y)
-    end
-end
-
-local function handleTouchEnd(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        joystickActive = false
-        moveDirection = Vector3.new(0, 0, 0)
-    end
-end
-
-UIS.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        handleTouch(input)
-    end
-end)
-
-UIS.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        handleTouchEnd(input)
-    end
-end)
-
 -- // ========== ОБНОВЛЕНИЕ В ЦИКЛЕ ========== //
 RunService.Heartbeat:Connect(function()
     if flying then updateFly() end
@@ -485,7 +445,7 @@ Player.CharacterAdded:Connect(function()
     if noclipActive then toggleNoclip() end
 end)
 
--- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ ПО ИКОНКЕ ========== //
+-- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ ========== //
 local menuOpen = false
 IconButton.MouseButton1Click:Connect(function()
     menuOpen = not menuOpen
@@ -501,8 +461,7 @@ UIS.InputBegan:Connect(function(input)
     end
 end)
 
-print("☠ RUSSIAN YAD v9.0 ЗАГРУЖЕН")
-print("📌 ПЕРЕТАСКИВАЙ ИКОНКУ ПАЛЬЦЕМ")
+print("☠ RUSSIAN YAD v10.0 ЗАГРУЖЕН")
+print("📌 УПРАВЛЕНИЕ ЧЕРЕЗ ВИРТУАЛЬНЫЙ ДЖОЙСТИК (ТОТ, ЧТО В ИГРЕ)")
 print("🌀 FLY — ВКЛЮЧИТЬ ПОЛЁТ")
 print("⬜ НОКЛИП — ПРОХОД СКВОЗЬ СТЕНЫ")
-print("👆 ТЯНИ ПАЛЕЦ ПО ЭКРАНУ — УПРАВЛЕНИЕ ПОЛЁТОМ")
