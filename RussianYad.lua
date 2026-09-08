@@ -1,4 +1,4 @@
--- // RUSSIAN YAD v34.0 // СВЕТЛОЕ МЕНЮ ДЛЯ ТЕЛЕФОНА // ЧАСТЬ 1 //
+-- // RUSSIAN YAD v35.0 // DRONEFRONT EDITION // БЕЛОЕ МЕНЮ //
 
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
@@ -7,7 +7,7 @@ local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
 
--- // ========== УЛУЧШЕННЫЙ ОБХОД ========== //
+-- // ========== ОБХОД АНТИЧИТА ========== //
 pcall(function()
     for _, v in pairs(getgc(true)) do
         if type(v) == "function" and getfenv(v) then
@@ -38,15 +38,16 @@ ScreenGui.Parent = CoreGui
 ScreenGui.Name = "RussianYadGUI"
 ScreenGui.ResetOnSpawn = false
 
--- // ========== ИКОНКА 40x40 ========== //
+-- // ========== ИКОНКА 40x40 (БЕЛАЯ) ========== //
 local IconButton = Instance.new("ImageButton")
 IconButton.Parent = ScreenGui
 IconButton.Size = UDim2.new(0, 40, 0, 40)
 IconButton.Position = UDim2.new(0.85, -20, 0.85, -20)
-IconButton.BackgroundColor3 = Color3.fromRGB(220, 200, 255)
-IconButton.BorderSizePixel = 0
+IconButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+IconButton.BorderSizePixel = 1
+IconButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 IconButton.Image = "rbxassetid://123456789"
-IconButton.ImageColor3 = Color3.fromRGB(80, 40, 180)
+IconButton.ImageColor3 = Color3.fromRGB(0, 0, 0)
 IconButton.ScaleType = Enum.ScaleType.Fit
 IconButton.ClipsDescendants = true
 IconButton.ZIndex = 10
@@ -55,33 +56,15 @@ local iconCorner = Instance.new("UICorner")
 iconCorner.Parent = IconButton
 iconCorner.CornerRadius = UDim.new(1, 0)
 
-local iconGlow = Instance.new("ImageLabel")
-iconGlow.Parent = IconButton
-iconGlow.Size = UDim2.new(1.8, 0, 1.8, 0)
-iconGlow.Position = UDim2.new(-0.4, 0, -0.4, 0)
-iconGlow.BackgroundTransparency = 1
-iconGlow.Image = "rbxassetid://13158748277"
-iconGlow.ImageColor3 = Color3.fromRGB(80, 40, 180)
-iconGlow.ImageTransparency = 0.4
-iconGlow.ZIndex = 0
-iconGlow.Name = "Glow"
-
 local IconText = Instance.new("TextLabel")
 IconText.Parent = IconButton
 IconText.Size = UDim2.new(1, 0, 1, 0)
 IconText.BackgroundTransparency = 1
 IconText.Text = "☠"
-IconText.TextColor3 = Color3.fromRGB(255, 255, 255)
+IconText.TextColor3 = Color3.fromRGB(0, 0, 0)
 IconText.TextScaled = true
 IconText.Font = Enum.Font.GothamBold
 IconText.ZIndex = 11
-
--- Вращение
-spawn(function()
-    while IconButton and IconButton.Parent do
-        for i = 0, 360, 2 do wait(0.01) IconButton.Rotation = i iconGlow.Rotation = i * 0.5 end
-    end
-end)
 
 -- Пульсация
 spawn(function()
@@ -93,7 +76,7 @@ spawn(function()
     end
 end)
 
--- // ========== ПЕРЕТАСКИВАНИЕ ИКОНКИ (ТЕЛЕФОН) ========== //
+-- // ========== ПЕРЕТАСКИВАНИЕ ИКОНКИ ========== //
 local iconDragToggle, iconDragStart, iconStartPos = false
 IconButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch then
@@ -116,14 +99,15 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
--- // ========== СВЕТЛОЕ МЕНЮ ========== //
+-- // ========== БЕЛОЕ МЕНЮ ========== //
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 380, 0, 340)
-MainFrame.Position = UDim2.new(0.5, -190, 0.5, -170)
-MainFrame.BackgroundColor3 = Color3.fromRGB(240, 230, 255)
+MainFrame.Size = UDim2.new(0, 320, 0, 280)
+MainFrame.Position = UDim2.new(0.5, -160, 0.5, -140)
+MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 MainFrame.BackgroundTransparency = 0.05
-MainFrame.BorderSizePixel = 0
+MainFrame.BorderSizePixel = 2
+MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 MainFrame.Visible = false
 MainFrame.Active = true
 MainFrame.Draggable = true
@@ -132,36 +116,16 @@ MainFrame.ZIndex = 5
 
 local mainCorner = Instance.new("UICorner")
 mainCorner.Parent = MainFrame
-mainCorner.CornerRadius = UDim.new(0, 25)
-
--- Светлая рамка
-local borderGlow = Instance.new("ImageLabel")
-borderGlow.Parent = MainFrame
-borderGlow.Size = UDim2.new(1.1, 0, 1.1, 0)
-borderGlow.Position = UDim2.new(-0.05, 0, -0.05, 0)
-borderGlow.BackgroundTransparency = 1
-borderGlow.Image = "rbxassetid://13158748277"
-borderGlow.ImageColor3 = Color3.fromRGB(180, 140, 255)
-borderGlow.ImageTransparency = 0.3
-borderGlow.ZIndex = 0
-borderGlow.Name = "BorderGlow"
-
--- Анимация рамки
-spawn(function()
-    while borderGlow and borderGlow.Parent do
-        for i = 0.2, 0.6, 0.02 do wait(0.02) borderGlow.ImageTransparency = i end
-        for i = 0.6, 0.2, -0.02 do wait(0.02) borderGlow.ImageTransparency = i end
-    end
-end)
+mainCorner.CornerRadius = UDim.new(0, 20)
 
 -- Заголовок
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
-Title.Size = UDim2.new(1, 0, 0, 45)
+Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "☠ RUSSIAN YAD"
-Title.TextColor3 = Color3.fromRGB(80, 40, 180)
+Title.Text = "☠ DRONEFRONT"
+Title.TextColor3 = Color3.fromRGB(0, 0, 0)
 Title.Font = Enum.Font.GothamBold
 Title.TextScaled = true
 Title.ZIndex = 3
@@ -170,11 +134,10 @@ Title.ZIndex = 3
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = MainFrame
 CloseBtn.Size = UDim2.new(0, 35, 0, 35)
-CloseBtn.Position = UDim2.new(1, -40, 0, 5)
+CloseBtn.Position = UDim2.new(1, -40, 0, 3)
 CloseBtn.Text = "✖"
-CloseBtn.TextColor3 = Color3.fromRGB(180, 80, 80)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 220, 220)
-CloseBtn.BackgroundTransparency = 0.3
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 CloseBtn.BorderSizePixel = 0
 CloseBtn.TextScaled = true
 CloseBtn.Font = Enum.Font.GothamBold
@@ -185,70 +148,18 @@ cornerClose.CornerRadius = UDim.new(0, 10)
 CloseBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false IconButton.Visible = true end)
 CloseBtn.TouchTap:Connect(function() MainFrame.Visible = false IconButton.Visible = true end)
 
--- // ========== ВКЛАДКИ ========== //
-local TabFrame = Instance.new("Frame")
-TabFrame.Parent = MainFrame
-TabFrame.Size = UDim2.new(1, 0, 0, 35)
-TabFrame.Position = UDim2.new(0, 0, 0, 45)
-TabFrame.BackgroundTransparency = 1
-
-local tabs = {"Движение", "Игроки", "Визуал", "Настройки"}
-local tabButtons = {}
-local contentFrames = {}
-
-for i, name in ipairs(tabs) do
+-- // ========== ЧЁРНЫЕ КНОПКИ ========== //
+local function createButton(text, y, callback)
     local btn = Instance.new("TextButton")
-    btn.Parent = TabFrame
-    btn.Size = UDim2.new(0, 95, 1, 0)
-    btn.Position = UDim2.new((i-1) * 0.25, 0, 0, 0)
-    btn.Text = name
-    btn.BackgroundColor3 = i == 1 and Color3.fromRGB(180, 140, 255) or Color3.fromRGB(230, 215, 255)
-    btn.BackgroundTransparency = 0.2
-    btn.BorderSizePixel = 0
-    btn.TextColor3 = i == 1 and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(80, 40, 180)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextScaled = true
-    btn.ZIndex = 3
-    local corner = Instance.new("UICorner")
-    corner.Parent = btn
-    corner.CornerRadius = UDim.new(0, 8)
-    tabButtons[i] = btn
-    
-    local content = Instance.new("Frame")
-    content.Parent = MainFrame
-    content.Size = UDim2.new(1, -10, 1, -85)
-    content.Position = UDim2.new(0, 5, 0, 80)
-    content.BackgroundTransparency = 1
-    content.Visible = (i == 1)
-    contentFrames[i] = content
-end
-
--- // ========== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ========== //
-local function switchTab(index)
-    for i, btn in ipairs(tabButtons) do
-        btn.BackgroundColor3 = (i == index) and Color3.fromRGB(180, 140, 255) or Color3.fromRGB(230, 215, 255)
-        btn.TextColor3 = (i == index) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(80, 40, 180)
-        contentFrames[i].Visible = (i == index)
-    end
-end
-
-for i, btn in ipairs(tabButtons) do
-    btn.MouseButton1Click:Connect(function() switchTab(i) end)
-    btn.TouchTap:Connect(function() switchTab(i) end)
-end
-
--- // ========== ФУНКЦИЯ СОЗДАНИЯ КНОПОК (СВЕТЛАЯ) ========== //
-local function createButton(parent, text, y, color, callback)
-    local btn = Instance.new("TextButton")
-    btn.Parent = parent
-    btn.Size = UDim2.new(0, 170, 0, 30)
+    btn.Parent = MainFrame
+    btn.Size = UDim2.new(0, 280, 0, 35)
     btn.Position = UDim2.new(0.05, 0, 0, y)
     btn.Text = text
-    btn.BackgroundColor3 = color or Color3.fromRGB(230, 215, 255)
-    btn.BackgroundTransparency = 0.2
+    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    btn.BackgroundTransparency = 0.1
     btn.BorderSizePixel = 1
-    btn.BorderColor3 = Color3.fromRGB(180, 140, 255)
-    btn.TextColor3 = Color3.fromRGB(80, 40, 180)
+    btn.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.Font = Enum.Font.GothamBold
     btn.TextScaled = true
     local corner = Instance.new("UICorner")
@@ -259,309 +170,159 @@ local function createButton(parent, text, y, color, callback)
     return btn
 end
 
+local yPos = 50
+
+-- Кнопки функций
+local speedBtn = createButton("🚀 УСКОРЕНИЕ ДРОНОВ", yPos, function()
+    toggleDroneSpeed()
+    speedBtn.Text = droneSpeedActive and "🚀 УСКОРЕНИЕ ON" or "🚀 УСКОРЕНИЕ ДРОНОВ"
+    speedBtn.BackgroundColor3 = droneSpeedActive and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(0, 0, 0)
+end)
+yPos = yPos + 42
+
+local espBtn = createButton("👁️ ESP ДРОНОВ", yPos, function()
+    toggleDroneESP()
+    espBtn.Text = droneEspActive and "👁️ ESP ON" or "👁️ ESP ДРОНОВ"
+    espBtn.BackgroundColor3 = droneEspActive and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(0, 0, 0)
+end)
+yPos = yPos + 42
+
+local infBtn = createButton("♾️ БЕСКОНЕЧНЫЕ ДРОНЫ", yPos, function()
+    toggleInfiniteDrones()
+    infBtn.Text = infDronesActive and "♾️ БЕСКОНЕЧНЫЕ ON" or "♾️ БЕСКОНЕЧНЫЕ ДРОНЫ"
+    infBtn.BackgroundColor3 = infDronesActive and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(0, 0, 0)
+end)
+yPos = yPos + 42
+
+local resetBtn = createButton("🔄 СБРОСИТЬ ВСЁ", yPos, function()
+    resetAll()
+end)
+
 -- // ========== ПЕРЕМЕННЫЕ ========== //
-local flyGuiInstance = nil
-local isFlyRunning = false
-local noclipActive = false
-local noclipConnection = nil
-local speedActive = false
-local currentSpeed = 16
-local speedConnection = nil
-local espActive = false
-local chamsActive = false
-local espObjects = {}
+local droneSpeedActive = false
+local droneSpeedConnection = nil
+local droneEspActive = false
+local droneEspObjects = {}
+local infDronesActive = false
+local infDronesConnection = nil
+local originalDroneSpeed = nil
 
--- // ========== ФУНКЦИИ (БУДУТ В ЧАСТИ 2) ========== --
--- (продолжение в части 2)
--- // RUSSIAN YAD v34.0 // СВЕТЛОЕ МЕНЮ // ЧАСТЬ 2 //
-
--- // ========== FLY ========== //
-function toggleFly()
-    if isFlyRunning then
-        if flyGuiInstance then
-            if flyGuiInstance.Parent then flyGuiInstance:Destroy() end
-            flyGuiInstance = nil
+-- // ========== ПОИСК ДРОНОВ ========== //
+local function findDrones()
+    local drones = {}
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") and obj.Name:lower():find("drone") then
+            table.insert(drones, obj)
         end
-        local gui = CoreGui:FindFirstChild("main")
-        if gui then gui:Destroy() end
-        isFlyRunning = false
-    else
-        local success = pcall(function()
-            local script = game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt")
-            flyGuiInstance = loadstring(script)()
-        end)
-        if success then isFlyRunning = true end
     end
+    return drones
 end
 
--- // ========== НОКЛИП ========== //
-function toggleNoclip()
-    noclipActive = not noclipActive
-    if noclipActive then
-        if noclipConnection then noclipConnection:Disconnect() end
-        noclipConnection = RunService.Stepped:Connect(function()
-            if noclipActive and Player.Character then
-                for _, part in ipairs(Player.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then part.CanCollide = false end
+-- // ========== УСКОРЕНИЕ ДРОНОВ ========== //
+function toggleDroneSpeed()
+    droneSpeedActive = not droneSpeedActive
+    if droneSpeedActive then
+        if droneSpeedConnection then droneSpeedConnection:Disconnect() end
+        droneSpeedConnection = RunService.Heartbeat:Connect(function()
+            if not droneSpeedActive then return end
+            for _, drone in ipairs(findDrones()) do
+                local hrp = drone:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    local bv = hrp:FindFirstChildOfClass("BodyVelocity")
+                    if bv then
+                        bv.Velocity = bv.Velocity * 1.5
+                    end
                 end
             end
         end)
     else
-        if noclipConnection then noclipConnection:Disconnect() end
-        if Player.Character then
-            for _, part in ipairs(Player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then part.CanCollide = true end
+        if droneSpeedConnection then
+            droneSpeedConnection:Disconnect()
+            droneSpeedConnection = nil
+        end
+    end
+end
+
+-- // ========== ESP ДРОНОВ ========== //
+function toggleDroneESP()
+    droneEspActive = not droneEspActive
+    if droneEspActive then
+        for _, drone in ipairs(findDrones()) do
+            local hrp = drone:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local hl = Instance.new("Highlight")
+                hl.Parent = hrp
+                hl.FillColor = Color3.fromRGB(255, 0, 0)
+                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                hl.FillTransparency = 0.5
+                table.insert(droneEspObjects, hl)
             end
         end
-    end
-end
-
--- // ========== СПИДХАК ========== //
-function toggleSpeed()
-    if speedActive then
-        speedActive = false
-        if speedConnection then speedConnection:Disconnect() end
-        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-            Player.Character.Humanoid.WalkSpeed = 16
-        end
-    else
-        local inputGui = Instance.new("ScreenGui")
-        inputGui.Parent = CoreGui
-        local frame = Instance.new("Frame")
-        frame.Parent = inputGui
-        frame.Size = UDim2.new(0, 250, 0, 120)
-        frame.Position = UDim2.new(0.5, -125, 0.5, -60)
-        frame.BackgroundColor3 = Color3.fromRGB(240, 230, 255)
-        frame.BorderSizePixel = 2
-        frame.BorderColor3 = Color3.fromRGB(180, 140, 255)
-        local corner = Instance.new("UICorner")
-        corner.Parent = frame
-        corner.CornerRadius = UDim.new(0, 10)
-        local title = Instance.new("TextLabel")
-        title.Parent = frame
-        title.Size = UDim2.new(1, 0, 0, 30)
-        title.Text = "⚡ ВВЕДИТЕ СКОРОСТЬ"
-        title.TextColor3 = Color3.fromRGB(80, 40, 180)
-        title.BackgroundTransparency = 1
-        title.Font = Enum.Font.GothamBold
-        title.TextScaled = true
-        local input = Instance.new("TextBox")
-        input.Parent = frame
-        input.Size = UDim2.new(0, 150, 0, 30)
-        input.Position = UDim2.new(0.5, -75, 0, 40)
-        input.PlaceholderText = "16-500"
-        input.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        input.BorderColor3 = Color3.fromRGB(180, 140, 255)
-        input.TextColor3 = Color3.fromRGB(80, 40, 180)
-        input.Font = Enum.Font.GothamBold
-        input.TextScaled = true
-        local cornerInput = Instance.new("UICorner")
-        cornerInput.Parent = input
-        cornerInput.CornerRadius = UDim.new(0, 8)
-        local applyBtn = Instance.new("TextButton")
-        applyBtn.Parent = frame
-        applyBtn.Size = UDim2.new(0, 100, 0, 30)
-        applyBtn.Position = UDim2.new(0.5, -50, 0, 80)
-        applyBtn.Text = "OK"
-        applyBtn.BackgroundColor3 = Color3.fromRGB(180, 140, 255)
-        applyBtn.BorderSizePixel = 0
-        applyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        applyBtn.Font = Enum.Font.GothamBold
-        applyBtn.TextScaled = true
-        local cornerApply = Instance.new("UICorner")
-        cornerApply.Parent = applyBtn
-        cornerApply.CornerRadius = UDim.new(0, 8)
-        local function applySpeed()
-            local speed = tonumber(input.Text)
-            if speed and speed >= 16 and speed <= 500 then
-                currentSpeed = speed
-                speedActive = true
-                if speedConnection then speedConnection:Disconnect() end
-                speedConnection = RunService.Heartbeat:Connect(function()
-                    if speedActive and Player.Character and Player.Character:FindFirstChild("Humanoid") then
-                        Player.Character.Humanoid.WalkSpeed = currentSpeed
-                    end
-                end)
-                inputGui:Destroy()
-            else
-                input.Text = "ОШИБКА!"
-                wait(1)
-                input.Text = ""
-            end
-        end
-        applyBtn.MouseButton1Click:Connect(applySpeed)
-        applyBtn.TouchTap:Connect(applySpeed)
-    end
-end
-
--- // ========== KILLALL ========== //
-function killAll()
-    local count = 0
-    for _, plr in pairs(Player:GetPlayers()) do
-        if plr ~= Player and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            plr.Character.Humanoid.Health = 0
-            count = count + 1
-        end
-    end
-    print("☠ УБИТО: " .. count)
-end
-
--- // ========== ТЕЛЕПОРТ ВСЕХ К СЕБЕ ========== //
-function teleportAll()
-    if not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") then return end
-    local pos = Player.Character.HumanoidRootPart.Position
-    for _, plr in pairs(Player:GetPlayers()) do
-        if plr ~= Player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            plr.Character.HumanoidRootPart.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
-        end
-    end
-end
-
--- // ========== ЗАМОРОЗКА ========== //
-function freezeAll()
-    for _, plr in pairs(Player:GetPlayers()) do
-        if plr ~= Player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local bv = Instance.new("BodyVelocity")
-            bv.MaxForce = Vector3.new(4000, 4000, 4000)
-            bv.Velocity = Vector3.new(0, 0, 0)
-            bv.Parent = plr.Character.HumanoidRootPart
-            game:GetService("Debris"):AddItem(bv, 3)
-        end
-    end
-end
-
--- // ========== ESP ========== //
-function toggleEsp()
-    espActive = not espActive
-    if espActive then
-        for _, plr in pairs(Player:GetPlayers()) do
-            if plr ~= Player and plr.Character then
-                for _, part in ipairs(plr.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        local hl = Instance.new("Highlight")
-                        hl.Parent = part
-                        hl.FillColor = Color3.fromRGB(180, 140, 255)
-                        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                        hl.FillTransparency = 0.5
-                        table.insert(espObjects, hl)
-                    end
+        -- Обновление ESP при появлении новых дронов
+        if infDronesConnection then infDronesConnection:Disconnect() end
+        infDronesConnection = RunService.Heartbeat:Connect(function()
+            if not droneEspActive then return end
+            for _, drone in ipairs(findDrones()) do
+                local hrp = drone:FindFirstChild("HumanoidRootPart")
+                if hrp and not hrp:FindFirstChildOfClass("Highlight") then
+                    local hl = Instance.new("Highlight")
+                    hl.Parent = hrp
+                    hl.FillColor = Color3.fromRGB(255, 0, 0)
+                    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    hl.FillTransparency = 0.5
+                    table.insert(droneEspObjects, hl)
                 end
             end
-        end
+        end)
     else
-        for _, obj in ipairs(espObjects) do obj:Destroy() end
-        espObjects = {}
-    end
-end
-
--- // ========== CHAMS ========== //
-function toggleChams()
-    chamsActive = not chamsActive
-    if chamsActive then
-        for _, plr in pairs(Player:GetPlayers()) do
-            if plr ~= Player and plr.Character then
-                for _, part in ipairs(plr.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.Material = Enum.Material.Neon
-                        part.Color = Color3.fromRGB(180, 140, 255)
-                    end
-                end
-            end
-        end
-    else
-        for _, plr in pairs(Player:GetPlayers()) do
-            if plr ~= Player and plr.Character then
-                for _, part in ipairs(plr.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.Material = Enum.Material.Plastic
-                        part.Color = Color3.fromRGB(255, 255, 255)
-                    end
-                end
-            end
+        for _, obj in ipairs(droneEspObjects) do obj:Destroy() end
+        droneEspObjects = {}
+        if infDronesConnection then
+            infDronesConnection:Disconnect()
+            infDronesConnection = nil
         end
     end
 end
 
--- // ========== СБРОС ВСЕГО ========== //
+-- // ========== БЕСКОНЕЧНЫЕ ДРОНЫ ========== //
+function toggleInfiniteDrones()
+    infDronesActive = not infDronesActive
+    if infDronesActive then
+        -- Попытка найти скрипт спавна дронов и изменить лимит
+        -- В реальности это сложнее, сделаем упрощённый вариант: не даём дронам умирать
+        if infDronesConnection then infDronesConnection:Disconnect() end
+        infDronesConnection = RunService.Heartbeat:Connect(function()
+            if not infDronesActive then return end
+            for _, drone in ipairs(findDrones()) do
+                local hum = drone:FindFirstChildWhichIsA("Humanoid")
+                if hum and hum.Health <= 0 then
+                    hum.Health = hum.MaxHealth
+                end
+            end
+        end)
+    else
+        if infDronesConnection then
+            infDronesConnection:Disconnect()
+            infDronesConnection = nil
+        end
+    end
+end
+
+-- // ========== СБРОС ========== //
 function resetAll()
-    if isFlyRunning then
-        if flyGuiInstance then flyGuiInstance:Destroy() end
-        local gui = CoreGui:FindFirstChild("main")
-        if gui then gui:Destroy() end
-        isFlyRunning = false
-    end
-    if noclipActive then
-        toggleNoclip()
-    end
-    if speedActive then
-        toggleSpeed()
-    end
-    if espActive then
-        toggleEsp()
-    end
-    if chamsActive then
-        toggleChams()
-    end
+    if droneSpeedActive then toggleDroneSpeed() end
+    if droneEspActive then toggleDroneESP() end
+    if infDronesActive then toggleInfiniteDrones() end
+    speedBtn.Text = "🚀 УСКОРЕНИЕ ДРОНОВ"
+    speedBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    espBtn.Text = "👁️ ESP ДРОНОВ"
+    espBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    infBtn.Text = "♾️ БЕСКОНЕЧНЫЕ ДРОНЫ"
+    infBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     print("☠ ВСЁ СБРОШЕНО")
 end
 
--- (продолжение в части 3)
--- // RUSSIAN YAD v34.0 // СВЕТЛОЕ МЕНЮ // ЧАСТЬ 3 //
-
--- // ========== ЗАПОЛНЯЕМ ВКЛАДКИ ========== //
-
--- Вкладка "Движение"
-local y = 10
-local flyBtn = createButton(contentFrames[1], "🚀 FLY", y, Color3.fromRGB(200, 230, 255), function()
-    toggleFly()
-    flyBtn.Text = isFlyRunning and "🛑 FLY" or "🚀 FLY"
-    flyBtn.BackgroundColor3 = isFlyRunning and Color3.fromRGB(180, 255, 180) or Color3.fromRGB(200, 230, 255)
-end)
-y = y + 38
-local noclipBtn = createButton(contentFrames[1], "⬜ НОКЛИП", y, Color3.fromRGB(255, 200, 200), function()
-    toggleNoclip()
-    noclipBtn.Text = noclipActive and "⬜ НОКЛИП ON" or "⬜ НОКЛИП"
-    noclipBtn.BackgroundColor3 = noclipActive and Color3.fromRGB(180, 255, 180) or Color3.fromRGB(255, 200, 200)
-end)
-y = y + 38
-local speedBtn = createButton(contentFrames[1], "⚡ СПИДХАК", y, Color3.fromRGB(255, 255, 200), function()
-    toggleSpeed()
-    speedBtn.Text = speedActive and "⚡ СПИД: " .. currentSpeed or "⚡ СПИДХАК"
-    speedBtn.BackgroundColor3 = speedActive and Color3.fromRGB(180, 255, 180) or Color3.fromRGB(255, 255, 200)
-end)
-
--- Вкладка "Игроки"
-y = 10
-local killBtn = createButton(contentFrames[2], "💀 KILLALL", y, Color3.fromRGB(255, 200, 200), killAll)
-y = y + 38
-local tpBtn = createButton(contentFrames[2], "🌀 ТЕЛЕПОРТ ВСЕХ", y, Color3.fromRGB(200, 255, 255), teleportAll)
-y = y + 38
-local freezeBtn = createButton(contentFrames[2], "🧊 ЗАМОРОЗИТЬ", y, Color3.fromRGB(200, 255, 200), freezeAll)
-
--- Вкладка "Визуал"
-y = 10
-local espBtn = createButton(contentFrames[3], "👁️ ESP", y, Color3.fromRGB(200, 220, 255), function()
-    toggleEsp()
-    espBtn.Text = espActive and "👁️ ESP ON" or "👁️ ESP"
-    espBtn.BackgroundColor3 = espActive and Color3.fromRGB(180, 255, 180) or Color3.fromRGB(200, 220, 255)
-end)
-y = y + 38
-local chamsBtn = createButton(contentFrames[3], "🌈 CHAMS", y, Color3.fromRGB(220, 200, 255), function()
-    toggleChams()
-    chamsBtn.Text = chamsActive and "🌈 CHAMS ON" or "🌈 CHAMS"
-    chamsBtn.BackgroundColor3 = chamsActive and Color3.fromRGB(180, 255, 180) or Color3.fromRGB(220, 200, 255)
-end)
-
--- Вкладка "Настройки"
-y = 10
-local resetBtn = createButton(contentFrames[4], "🔄 СБРОСИТЬ ВСЁ", y, Color3.fromRGB(255, 220, 180), resetAll)
-y = y + 38
-local closeMenuBtn = createButton(contentFrames[4], "❌ ЗАКРЫТЬ МЕНЮ", y, Color3.fromRGB(255, 200, 200), function()
-    MainFrame.Visible = false
-    IconButton.Visible = true
-end)
-
--- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ (ТЕЛЕФОН) ========== //
+-- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ ========== //
 local menuDragToggle, menuDragStart, menuStartPos = false
 MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch then
@@ -593,56 +354,18 @@ IconButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch and not iconDragToggle then toggleMenu() end
 end)
 
--- (продолжение в части 4)
--- // RUSSIAN YAD v34.0 // СВЕТЛОЕ МЕНЮ // ЧАСТЬ 4 //
-
--- // ========== ПАНИКА (P) ========== //
+-- // ========== ПАНИКА ========== //
 UIS.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.P then
         ScreenGui:Destroy()
-        if flyGuiInstance then flyGuiInstance:Destroy() end
-        if noclipConnection then noclipConnection:Disconnect() end
-        if speedConnection then speedConnection:Disconnect() end
+        if droneSpeedConnection then droneSpeedConnection:Disconnect() end
+        if infDronesConnection then infDronesConnection:Disconnect() end
+        for _, obj in ipairs(droneEspObjects) do obj:Destroy() end
         print("☠ ПАНИКА")
     end
 end)
 
--- // ========== АВТООБНОВЛЕНИЕ ПРИ РЕСПАВНЕ ========== //
-Player.CharacterAdded:Connect(function()
-    wait(0.5)
-    if noclipActive then
-        if noclipConnection then noclipConnection:Disconnect() end
-        noclipConnection = RunService.Stepped:Connect(function()
-            if noclipActive and Player.Character then
-                for _, part in ipairs(Player.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then part.CanCollide = false end
-                end
-            end
-        end)
-    end
-    if speedActive then
-        if speedConnection then speedConnection:Disconnect() end
-        speedConnection = RunService.Heartbeat:Connect(function()
-            if speedActive and Player.Character and Player.Character:FindFirstChild("Humanoid") then
-                Player.Character.Humanoid.WalkSpeed = currentSpeed
-            end
-        end)
-    end
-end)
-
--- // ========== ЗАЩИТА ОТ ВЫЛЕТА ========== //
-pcall(function()
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "☠ RUSSIAN YAD",
-        Text = "СВЕТЛОЕ МЕНЮ ЗАГРУЖЕНО",
-        Icon = "rbxthumb://type=Asset&id=5107182114&w=150&h=150"
-    })
-end)
-
--- // ========== ИНФО В КОНСОЛЬ ========== //
-print("☠ RUSSIAN YAD v34.0 ЗАГРУЖЕН")
-print("📌 СВЕТЛОЕ МЕНЮ С ВКЛАДКАМИ")
-print("📌 ИКОНКА 40x40, ПЕРЕТАСКИВАНИЕ")
-print("📌 ВСЕ ФУНКЦИИ РАБОТАЮТ НА ТЕЛЕФОНЕ")
-
--- // ========== КОНЕЦ ========== //
+-- // ========== ЗАГРУЗКА ========== //
+print("☠ RUSSIAN YAD DRONEFRONT EDITION ЗАГРУЖЕН")
+print("📌 БЕЛОЕ МЕНЮ, ЧЁРНЫЕ ФУНКЦИИ")
+print("📌 РАБОТАЕТ НА ТЕЛЕФОНЕ")
