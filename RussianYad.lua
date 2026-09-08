@@ -1,11 +1,10 @@
--- // RUSSIAN YAD v26.0 // МЕНЬШАЯ ИКОНКА + СПИДХАК //
+-- // RUSSIAN YAD v27.1 // АИМ ВКЛЮЧАЕТСЯ 1 РАЗ //
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- // ========== ОБХОД АНТИЧИТА ========== //
 pcall(function()
@@ -25,7 +24,7 @@ ScreenGui.Parent = CoreGui
 ScreenGui.Name = "RussianYadGUI"
 ScreenGui.ResetOnSpawn = false
 
--- // ========== МАЛЕНЬКАЯ ИКОНКА (60x60) ========== //
+-- // ========== ИКОНКА ========== //
 local IconButton = Instance.new("ImageButton")
 IconButton.Parent = ScreenGui
 IconButton.Size = UDim2.new(0, 60, 0, 60)
@@ -38,7 +37,6 @@ IconButton.ScaleType = Enum.ScaleType.Fit
 IconButton.ClipsDescendants = true
 IconButton.ZIndex = 10
 
--- Стеклянный эффект
 local glassEffect = Instance.new("Frame")
 glassEffect.Parent = IconButton
 glassEffect.Size = UDim2.new(1, 0, 1, 0)
@@ -50,7 +48,6 @@ local cornerIcon = Instance.new("UICorner")
 cornerIcon.Parent = IconButton
 cornerIcon.CornerRadius = UDim.new(1, 0)
 
--- Неоновое свечение
 local glowIcon = Instance.new("ImageLabel")
 glowIcon.Parent = IconButton
 glowIcon.Size = UDim2.new(1.6, 0, 1.6, 0)
@@ -62,7 +59,6 @@ glowIcon.ImageTransparency = 0.6
 glowIcon.ZIndex = 0
 glowIcon.Name = "Glow"
 
--- Текст иконки
 local IconText = Instance.new("TextLabel")
 IconText.Parent = IconButton
 IconText.Size = UDim2.new(1, 0, 1, 0)
@@ -73,7 +69,7 @@ IconText.TextScaled = true
 IconText.Font = Enum.Font.GothamBold
 IconText.ZIndex = 11
 
--- Вращение иконки
+-- Вращение
 spawn(function()
     while IconButton and IconButton.Parent do
         for i = 0, 360, 3 do
@@ -84,7 +80,7 @@ spawn(function()
     end
 end)
 
--- Пульсация размера
+-- Пульсация
 spawn(function()
     while IconButton and IconButton.Parent do
         local tween1 = TweenService:Create(IconButton, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {Size = UDim2.new(0, 65, 0, 65)})
@@ -119,7 +115,7 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
--- // ========== НОВОЕ МЕНЮ ========== //
+-- // ========== МЕНЮ ========== //
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
 MainFrame.Size = UDim2.new(0, 280, 0, 260)
@@ -184,7 +180,7 @@ CloseBtn.MouseButton1Click:Connect(function()
     IconButton.Visible = true
 end)
 
--- // ========== КНОПКИ МЕНЮ ========== //
+-- // ========== КНОПКИ ========== //
 local yPos = 50
 local btnH = 32
 local btnW = 120
@@ -208,22 +204,18 @@ local function createStyledButton(parent, text, x, y, w, h, color)
     return btn
 end
 
--- РЯД 1: FLY + НОКЛИП
 local FlyBtn = createStyledButton(MainFrame, "🚀 FLY", 0.04, yPos, btnW, btnH, Color3.fromRGB(30, 30, 80))
 local NoclipBtn = createStyledButton(MainFrame, "⬜ НОКЛИП", 0.54, yPos, btnW, btnH, Color3.fromRGB(80, 30, 30))
 yPos = yPos + btnH + 6
 
--- РЯД 2: ESP + АИМ
 local EspBtn = createStyledButton(MainFrame, "👁️ ESP", 0.04, yPos, btnW, btnH, Color3.fromRGB(30, 50, 80))
 local AimBtn = createStyledButton(MainFrame, "🎯 АИМ", 0.54, yPos, btnW, btnH, Color3.fromRGB(50, 30, 80))
 yPos = yPos + btnH + 6
 
--- РЯД 3: СПИДХАК + МОЛОТОК
 local SpeedBtn = createStyledButton(MainFrame, "⚡ СПИДХАК", 0.04, yPos, btnW, btnH, Color3.fromRGB(50, 50, 30))
 local HammerBtn = createStyledButton(MainFrame, "🔨 МОЛОТОК", 0.54, yPos, btnW, btnH, Color3.fromRGB(80, 50, 30))
 yPos = yPos + btnH + 6
 
--- РЯД 4: ВЫКЛЮЧИТЬ ВСЁ
 local OffBtn = createStyledButton(MainFrame, "❌ ВЫКЛ ВСЁ", 0.04, yPos, 250, btnH, Color3.fromRGB(80, 0, 0))
 
 -- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ ========== //
@@ -258,9 +250,41 @@ local speedActive = false
 local currentSpeed = 16
 local speedConnection = nil
 
--- // ========== СПИДХАК С ВВОДОМ СКОРОСТИ ========== //
+-- // ========== АИМБОТ (ВКЛЮЧАЕТСЯ 1 РАЗ И БЛОКИРУЕТСЯ) ========== //
+local aimbotLoaded = false
+local aimbotThread = nil
+local aimButtonBlocked = false
+
+local function loadAimbot()
+    if aimbotLoaded or aimButtonBlocked then
+        print("☠ АИМБОТ УЖЕ АКТИВЕН И ЗАБЛОКИРОВАН!")
+        return
+    end
+    
+    local success, err = pcall(function()
+        aimbotThread = RunService.Heartbeat:Connect(function()
+            local aimScript = game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile")
+            loadstring(aimScript)()
+        end)
+    end)
+    
+    if success then
+        aimbotLoaded = true
+        aimButtonBlocked = true
+        AimBtn.Text = "🎯 АИМ ВКЛ"
+        AimBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+        AimBtn.BorderColor3 = Color3.fromRGB(0, 255, 0)
+        AimBtn.TextColor3 = Color3.fromRGB(200, 255, 200)
+        AimBtn.Active = false
+        AimBtn.Selectable = false
+        print("☠ АИМБОТ АКТИВИРОВАН (НАВСЕГДА)")
+    else
+        print("Ошибка загрузки аимбота: " .. tostring(err))
+    end
+end
+
+-- // ========== СПИДХАК ========== //
 local function setupSpeedHack()
-    -- Создаём GUI для ввода скорости
     local inputGui = Instance.new("ScreenGui")
     inputGui.Parent = CoreGui
     inputGui.Name = "SpeedInput"
@@ -336,46 +360,6 @@ local function setupSpeedHack()
             input.Text = ""
         end
     end)
-    
-    -- Закрытие по клику вне
-    frame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
-            local pos = UIS:GetMouseLocation()
-            local framePos = frame.AbsolutePosition
-            local frameSize = frame.AbsoluteSize
-            if pos.X < framePos.X or pos.X > framePos.X + frameSize.X or
-               pos.Y < framePos.Y or pos.Y > framePos.Y + frameSize.Y then
-                inputGui:Destroy()
-            end
-        end
-    end)
-end
-
--- // ========== АИМБОТ (1 РАЗ) ========== //
-local aimbotLoaded = false
-local aimbotThread = nil
-
-local function loadAimbot()
-    if aimbotLoaded then
-        print("☠ АИМБОТ УЖЕ АКТИВЕН!")
-        return
-    end
-    
-    local success, err = pcall(function()
-        aimbotThread = RunService.Heartbeat:Connect(function()
-            local aimScript = game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile")
-            loadstring(aimScript)()
-        end)
-    end)
-    
-    if success then
-        aimbotLoaded = true
-        AimBtn.Text = "🎯 АИМ ON"
-        AimBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
-        print("☠ АИМБОТ АКТИВИРОВАН (ТОЛЬКО 1 РАЗ)")
-    else
-        print("Ошибка загрузки аимбота: " .. tostring(err))
-    end
 end
 
 -- // ========== МОЛОТОК ========== //
@@ -566,8 +550,14 @@ EspBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- АИМ (1 РАЗ)
-AimBtn.MouseButton1Click:Connect(loadAimbot)
+-- АИМ (одноразовый)
+AimBtn.MouseButton1Click:Connect(function()
+    if not aimbotLoaded and not aimButtonBlocked then
+        loadAimbot()
+    else
+        print("☠ АИМБОТ УЖЕ АКТИВЕН")
+    end
+end)
 
 -- СПИДХАК
 SpeedBtn.MouseButton1Click:Connect(function()
@@ -707,7 +697,7 @@ UIS.InputBegan:Connect(function(input)
     end
 end)
 
-print("☠ RUSSIAN YAD v26.0 ЗАГРУЖЕН")
+print("☠ RUSSIAN YAD v27.1 ЗАГРУЖЕН")
 print("📌 ИКОНКА 60x60 — МОЖНО ТАСКАТЬ")
 print("⚡ СПИДХАК С ВВОДОМ СКОРОСТИ")
-print("🎯 АИМБОТ АКТИВИРУЕТСЯ ТОЛЬКО 1 РАЗ")
+print("🎯 АИМБОТ ВКЛЮЧАЕТСЯ 1 РАЗ И БЛОКИРУЕТСЯ")
