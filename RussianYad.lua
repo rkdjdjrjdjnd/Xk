@@ -1,4 +1,4 @@
--- // RUSSIAN YAD v27.1 // АИМ ВКЛЮЧАЕТСЯ 1 РАЗ //
+-- // RUSSIAN YAD v28.3 // БЕЗ ВЫКЛ ВСЁ И ПАНИКИ //
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
@@ -118,8 +118,8 @@ end)
 -- // ========== МЕНЮ ========== //
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 280, 0, 260)
-MainFrame.Position = UDim2.new(0.5, -140, 0.5, -130)
+MainFrame.Size = UDim2.new(0, 280, 0, 180)
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -90)
 MainFrame.BackgroundColor3 = Color3.fromRGB(10, 0, 25)
 MainFrame.BackgroundTransparency = 0.15
 MainFrame.BorderSizePixel = 0
@@ -208,15 +208,8 @@ local FlyBtn = createStyledButton(MainFrame, "🚀 FLY", 0.04, yPos, btnW, btnH,
 local NoclipBtn = createStyledButton(MainFrame, "⬜ НОКЛИП", 0.54, yPos, btnW, btnH, Color3.fromRGB(80, 30, 30))
 yPos = yPos + btnH + 6
 
-local EspBtn = createStyledButton(MainFrame, "👁️ ESP", 0.04, yPos, btnW, btnH, Color3.fromRGB(30, 50, 80))
-local AimBtn = createStyledButton(MainFrame, "🎯 АИМ", 0.54, yPos, btnW, btnH, Color3.fromRGB(50, 30, 80))
-yPos = yPos + btnH + 6
-
-local SpeedBtn = createStyledButton(MainFrame, "⚡ СПИДХАК", 0.04, yPos, btnW, btnH, Color3.fromRGB(50, 50, 30))
-local HammerBtn = createStyledButton(MainFrame, "🔨 МОЛОТОК", 0.54, yPos, btnW, btnH, Color3.fromRGB(80, 50, 30))
-yPos = yPos + btnH + 6
-
-local OffBtn = createStyledButton(MainFrame, "❌ ВЫКЛ ВСЁ", 0.04, yPos, 250, btnH, Color3.fromRGB(80, 0, 0))
+local KillallBtn = createStyledButton(MainFrame, "💀 KILLALL", 0.04, yPos, btnW, btnH, Color3.fromRGB(80, 0, 0))
+local SpeedBtn = createStyledButton(MainFrame, "⚡ СПИДХАК", 0.54, yPos, btnW, btnH, Color3.fromRGB(50, 50, 30))
 
 -- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ ========== //
 local menuDragToggle, menuDragStart, menuStartPos = false
@@ -243,43 +236,23 @@ end)
 local flyGuiInstance = nil
 local isFlyRunning = false
 local noclipActive = false
-local espLoaded = false
-local hammerActive = false
-local hammerTool = nil
 local speedActive = false
 local currentSpeed = 16
 local speedConnection = nil
 
--- // ========== АИМБОТ (ВКЛЮЧАЕТСЯ 1 РАЗ И БЛОКИРУЕТСЯ) ========== //
-local aimbotLoaded = false
-local aimbotThread = nil
-local aimButtonBlocked = false
-
-local function loadAimbot()
-    if aimbotLoaded or aimButtonBlocked then
-        print("☠ АИМБОТ УЖЕ АКТИВЕН И ЗАБЛОКИРОВАН!")
-        return
+-- // ========== KILLALL ========== //
+local function killAll()
+    local count = 0
+    for _, plr in pairs(Player:GetPlayers()) do
+        if plr ~= Player and plr.Character and plr.Character:FindFirstChild("Humanoid") then
+            plr.Character.Humanoid.Health = 0
+            count = count + 1
+        end
     end
-    
-    local success, err = pcall(function()
-        aimbotThread = RunService.Heartbeat:Connect(function()
-            local aimScript = game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile")
-            loadstring(aimScript)()
-        end)
-    end)
-    
-    if success then
-        aimbotLoaded = true
-        aimButtonBlocked = true
-        AimBtn.Text = "🎯 АИМ ВКЛ"
-        AimBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
-        AimBtn.BorderColor3 = Color3.fromRGB(0, 255, 0)
-        AimBtn.TextColor3 = Color3.fromRGB(200, 255, 200)
-        AimBtn.Active = false
-        AimBtn.Selectable = false
-        print("☠ АИМБОТ АКТИВИРОВАН (НАВСЕГДА)")
+    if count > 0 then
+        print("☠ УБИТО ИГРОКОВ: " .. count)
     else
-        print("Ошибка загрузки аимбота: " .. tostring(err))
+        print("☠ НЕТ ВРАГОВ")
     end
 end
 
@@ -362,116 +335,6 @@ local function setupSpeedHack()
     end)
 end
 
--- // ========== МОЛОТОК ========== //
-local function createHammer()
-    if hammerActive then
-        if hammerTool then
-            hammerTool:Destroy()
-            hammerTool = nil
-        end
-        hammerActive = false
-        HammerBtn.Text = "🔨 МОЛОТОК"
-        HammerBtn.BackgroundColor3 = Color3.fromRGB(80, 50, 30)
-        print("☠ МОЛОТОК УБРАН")
-        return
-    end
-    
-    hammerTool = Instance.new("Tool")
-    hammerTool.Name = "🔨 АДМИН-МОЛОТОК"
-    hammerTool.RequiresHandle = true
-    hammerTool.CanBeDropped = false
-    
-    local handle = Instance.new("Part")
-    handle.Parent = hammerTool
-    handle.Size = Vector3.new(0.4, 0.4, 2)
-    handle.BrickColor = BrickColor.new("Dark stone grey")
-    handle.Material = Enum.Material.SmoothPlastic
-    
-    local head = Instance.new("Part")
-    head.Parent = hammerTool
-    head.Size = Vector3.new(2.5, 1.2, 1.5)
-    head.Position = Vector3.new(0, 1, 0)
-    head.BrickColor = BrickColor.new("Bright red")
-    head.Material = Enum.Material.Neon
-    
-    local glow = Instance.new("Attachment")
-    glow.Parent = head
-    local beam = Instance.new("Beam")
-    beam.Parent = head
-    beam.Attachment0 = glow
-    beam.Attachment1 = glow
-    beam.Color = ColorSequence.new(Color3.fromRGB(255, 0, 0))
-    beam.Transparency = NumberSequence.new(0.3)
-    
-    hammerTool.Activated:Connect(function()
-        local char = Player.Character
-        if not char then return end
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
-        
-        local camera = Workspace.CurrentCamera
-        if not camera then return end
-        
-        local ray = Ray.new(camera.CFrame.Position, camera.CFrame.LookVector * 100)
-        local hit, pos = Workspace:FindPartOnRay(ray, char)
-        
-        if hit and hit ~= char and hit.Parent ~= char then
-            local parent = hit.Parent
-            if parent and parent:IsA("Model") then
-                parent:Destroy()
-            else
-                hit:Destroy()
-            end
-            
-            local explode = Instance.new("Explosion")
-            explode.Position = pos
-            explode.BlastRadius = 2
-            explode.BlastDamage = 0
-            explode.Parent = Workspace
-            game:GetService("Debris"):AddItem(explode, 0.5)
-        end
-    end)
-    
-    hammerTool.SecondaryActivated:Connect(function()
-        local char = Player.Character
-        if not char then return end
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
-        
-        local camera = Workspace.CurrentCamera
-        if not camera then return end
-        
-        local ray = Ray.new(camera.CFrame.Position, camera.CFrame.LookVector * 50)
-        local hit, pos = Workspace:FindPartOnRay(ray, char)
-        
-        if pos then
-            local block = Instance.new("Part")
-            block.Size = Vector3.new(3, 3, 3)
-            block.Position = pos + Vector3.new(0, 1.5, 0)
-            block.BrickColor = BrickColor.new("Bright red")
-            block.Material = Enum.Material.Neon
-            block.Anchored = true
-            block.Parent = Workspace
-            block.Name = "AdminBlock"
-            
-            local bg = Instance.new("BodyGyro")
-            bg.Parent = block
-            bg.MaxTorque = Vector3.new(4000, 4000, 4000)
-            bg.CFrame = block.CFrame
-            
-            block.Size = Vector3.new(0.1, 0.1, 0.1)
-            TweenService:Create(block, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = Vector3.new(3, 3, 3)}):Play()
-            game:GetService("Debris"):AddItem(block, 30)
-        end
-    end)
-    
-    hammerTool.Parent = Player.Backpack
-    hammerActive = true
-    HammerBtn.Text = "🔨 МОЛОТОК ON"
-    HammerBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
-    print("☠ МОЛОТОК СОЗДАН")
-end
-
 -- // ========== ОБРАБОТЧИКИ КНОПОК ========== //
 
 -- FLY
@@ -521,43 +384,8 @@ NoclipBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- ESP
-EspBtn.MouseButton1Click:Connect(function()
-    if espLoaded then
-        for _, plr in pairs(Player:GetPlayers()) do
-            if plr.Character then
-                local hl = plr.Character:FindFirstChild("ESPHighlight")
-                if hl then hl:Destroy() end
-                local head = plr.Character:FindFirstChild("Head")
-                if head then
-                    local tag = head:FindFirstChild("NameTag")
-                    if tag then tag:Destroy() end
-                end
-            end
-        end
-        espLoaded = false
-        EspBtn.Text = "👁️ ESP"
-        EspBtn.BackgroundColor3 = Color3.fromRGB(30, 50, 80)
-    else
-        local success, err = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Yahahahau/Ultimate-Esp-v1/refs/heads/main/Ultimate%20esp%20v1.lua"))()
-        end)
-        if success then
-            espLoaded = true
-            EspBtn.Text = "👁️ ESP ON"
-            EspBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
-        end
-    end
-end)
-
--- АИМ (одноразовый)
-AimBtn.MouseButton1Click:Connect(function()
-    if not aimbotLoaded and not aimButtonBlocked then
-        loadAimbot()
-    else
-        print("☠ АИМБОТ УЖЕ АКТИВЕН")
-    end
-end)
+-- KILLALL
+KillallBtn.MouseButton1Click:Connect(killAll)
 
 -- СПИДХАК
 SpeedBtn.MouseButton1Click:Connect(function()
@@ -578,77 +406,6 @@ SpeedBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- МОЛОТОК
-HammerBtn.MouseButton1Click:Connect(createHammer)
-
--- ВЫКЛЮЧИТЬ ВСЁ
-OffBtn.MouseButton1Click:Connect(function()
-    if isFlyRunning then
-        if flyGuiInstance then
-            if flyGuiInstance.Parent then flyGuiInstance:Destroy() end
-            flyGuiInstance = nil
-        end
-        local gui = CoreGui:FindFirstChild("main")
-        if gui then gui:Destroy() end
-        isFlyRunning = false
-        FlyBtn.Text = "🚀 FLY"
-        FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
-    end
-    
-    if noclipActive then
-        noclipActive = false
-        NoclipBtn.BackgroundColor3 = Color3.fromRGB(80, 30, 30)
-        NoclipBtn.Text = "⬜ НОКЛИП"
-        if Player.Character then
-            for _, part in ipairs(Player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then part.CanCollide = true end
-            end
-        end
-    end
-    
-    if espLoaded then
-        for _, plr in pairs(Player:GetPlayers()) do
-            if plr.Character then
-                local hl = plr.Character:FindFirstChild("ESPHighlight")
-                if hl then hl:Destroy() end
-                local head = plr.Character:FindFirstChild("Head")
-                if head then
-                    local tag = head:FindFirstChild("NameTag")
-                    if tag then tag:Destroy() end
-                end
-            end
-        end
-        espLoaded = false
-        EspBtn.Text = "👁️ ESP"
-        EspBtn.BackgroundColor3 = Color3.fromRGB(30, 50, 80)
-    end
-    
-    if speedActive then
-        speedActive = false
-        if speedConnection then
-            speedConnection:Disconnect()
-            speedConnection = nil
-        end
-        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-            Player.Character.Humanoid.WalkSpeed = 16
-        end
-        SpeedBtn.Text = "⚡ СПИДХАК"
-        SpeedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 30)
-    end
-    
-    if hammerActive then
-        if hammerTool then
-            hammerTool:Destroy()
-            hammerTool = nil
-        end
-        hammerActive = false
-        HammerBtn.Text = "🔨 МОЛОТОК"
-        HammerBtn.BackgroundColor3 = Color3.fromRGB(80, 50, 30)
-    end
-    
-    print("☠ ВСЁ ВЫКЛЮЧЕНО (КРОМЕ АИМБОТА)")
-end)
-
 -- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ ========== //
 local menuOpen = false
 IconButton.MouseButton1Click:Connect(function()
@@ -657,47 +414,5 @@ IconButton.MouseButton1Click:Connect(function()
     IconButton.Visible = not menuOpen
 end)
 
--- // ========== ПАНИКА ========== //
-UIS.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.P then
-        ScreenGui:Destroy()
-        if isFlyRunning then
-            if flyGuiInstance then flyGuiInstance:Destroy() end
-            local gui = CoreGui:FindFirstChild("main")
-            if gui then gui:Destroy() end
-        end
-        if hammerTool then
-            hammerTool:Destroy()
-            hammerTool = nil
-        end
-        if speedActive then
-            speedActive = false
-            if speedConnection then
-                speedConnection:Disconnect()
-                speedConnection = nil
-            end
-            if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-                Player.Character.Humanoid.WalkSpeed = 16
-            end
-        end
-        if espLoaded then
-            for _, plr in pairs(Player:GetPlayers()) do
-                if plr.Character then
-                    local hl = plr.Character:FindFirstChild("ESPHighlight")
-                    if hl then hl:Destroy() end
-                    local head = plr.Character:FindFirstChild("Head")
-                    if head then
-                        local tag = head:FindFirstChild("NameTag")
-                        if tag then tag:Destroy() end
-                    end
-                end
-            end
-        end
-        print("☠ ПАНИКА")
-    end
-end)
-
-print("☠ RUSSIAN YAD v27.1 ЗАГРУЖЕН")
-print("📌 ИКОНКА 60x60 — МОЖНО ТАСКАТЬ")
-print("⚡ СПИДХАК С ВВОДОМ СКОРОСТИ")
-print("🎯 АИМБОТ ВКЛЮЧАЕТСЯ 1 РАЗ И БЛОКИРУЕТСЯ")
+print("☠ RUSSIAN YAD v28.3 ЗАГРУЖЕН")
+print("📌 КНОПКИ: FLY, НОКЛИП, KILLALL, СПИДХАК")
