@@ -1,10 +1,9 @@
--- // RUSSIAN YAD v7.0 // ДЛЯ DELTA НА ТЕЛЕФОНЕ //
+-- // RUSSIAN YAD v8.0 // КОМПАКТНЫЙ + НОКЛИП //
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
-local TweenService = game:GetService("TweenService")
 
 -- // ========== ОБХОД АНТИЧИТА ========== //
 local function bypassAntiCheat()
@@ -21,13 +20,13 @@ local function bypassAntiCheat()
 end
 pcall(bypassAntiCheat)
 
--- // ========== СОЗДАНИЕ GUI ========== //
+-- // ========== GUI ========== //
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = CoreGui
 ScreenGui.Name = "RussianYadGUI"
 ScreenGui.ResetOnSpawn = false
 
--- // ========== ИКОНКА (60x60 ДЛЯ ПАЛЬЦА) ========== //
+-- // ========== ИКОНКА ========== //
 local IconButton = Instance.new("ImageButton")
 IconButton.Parent = ScreenGui
 IconButton.Size = UDim2.new(0, 70, 0, 70)
@@ -46,15 +45,11 @@ spawn(function()
     while IconButton and IconButton.Parent do
         for i = 0.8, 1.2, 0.05 do
             wait(0.02)
-            if IconButton then
-                IconButton.Size = UDim2.new(0, 70 * i, 0, 70 * i)
-            end
+            if IconButton then IconButton.Size = UDim2.new(0, 70 * i, 0, 70 * i) end
         end
         for i = 1.2, 0.8, -0.05 do
             wait(0.02)
-            if IconButton then
-                IconButton.Size = UDim2.new(0, 70 * i, 0, 70 * i)
-            end
+            if IconButton then IconButton.Size = UDim2.new(0, 70 * i, 0, 70 * i) end
         end
     end
 end)
@@ -69,11 +64,11 @@ IconText.TextScaled = true
 IconText.Font = Enum.Font.GothamBold
 IconText.ZIndex = 11
 
--- // ========== ОСНОВНОЕ МЕНЮ (БОЛЬШЕ КНОПКИ) ========== //
+-- // ========== КОМПАКТНОЕ МЕНЮ ========== //
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 280, 0, 380)
-MainFrame.Position = UDim2.new(0.5, -140, 0.5, -190)
+MainFrame.Size = UDim2.new(0, 200, 0, 180)
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -90)
 MainFrame.BackgroundColor3 = Color3.fromRGB(8, 0, 15)
 MainFrame.BorderSizePixel = 3
 MainFrame.BorderColor3 = Color3.fromRGB(255, 0, 60)
@@ -86,23 +81,23 @@ MainFrame.Name = "MainFrame"
 -- ЗАГОЛОВОК
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
-Title.Size = UDim2.new(1, 0, 0, 50)
+Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundTransparency = 1
-Title.Text = "☠ FLY V7 ☠"
+Title.Text = "☠ FLY"
 Title.TextScaled = true
 Title.TextColor3 = Color3.fromRGB(255, 0, 80)
 Title.Font = Enum.Font.GothamBold
 
--- КНОПКА ЗАКРЫТИЯ
+-- КРЕСТИК
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = MainFrame
-CloseBtn.Size = UDim2.new(0, 40, 0, 40)
-CloseBtn.Position = UDim2.new(1, -45, 0, 5)
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -35, 0, 3)
 CloseBtn.Text = "✖"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
 CloseBtn.BorderColor3 = Color3.fromRGB(255, 0, 0)
-CloseBtn.BorderSizePixel = 2
+CloseBtn.BorderSizePixel = 1
 CloseBtn.TextScaled = true
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.MouseButton1Click:Connect(function()
@@ -110,46 +105,15 @@ CloseBtn.MouseButton1Click:Connect(function()
     IconButton.Visible = true
 end)
 
--- // ========== БОЛЬШИЕ КНОПКИ ДЛЯ ТЕЛЕФОНА ========== //
-local yPos = 55
-local btnHeight = 45
-local btnWidth = 120
+-- // ========== КНОПКИ (ТОЛЬКО 3) ========== //
+local yPos = 40
+local btnH = 35
 
--- КНОПКА ВВЕРХ
-local UpBtn = Instance.new("TextButton")
-UpBtn.Parent = MainFrame
-UpBtn.Size = UDim2.new(0, btnWidth, 0, btnHeight)
-UpBtn.Position = UDim2.new(0.03, 0, 0, yPos)
-UpBtn.Text = "⬆ ВВЕРХ"
-UpBtn.BackgroundColor3 = Color3.fromRGB(20, 100, 20)
-UpBtn.BorderColor3 = Color3.fromRGB(0, 255, 0)
-UpBtn.BorderSizePixel = 2
-UpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-UpBtn.Font = Enum.Font.GothamBold
-UpBtn.TextScaled = true
-UpBtn.Name = "UpBtn"
-
--- КНОПКА ВНИЗ
-local DownBtn = Instance.new("TextButton")
-DownBtn.Parent = MainFrame
-DownBtn.Size = UDim2.new(0, btnWidth, 0, btnHeight)
-DownBtn.Position = UDim2.new(0.53, 0, 0, yPos)
-DownBtn.Text = "⬇ ВНИЗ"
-DownBtn.BackgroundColor3 = Color3.fromRGB(100, 20, 20)
-DownBtn.BorderColor3 = Color3.fromRGB(255, 0, 0)
-DownBtn.BorderSizePixel = 2
-DownBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-DownBtn.Font = Enum.Font.GothamBold
-DownBtn.TextScaled = true
-DownBtn.Name = "DownBtn"
-
-yPos = yPos + btnHeight + 10
-
--- КНОПКА ВКЛЮЧИТЬ FLY
+-- FLY
 local FlyBtn = Instance.new("TextButton")
 FlyBtn.Parent = MainFrame
-FlyBtn.Size = UDim2.new(0, 250, 0, btnHeight)
-FlyBtn.Position = UDim2.new(0.03, 0, 0, yPos)
+FlyBtn.Size = UDim2.new(0, 170, 0, btnH)
+FlyBtn.Position = UDim2.new(0.05, 0, 0, yPos)
 FlyBtn.Text = "🌀 FLY"
 FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
 FlyBtn.BorderColor3 = Color3.fromRGB(100, 100, 255)
@@ -159,71 +123,110 @@ FlyBtn.Font = Enum.Font.GothamBold
 FlyBtn.TextScaled = true
 FlyBtn.Name = "FlyBtn"
 
-yPos = yPos + btnHeight + 10
+yPos = yPos + btnH + 5
 
--- КНОПКИ СКОРОСТИ
-local SpeedLabel = Instance.new("TextLabel")
-SpeedLabel.Parent = MainFrame
-SpeedLabel.Size = UDim2.new(0, 80, 0, btnHeight)
-SpeedLabel.Position = UDim2.new(0.35, 0, 0, yPos)
-SpeedLabel.Text = "5"
-SpeedLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-SpeedLabel.BorderColor3 = Color3.fromRGB(255, 255, 0)
-SpeedLabel.BorderSizePixel = 2
-SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
-SpeedLabel.Font = Enum.Font.GothamBold
-SpeedLabel.TextScaled = true
-SpeedLabel.Name = "SpeedLabel"
+-- НОКЛИП
+local NoclipBtn = Instance.new("TextButton")
+NoclipBtn.Parent = MainFrame
+NoclipBtn.Size = UDim2.new(0, 170, 0, btnH)
+NoclipBtn.Position = UDim2.new(0.05, 0, 0, yPos)
+NoclipBtn.Text = "⬜ НОКЛИП"
+NoclipBtn.BackgroundColor3 = Color3.fromRGB(80, 30, 30)
+NoclipBtn.BorderColor3 = Color3.fromRGB(255, 100, 100)
+NoclipBtn.BorderSizePixel = 2
+NoclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+NoclipBtn.Font = Enum.Font.GothamBold
+NoclipBtn.TextScaled = true
+NoclipBtn.Name = "NoclipBtn"
+
+yPos = yPos + btnH + 5
+
+-- СКОРОСТЬ
+local SpeedFrame = Instance.new("Frame")
+SpeedFrame.Parent = MainFrame
+SpeedFrame.Size = UDim2.new(0, 170, 0, btnH)
+SpeedFrame.Position = UDim2.new(0.05, 0, 0, yPos)
+SpeedFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+SpeedFrame.BorderColor3 = Color3.fromRGB(100, 100, 100)
+SpeedFrame.BorderSizePixel = 1
 
 local SpeedMinus = Instance.new("TextButton")
-SpeedMinus.Parent = MainFrame
-SpeedMinus.Size = UDim2.new(0, 60, 0, btnHeight)
-SpeedMinus.Position = UDim2.new(0.03, 0, 0, yPos)
+SpeedMinus.Parent = SpeedFrame
+SpeedMinus.Size = UDim2.new(0, 40, 0, btnH)
+SpeedMinus.Position = UDim2.new(0, 0, 0, 0)
 SpeedMinus.Text = "-"
 SpeedMinus.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 SpeedMinus.BorderColor3 = Color3.fromRGB(255, 255, 255)
-SpeedMinus.BorderSizePixel = 2
+SpeedMinus.BorderSizePixel = 1
 SpeedMinus.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedMinus.Font = Enum.Font.GothamBold
 SpeedMinus.TextScaled = true
 SpeedMinus.Name = "SpeedMinus"
 
+local SpeedLabel = Instance.new("TextLabel")
+SpeedLabel.Parent = SpeedFrame
+SpeedLabel.Size = UDim2.new(0, 50, 0, btnH)
+SpeedLabel.Position = UDim2.new(0.35, 0, 0, 0)
+SpeedLabel.Text = "5"
+SpeedLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+SpeedLabel.BorderColor3 = Color3.fromRGB(255, 255, 0)
+SpeedLabel.BorderSizePixel = 1
+SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+SpeedLabel.Font = Enum.Font.GothamBold
+SpeedLabel.TextScaled = true
+SpeedLabel.Name = "SpeedLabel"
+
 local SpeedPlus = Instance.new("TextButton")
-SpeedPlus.Parent = MainFrame
-SpeedPlus.Size = UDim2.new(0, 60, 0, btnHeight)
-SpeedPlus.Position = UDim2.new(0.74, 0, 0, yPos)
+SpeedPlus.Parent = SpeedFrame
+SpeedPlus.Size = UDim2.new(0, 40, 0, btnH)
+SpeedPlus.Position = UDim2.new(0.76, 0, 0, 0)
 SpeedPlus.Text = "+"
 SpeedPlus.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 SpeedPlus.BorderColor3 = Color3.fromRGB(255, 255, 255)
-SpeedPlus.BorderSizePixel = 2
+SpeedPlus.BorderSizePixel = 1
 SpeedPlus.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedPlus.Font = Enum.Font.GothamBold
 SpeedPlus.TextScaled = true
 SpeedPlus.Name = "SpeedPlus"
 
-yPos = yPos + btnHeight + 10
-
--- УПРАВЛЕНИЕ ДЖОЙСТИКОМ (ТЕЛЕФОН)
-local JoystickLabel = Instance.new("TextLabel")
-JoystickLabel.Parent = MainFrame
-JoystickLabel.Size = UDim2.new(1, 0, 0, 30)
-JoystickLabel.Position = UDim2.new(0, 0, 0, yPos)
-JoystickLabel.Text = "👆 ТЯНИ ПАЛЕЦ ПО ЭКРАНУ ДЛЯ ДВИЖЕНИЯ"
-JoystickLabel.BackgroundTransparency = 1
-JoystickLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-JoystickLabel.Font = Enum.Font.Code
-JoystickLabel.TextScaled = true
-
 -- // ========== ПЕРЕМЕННЫЕ ========== //
 local flying = false
 local flySpeed = 5
-local currentSpeed = 5
 local flyBV = nil
 local flyBG = nil
 local isR6 = false
 local moveDirection = Vector3.new(0, 0, 0)
-local touchPos = nil
 local joystickActive = false
+local noclipActive = false
+
+-- // ========== НОКЛИП ========== //
+local function toggleNoclip()
+    noclipActive = not noclipActive
+    NoclipBtn.BackgroundColor3 = noclipActive and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(80, 30, 30)
+    NoclipBtn.Text = noclipActive and "⬜ НОКЛИП ON" or "⬜ НОКЛИП"
+    
+    if noclipActive then
+        RunService.Stepped:Connect(function()
+            if noclipActive and Player.Character then
+                for _, part in ipairs(Player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+    else
+        if Player.Character then
+            for _, part in ipairs(Player.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+    end
+end
+
+NoclipBtn.MouseButton1Click:Connect(toggleNoclip)
 
 -- // ========== ФУНКЦИИ ПОЛЁТА ========== //
 local function startFly()
@@ -286,7 +289,6 @@ local function updateFly()
     local speed = flySpeed * 2
     local move = moveDirection * speed
     
-    -- Если джойстик не активен, плавно останавливаемся
     if not joystickActive then
         move = move * 0.9
         if move.Magnitude < 0.1 then move = Vector3.new(0, 0, 0) end
@@ -298,46 +300,11 @@ local function updateFly()
     end
 end
 
--- // ========== ОБРАБОТЧИКИ КНОПОК ========== //
-
--- FLY
 FlyBtn.MouseButton1Click:Connect(function()
     if flying then stopFly() else startFly() end
 end)
 
--- UP (удержание)
-local upHold = false
-local upConn = nil
-
-UpBtn.MouseButton1Down:Connect(function()
-    upHold = true
-    upConn = RunService.Heartbeat:Connect(function()
-        if upHold and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart.CFrame = Player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 2, 0)
-        end
-    end)
-end)
-
-UpBtn.MouseButton1Up:Connect(function() upHold = false if upConn then upConn:Disconnect() upConn = nil end end)
-UpBtn.MouseLeave:Connect(function() upHold = false if upConn then upConn:Disconnect() upConn = nil end end)
-
--- DOWN (удержание)
-local downHold = false
-local downConn = nil
-
-DownBtn.MouseButton1Down:Connect(function()
-    downHold = true
-    downConn = RunService.Heartbeat:Connect(function()
-        if downHold and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart.CFrame = Player.Character.HumanoidRootPart.CFrame * CFrame.new(0, -2, 0)
-        end
-    end)
-end)
-
-DownBtn.MouseButton1Up:Connect(function() downHold = false if downConn then downConn:Disconnect() downConn = nil end end)
-DownBtn.MouseLeave:Connect(function() downHold = false if downConn then downConn:Disconnect() downConn = nil end end)
-
--- СКОРОСТЬ
+-- // ========== СКОРОСТЬ ========== //
 SpeedPlus.MouseButton1Click:Connect(function()
     flySpeed = math.min(flySpeed + 1, 20)
     SpeedLabel.Text = tostring(flySpeed)
@@ -348,7 +315,7 @@ SpeedMinus.MouseButton1Click:Connect(function()
     SpeedLabel.Text = tostring(flySpeed)
 end)
 
--- // ========== ДЖОЙСТИК ДЛЯ ТЕЛЕФОНА ========== //
+-- // ========== ДЖОЙСТИК ========== //
 local function handleTouch(input)
     if not flying then return end
     if input.UserInputType == Enum.UserInputType.Touch then
@@ -370,15 +337,9 @@ local function handleTouchEnd(input)
     end
 end
 
--- Отслеживаем касания на всём экране (кроме GUI)
 UIS.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch then
-        -- Проверяем, не нажата ли кнопка GUI
-        local guiObject = CoreGui:FindFirstChild("RussianYadGUI")
-        if guiObject then
-            -- Если коснулись вне кнопок GUI — активируем джойстик
-            handleTouch(input)
-        end
+        handleTouch(input)
     end
 end)
 
@@ -388,108 +349,19 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- Альтернатива: кнопки движения на экране (простое управление)
-local moveUpBtn = Instance.new("TextButton")
-moveUpBtn.Parent = ScreenGui
-moveUpBtn.Size = UDim2.new(0, 60, 0, 60)
-moveUpBtn.Position = UDim2.new(0.02, 0, 0.7, 0)
-moveUpBtn.Text = "▲"
-moveUpBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
-moveUpBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
-moveUpBtn.BorderSizePixel = 2
-moveUpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-moveUpBtn.Font = Enum.Font.GothamBold
-moveUpBtn.TextScaled = true
-moveUpBtn.Visible = false
-moveUpBtn.Name = "MoveUp"
-
-local moveDownBtn = Instance.new("TextButton")
-moveDownBtn.Parent = ScreenGui
-moveDownBtn.Size = UDim2.new(0, 60, 0, 60)
-moveDownBtn.Position = UDim2.new(0.02, 0, 0.85, 0)
-moveDownBtn.Text = "▼"
-moveDownBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
-moveDownBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
-moveDownBtn.BorderSizePixel = 2
-moveDownBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-moveDownBtn.Font = Enum.Font.GothamBold
-moveDownBtn.TextScaled = true
-moveDownBtn.Visible = false
-moveDownBtn.Name = "MoveDown"
-
-local moveLeftBtn = Instance.new("TextButton")
-moveLeftBtn.Parent = ScreenGui
-moveLeftBtn.Size = UDim2.new(0, 60, 0, 60)
-moveLeftBtn.Position = UDim2.new(0.15, 0, 0.775, 0)
-moveLeftBtn.Text = "◄"
-moveLeftBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
-moveLeftBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
-moveLeftBtn.BorderSizePixel = 2
-moveLeftBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-moveLeftBtn.Font = Enum.Font.GothamBold
-moveLeftBtn.TextScaled = true
-moveLeftBtn.Visible = false
-moveLeftBtn.Name = "MoveLeft"
-
-local moveRightBtn = Instance.new("TextButton")
-moveRightBtn.Parent = ScreenGui
-moveRightBtn.Size = UDim2.new(0, 60, 0, 60)
-moveRightBtn.Position = UDim2.new(0.25, 0, 0.775, 0)
-moveRightBtn.Text = "►"
-moveRightBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
-moveRightBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
-moveRightBtn.BorderSizePixel = 2
-moveRightBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-moveRightBtn.Font = Enum.Font.GothamBold
-moveRightBtn.TextScaled = true
-moveRightBtn.Visible = false
-moveRightBtn.Name = "MoveRight"
-
--- Обработчики кнопок движения (для тех, у кого нет джойстика)
-moveUpBtn.MouseButton1Down:Connect(function() if flying then moveDirection = Vector3.new(0, 0, -1) end end)
-moveUpBtn.MouseButton1Up:Connect(function() moveDirection = Vector3.new(0, 0, 0) end)
-
-moveDownBtn.MouseButton1Down:Connect(function() if flying then moveDirection = Vector3.new(0, 0, 1) end end)
-moveDownBtn.MouseButton1Up:Connect(function() moveDirection = Vector3.new(0, 0, 0) end)
-
-moveLeftBtn.MouseButton1Down:Connect(function() if flying then moveDirection = Vector3.new(-1, 0, 0) end end)
-moveLeftBtn.MouseButton1Up:Connect(function() moveDirection = Vector3.new(0, 0, 0) end)
-
-moveRightBtn.MouseButton1Down:Connect(function() if flying then moveDirection = Vector3.new(1, 0, 0) end end)
-moveRightBtn.MouseButton1Up:Connect(function() moveDirection = Vector3.new(0, 0, 0) end)
-
--- // ========== ПОКАЗЫВАТЬ КНОПКИ ДВИЖЕНИЯ ПРИ ПОЛЁТЕ ========== //
-local function showMoveButtons(show)
-    moveUpBtn.Visible = show
-    moveDownBtn.Visible = show
-    moveLeftBtn.Visible = show
-    moveRightBtn.Visible = show
-end
-
--- // ========== ОБНОВЛЕНИЕ В ЦИКЛЕ ========== //
+-- // ========== ОБНОВЛЕНИЕ ========== //
 RunService.Heartbeat:Connect(function()
-    if flying then
-        updateFly()
-        if not moveUpBtn.Visible then
-            showMoveButtons(true)
-        end
-    else
-        if moveUpBtn.Visible then
-            showMoveButtons(false)
-        end
-    end
+    if flying then updateFly() end
 end)
 
 -- // ========== СБРОС ПРИ СМЕРТИ ========== //
 Player.CharacterAdded:Connect(function()
     wait(0.5)
-    if flying then
-        stopFly()
-        showMoveButtons(false)
-    end
+    if flying then stopFly() end
+    if noclipActive then toggleNoclip() end
 end)
 
--- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ ПО ИКОНКЕ ========== //
+-- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ ========== //
 local menuOpen = false
 IconButton.MouseButton1Click:Connect(function()
     menuOpen = not menuOpen
@@ -497,7 +369,7 @@ IconButton.MouseButton1Click:Connect(function()
     IconButton.Visible = not menuOpen
 end)
 
--- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ ========== //
+-- // ========== ПЕРЕТАСКИВАНИЕ ========== //
 local dragToggle = nil
 local dragStart = nil
 local startPos = nil
@@ -536,7 +408,8 @@ UIS.InputBegan:Connect(function(input)
     end
 end)
 
-print("☠ RUSSIAN YAD v7.0 ДЛЯ DELTA ТЕЛЕФОН")
-print("📌 НАЖМИ НА ИКОНКУ ☠")
+print("☠ RUSSIAN YAD v8.0 ЗАГРУЖЕН")
+print("📌 ИКОНКА ☠ — ОТКРЫТЬ/ЗАКРЫТЬ")
+print("🌀 FLY — ВКЛЮЧИТЬ ПОЛЁТ")
+print("⬜ НОКЛИП — ПРОХОД СКВОЗЬ СТЕНЫ")
 print("👆 ТЯНИ ПАЛЕЦ ПО ЭКРАНУ — ЛЕТИШЬ")
-print("⬆⬇ КНОПКИ В МЕНЮ — ВВЕРХ/ВНИЗ")
