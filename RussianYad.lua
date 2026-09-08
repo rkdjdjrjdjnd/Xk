@@ -1,5 +1,4 @@
--- // RUSSIAN YAD v35.0 // DRONEFRONT EDITION // БЕЛОЕ МЕНЮ //
-
+-- // RUSSIAN YAD v36.0 // DRONEFRONT // БЕЛОЕ МЕНЮ, ЧЁРНЫЕ КНОПКИ //
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
@@ -7,7 +6,7 @@ local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
 
--- // ========== ОБХОД АНТИЧИТА ========== //
+-- // ========== ОБХОД АНТИЧИТА (ПРОСТОЙ) ========== //
 pcall(function()
     for _, v in pairs(getgc(true)) do
         if type(v) == "function" and getfenv(v) then
@@ -15,19 +14,6 @@ pcall(function()
             if env and env.script and tostring(env.script):find("AntiCheat") then
                 env.script.Disabled = true
             end
-        end
-    end
-    for _, v in pairs(getgc()) do
-        if type(v) == "function" and tostring(v):find("check") then
-            v = function() return true end
-        end
-    end
-    local oldSend = game:GetService("ReplicatedStorage"):FindFirstChild("RemoteEvent")
-    if oldSend then
-        oldSend.FireServer = function(...) 
-            local args = {...}
-            if tostring(args[1]):find("AntiCheat") then return end
-            return oldSend.FireServer(...)
         end
     end
 end)
@@ -76,7 +62,7 @@ spawn(function()
     end
 end)
 
--- // ========== ПЕРЕТАСКИВАНИЕ ИКОНКИ ========== //
+-- // ========== ПЕРЕТАСКИВАНИЕ ИКОНКИ (ТЕЛЕФОН) ========== //
 local iconDragToggle, iconDragStart, iconStartPos = false
 IconButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch then
@@ -130,7 +116,7 @@ Title.Font = Enum.Font.GothamBold
 Title.TextScaled = true
 Title.ZIndex = 3
 
--- Крестик
+-- Крестик (ЗАКРЫВАЕТ МЕНЮ)
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = MainFrame
 CloseBtn.Size = UDim2.new(0, 35, 0, 35)
@@ -145,10 +131,21 @@ CloseBtn.ZIndex = 3
 local cornerClose = Instance.new("UICorner")
 cornerClose.Parent = CloseBtn
 cornerClose.CornerRadius = UDim.new(0, 10)
-CloseBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false IconButton.Visible = true end)
-CloseBtn.TouchTap:Connect(function() MainFrame.Visible = false IconButton.Visible = true end)
 
--- // ========== ЧЁРНЫЕ КНОПКИ ========== //
+-- ОБРАБОТЧИК ДЛЯ КРЕСТИКА (НАДЁЖНО)
+local function closeMenu()
+    MainFrame.Visible = false
+    IconButton.Visible = true
+end
+CloseBtn.MouseButton1Click:Connect(closeMenu)
+CloseBtn.TouchTap:Connect(closeMenu)
+CloseBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        closeMenu()
+    end
+end)
+
+-- // ========== ЧЁРНЫЕ КНОПКИ С ON/OFF ========== //
 local function createButton(text, y, callback)
     local btn = Instance.new("TextButton")
     btn.Parent = MainFrame
@@ -165,35 +162,38 @@ local function createButton(text, y, callback)
     local corner = Instance.new("UICorner")
     corner.Parent = btn
     corner.CornerRadius = UDim.new(0, 10)
+    -- Обработчики для ПК и телефона
     btn.MouseButton1Click:Connect(callback)
     btn.TouchTap:Connect(callback)
+    btn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            callback()
+        end
+    end)
     return btn
 end
 
 local yPos = 50
 
--- Кнопки функций
+-- Кнопка 1: Ускорение дронов
 local speedBtn = createButton("🚀 УСКОРЕНИЕ ДРОНОВ", yPos, function()
     toggleDroneSpeed()
-    speedBtn.Text = droneSpeedActive and "🚀 УСКОРЕНИЕ ON" or "🚀 УСКОРЕНИЕ ДРОНОВ"
-    speedBtn.BackgroundColor3 = droneSpeedActive and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(0, 0, 0)
 end)
 yPos = yPos + 42
 
+-- Кнопка 2: ESP дронов
 local espBtn = createButton("👁️ ESP ДРОНОВ", yPos, function()
     toggleDroneESP()
-    espBtn.Text = droneEspActive and "👁️ ESP ON" or "👁️ ESP ДРОНОВ"
-    espBtn.BackgroundColor3 = droneEspActive and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(0, 0, 0)
 end)
 yPos = yPos + 42
 
+-- Кнопка 3: Бесконечные дроны
 local infBtn = createButton("♾️ БЕСКОНЕЧНЫЕ ДРОНЫ", yPos, function()
     toggleInfiniteDrones()
-    infBtn.Text = infDronesActive and "♾️ БЕСКОНЕЧНЫЕ ON" or "♾️ БЕСКОНЕЧНЫЕ ДРОНЫ"
-    infBtn.BackgroundColor3 = infDronesActive and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(0, 0, 0)
 end)
 yPos = yPos + 42
 
+-- Кнопка 4: Сброс
 local resetBtn = createButton("🔄 СБРОСИТЬ ВСЁ", yPos, function()
     resetAll()
 end)
@@ -205,14 +205,17 @@ local droneEspActive = false
 local droneEspObjects = {}
 local infDronesActive = false
 local infDronesConnection = nil
-local originalDroneSpeed = nil
 
--- // ========== ПОИСК ДРОНОВ ========== //
+-- // ========== ПОИСК ДРОНОВ (РАБОТАЕТ В DRONEFRONT) ========== //
 local function findDrones()
     local drones = {}
     for _, obj in ipairs(Workspace:GetDescendants()) do
-        if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") and obj.Name:lower():find("drone") then
-            table.insert(drones, obj)
+        -- Ищем модели, у которых есть HumanoidRootPart и имя содержит "drone" или "Drone"
+        if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") then
+            local name = obj.Name:lower()
+            if name:find("drone") or name:find("дрон") then
+                table.insert(drones, obj)
+            end
         end
     end
     return drones
@@ -235,11 +238,15 @@ function toggleDroneSpeed()
                 end
             end
         end)
+        speedBtn.Text = "🚀 УСКОРЕНИЕ ON"
+        speedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     else
         if droneSpeedConnection then
             droneSpeedConnection:Disconnect()
             droneSpeedConnection = nil
         end
+        speedBtn.Text = "🚀 УСКОРЕНИЕ ДРОНОВ"
+        speedBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     end
 end
 
@@ -247,6 +254,10 @@ end
 function toggleDroneESP()
     droneEspActive = not droneEspActive
     if droneEspActive then
+        -- Удаляем старые объекты ESP
+        for _, obj in ipairs(droneEspObjects) do obj:Destroy() end
+        droneEspObjects = {}
+        -- Добавляем ESP на всех дронов
         for _, drone in ipairs(findDrones()) do
             local hrp = drone:FindFirstChild("HumanoidRootPart")
             if hrp then
@@ -258,29 +269,13 @@ function toggleDroneESP()
                 table.insert(droneEspObjects, hl)
             end
         end
-        -- Обновление ESP при появлении новых дронов
-        if infDronesConnection then infDronesConnection:Disconnect() end
-        infDronesConnection = RunService.Heartbeat:Connect(function()
-            if not droneEspActive then return end
-            for _, drone in ipairs(findDrones()) do
-                local hrp = drone:FindFirstChild("HumanoidRootPart")
-                if hrp and not hrp:FindFirstChildOfClass("Highlight") then
-                    local hl = Instance.new("Highlight")
-                    hl.Parent = hrp
-                    hl.FillColor = Color3.fromRGB(255, 0, 0)
-                    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                    hl.FillTransparency = 0.5
-                    table.insert(droneEspObjects, hl)
-                end
-            end
-        end)
+        espBtn.Text = "👁️ ESP ON"
+        espBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     else
         for _, obj in ipairs(droneEspObjects) do obj:Destroy() end
         droneEspObjects = {}
-        if infDronesConnection then
-            infDronesConnection:Disconnect()
-            infDronesConnection = nil
-        end
+        espBtn.Text = "👁️ ESP ДРОНОВ"
+        espBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     end
 end
 
@@ -288,8 +283,6 @@ end
 function toggleInfiniteDrones()
     infDronesActive = not infDronesActive
     if infDronesActive then
-        -- Попытка найти скрипт спавна дронов и изменить лимит
-        -- В реальности это сложнее, сделаем упрощённый вариант: не даём дронам умирать
         if infDronesConnection then infDronesConnection:Disconnect() end
         infDronesConnection = RunService.Heartbeat:Connect(function()
             if not infDronesActive then return end
@@ -300,11 +293,15 @@ function toggleInfiniteDrones()
                 end
             end
         end)
+        infBtn.Text = "♾️ БЕСКОНЕЧНЫЕ ON"
+        infBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     else
         if infDronesConnection then
             infDronesConnection:Disconnect()
             infDronesConnection = nil
         end
+        infBtn.Text = "♾️ БЕСКОНЕЧНЫЕ ДРОНЫ"
+        infBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     end
 end
 
@@ -313,16 +310,10 @@ function resetAll()
     if droneSpeedActive then toggleDroneSpeed() end
     if droneEspActive then toggleDroneESP() end
     if infDronesActive then toggleInfiniteDrones() end
-    speedBtn.Text = "🚀 УСКОРЕНИЕ ДРОНОВ"
-    speedBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    espBtn.Text = "👁️ ESP ДРОНОВ"
-    espBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    infBtn.Text = "♾️ БЕСКОНЕЧНЫЕ ДРОНЫ"
-    infBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     print("☠ ВСЁ СБРОШЕНО")
 end
 
--- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ ========== //
+-- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ (ТЕЛЕФОН) ========== //
 local menuDragToggle, menuDragStart, menuStartPos = false
 MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch then
@@ -343,15 +334,18 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
--- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ МЕНЮ ========== //
+-- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ МЕНЮ (НАДЁЖНО) ========== //
 local function toggleMenu()
     MainFrame.Visible = not MainFrame.Visible
     IconButton.Visible = not MainFrame.Visible
 end
+
 IconButton.MouseButton1Click:Connect(toggleMenu)
 IconButton.TouchTap:Connect(toggleMenu)
 IconButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch and not iconDragToggle then toggleMenu() end
+    if input.UserInputType == Enum.UserInputType.Touch and not iconDragToggle then
+        toggleMenu()
+    end
 end)
 
 -- // ========== ПАНИКА ========== //
@@ -366,6 +360,7 @@ UIS.InputBegan:Connect(function(input)
 end)
 
 -- // ========== ЗАГРУЗКА ========== //
-print("☠ RUSSIAN YAD DRONEFRONT EDITION ЗАГРУЖЕН")
-print("📌 БЕЛОЕ МЕНЮ, ЧЁРНЫЕ ФУНКЦИИ")
-print("📌 РАБОТАЕТ НА ТЕЛЕФОНЕ")
+print("☠ RUSSIAN YAD v36.0 ЗАГРУЖЕН")
+print("📌 БЕЛОЕ МЕНЮ, ЧЁРНЫЕ КНОПКИ")
+print("📌 ON/OFF РАБОТАЕТ")
+print("📌 КРЕСТИК ЗАКРЫВАЕТ МЕНЮ")
