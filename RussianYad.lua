@@ -1,4 +1,4 @@
--- // RUSSIAN YAD v5.0 // С ИКОНКОЙ И ДВИЖЕНИЕМ // ДЛЯ ТЕЛЕФОНА //
+-- // RUSSIAN YAD v7.0 // ДЛЯ DELTA НА ТЕЛЕФОНЕ //
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
@@ -17,11 +17,6 @@ local function bypassAntiCheat()
                 end
             end
         end
-        for _, v in pairs(getgc()) do
-            if type(v) == "function" and tostring(v):find("check") then
-                v = function() return true end
-            end
-        end
     end)
 end
 pcall(bypassAntiCheat)
@@ -32,39 +27,38 @@ ScreenGui.Parent = CoreGui
 ScreenGui.Name = "RussianYadGUI"
 ScreenGui.ResetOnSpawn = false
 
--- // ========== ИКОНКА (КНОПКА ОТКРЫТИЯ) ========== //
+-- // ========== ИКОНКА (60x60 ДЛЯ ПАЛЬЦА) ========== //
 local IconButton = Instance.new("ImageButton")
 IconButton.Parent = ScreenGui
-IconButton.Size = UDim2.new(0, 60, 0, 60)
-IconButton.Position = UDim2.new(0.85, -30, 0.85, -30)
+IconButton.Size = UDim2.new(0, 70, 0, 70)
+IconButton.Position = UDim2.new(0.85, -35, 0.85, -35)
 IconButton.BackgroundColor3 = Color3.fromRGB(20, 0, 30)
 IconButton.BorderColor3 = Color3.fromRGB(255, 0, 80)
 IconButton.BorderSizePixel = 3
-IconButton.Image = "rbxassetid://123456789" -- Иконка (можно заменить)
+IconButton.Image = "rbxassetid://123456789"
 IconButton.ImageColor3 = Color3.fromRGB(255, 0, 80)
 IconButton.ScaleType = Enum.ScaleType.Fit
 IconButton.Name = "IconButton"
 IconButton.ZIndex = 10
 
--- ЭФФЕКТ ПУЛЬСАЦИИ ИКОНКИ
+-- ПУЛЬСАЦИЯ
 spawn(function()
     while IconButton and IconButton.Parent do
         for i = 0.8, 1.2, 0.05 do
             wait(0.02)
             if IconButton then
-                IconButton.Size = UDim2.new(0, 60 * i, 0, 60 * i)
+                IconButton.Size = UDim2.new(0, 70 * i, 0, 70 * i)
             end
         end
         for i = 1.2, 0.8, -0.05 do
             wait(0.02)
             if IconButton then
-                IconButton.Size = UDim2.new(0, 60 * i, 0, 60 * i)
+                IconButton.Size = UDim2.new(0, 70 * i, 0, 70 * i)
             end
         end
     end
 end)
 
--- ТЕКСТ НА ИКОНКЕ
 local IconText = Instance.new("TextLabel")
 IconText.Parent = IconButton
 IconText.Size = UDim2.new(1, 0, 1, 0)
@@ -75,11 +69,11 @@ IconText.TextScaled = true
 IconText.Font = Enum.Font.GothamBold
 IconText.ZIndex = 11
 
--- // ========== ОСНОВНОЕ МЕНЮ (СКРЫТО) ========== //
+-- // ========== ОСНОВНОЕ МЕНЮ (БОЛЬШЕ КНОПКИ) ========== //
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 350, 0, 500)
-MainFrame.Position = UDim2.new(0.5, -175, 0.5, -250)
+MainFrame.Size = UDim2.new(0, 280, 0, 380)
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -190)
 MainFrame.BackgroundColor3 = Color3.fromRGB(8, 0, 15)
 MainFrame.BorderSizePixel = 3
 MainFrame.BorderColor3 = Color3.fromRGB(255, 0, 60)
@@ -92,18 +86,18 @@ MainFrame.Name = "MainFrame"
 -- ЗАГОЛОВОК
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
-Title.Size = UDim2.new(1, 0, 0, 45)
+Title.Size = UDim2.new(1, 0, 0, 50)
 Title.BackgroundTransparency = 1
-Title.Text = "☠ RUSSIAN YAD v5.0 ☠"
+Title.Text = "☠ FLY V7 ☠"
 Title.TextScaled = true
 Title.TextColor3 = Color3.fromRGB(255, 0, 80)
 Title.Font = Enum.Font.GothamBold
 
--- КНОПКА ЗАКРЫТИЯ (крестик)
+-- КНОПКА ЗАКРЫТИЯ
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = MainFrame
-CloseBtn.Size = UDim2.new(0, 35, 0, 35)
-CloseBtn.Position = UDim2.new(1, -40, 0, 5)
+CloseBtn.Size = UDim2.new(0, 40, 0, 40)
+CloseBtn.Position = UDim2.new(1, -45, 0, 5)
 CloseBtn.Text = "✖"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
@@ -111,378 +105,400 @@ CloseBtn.BorderColor3 = Color3.fromRGB(255, 0, 0)
 CloseBtn.BorderSizePixel = 2
 CloseBtn.TextScaled = true
 CloseBtn.Font = Enum.Font.GothamBold
-
 CloseBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
     IconButton.Visible = true
 end)
 
--- // ========== КНОПКИ ФУНКЦИЙ ========== //
-local functions = {
-    {"🚀 СПИДХАК x50", "speed"},
-    {"💀 БЕССМЕРТИЕ", "god"},
-    {"🌀 ПОЛЁТ", "fly"},
-    {"⬜ НОКЛИП", "noclip"},
-    {"🎯 АИМБОТ (ГОЛОВА)", "aim"},
-    {"👁️ ESP", "esp"},
-    {"🔫 БЕСК. ПАТРОНЫ", "ammo"},
-    {"💀 КИЛЛ ВСЕХ (КРОМЕ СЕБЯ)", "killall"},
-    {"🌀 ТЕЛЕПОРТ К ИГРОКУ", "tpto"},
-    {"🌀 ПРИТЯНУТЬ И КРУЖИТЬ", "tpcircle"},
-    {"🌊 ХОДЬБА ПО ВОДЕ", "water"},
-    {"🕶️ НЕВИДИМОСТЬ", "invis"},
-    {"🧊 ЗАМОРОЗКА ВРАГОВ", "freeze"},
-    {"🎵 МУЗЫКА ДЛЯ ВСЕХ", "musicall"}
-}
+-- // ========== БОЛЬШИЕ КНОПКИ ДЛЯ ТЕЛЕФОНА ========== //
+local yPos = 55
+local btnHeight = 45
+local btnWidth = 120
 
-local yPos = 50
-local col = 0
+-- КНОПКА ВВЕРХ
+local UpBtn = Instance.new("TextButton")
+UpBtn.Parent = MainFrame
+UpBtn.Size = UDim2.new(0, btnWidth, 0, btnHeight)
+UpBtn.Position = UDim2.new(0.03, 0, 0, yPos)
+UpBtn.Text = "⬆ ВВЕРХ"
+UpBtn.BackgroundColor3 = Color3.fromRGB(20, 100, 20)
+UpBtn.BorderColor3 = Color3.fromRGB(0, 255, 0)
+UpBtn.BorderSizePixel = 2
+UpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+UpBtn.Font = Enum.Font.GothamBold
+UpBtn.TextScaled = true
+UpBtn.Name = "UpBtn"
 
-for i, data in ipairs(functions) do
-    local btn = Instance.new("TextButton")
-    btn.Parent = MainFrame
-    btn.Size = UDim2.new(0, 155, 0, 30)
-    btn.Position = UDim2.new(col == 0 and 0.03 or 0.53, 0, 0, yPos)
-    btn.Text = data[1]
-    btn.BackgroundColor3 = Color3.fromRGB(12, 0, 18)
-    btn.BorderColor3 = Color3.fromRGB(255, 0, 60)
-    btn.BorderSizePixel = 1
-    btn.TextColor3 = Color3.fromRGB(200, 60, 60)
-    btn.Font = Enum.Font.Code
-    btn.TextScaled = true
-    btn.Name = data[2]
-    btn.BackgroundTransparency = 0.3
-    
-    if col == 0 then col = 1 else col = 0 yPos = yPos + 35 end
-end
+-- КНОПКА ВНИЗ
+local DownBtn = Instance.new("TextButton")
+DownBtn.Parent = MainFrame
+DownBtn.Size = UDim2.new(0, btnWidth, 0, btnHeight)
+DownBtn.Position = UDim2.new(0.53, 0, 0, yPos)
+DownBtn.Text = "⬇ ВНИЗ"
+DownBtn.BackgroundColor3 = Color3.fromRGB(100, 20, 20)
+DownBtn.BorderColor3 = Color3.fromRGB(255, 0, 0)
+DownBtn.BorderSizePixel = 2
+DownBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+DownBtn.Font = Enum.Font.GothamBold
+DownBtn.TextScaled = true
+DownBtn.Name = "DownBtn"
 
--- // ========== ФУНКЦИИ ========== //
+yPos = yPos + btnHeight + 10
 
--- 1. СПИДХАК
-local speedEnabled = false
-MainFrame.speed.MouseButton1Click:Connect(function()
-    speedEnabled = not speedEnabled
-    MainFrame.speed.BackgroundColor3 = speedEnabled and Color3.fromRGB(50,0,0) or Color3.fromRGB(12,0,18)
-    if speedEnabled then
-        RunService.Stepped:Connect(function()
-            if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-                Player.Character.Humanoid.WalkSpeed = 80
-                Player.Character.Humanoid.JumpPower = 80
-            end
-        end)
-    else
-        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-            Player.Character.Humanoid.WalkSpeed = 16
-            Player.Character.Humanoid.JumpPower = 50
-        end
-    end
-end)
+-- КНОПКА ВКЛЮЧИТЬ FLY
+local FlyBtn = Instance.new("TextButton")
+FlyBtn.Parent = MainFrame
+FlyBtn.Size = UDim2.new(0, 250, 0, btnHeight)
+FlyBtn.Position = UDim2.new(0.03, 0, 0, yPos)
+FlyBtn.Text = "🌀 FLY"
+FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
+FlyBtn.BorderColor3 = Color3.fromRGB(100, 100, 255)
+FlyBtn.BorderSizePixel = 2
+FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlyBtn.Font = Enum.Font.GothamBold
+FlyBtn.TextScaled = true
+FlyBtn.Name = "FlyBtn"
 
--- 2. БЕССМЕРТИЕ
-MainFrame.god.MouseButton1Click:Connect(function()
-    if Player.Character then
-        Player.Character.Humanoid.MaxHealth = math.huge
-        Player.Character.Humanoid.Health = math.huge
-        Player.Character.Humanoid.BreakJointsOnDeath = false
-        MainFrame.god.BackgroundColor3 = Color3.fromRGB(50,0,0)
-    end
-end)
+yPos = yPos + btnHeight + 10
 
--- 3. ПОЛЁТ
+-- КНОПКИ СКОРОСТИ
+local SpeedLabel = Instance.new("TextLabel")
+SpeedLabel.Parent = MainFrame
+SpeedLabel.Size = UDim2.new(0, 80, 0, btnHeight)
+SpeedLabel.Position = UDim2.new(0.35, 0, 0, yPos)
+SpeedLabel.Text = "5"
+SpeedLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+SpeedLabel.BorderColor3 = Color3.fromRGB(255, 255, 0)
+SpeedLabel.BorderSizePixel = 2
+SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+SpeedLabel.Font = Enum.Font.GothamBold
+SpeedLabel.TextScaled = true
+SpeedLabel.Name = "SpeedLabel"
+
+local SpeedMinus = Instance.new("TextButton")
+SpeedMinus.Parent = MainFrame
+SpeedMinus.Size = UDim2.new(0, 60, 0, btnHeight)
+SpeedMinus.Position = UDim2.new(0.03, 0, 0, yPos)
+SpeedMinus.Text = "-"
+SpeedMinus.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+SpeedMinus.BorderColor3 = Color3.fromRGB(255, 255, 255)
+SpeedMinus.BorderSizePixel = 2
+SpeedMinus.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedMinus.Font = Enum.Font.GothamBold
+SpeedMinus.TextScaled = true
+SpeedMinus.Name = "SpeedMinus"
+
+local SpeedPlus = Instance.new("TextButton")
+SpeedPlus.Parent = MainFrame
+SpeedPlus.Size = UDim2.new(0, 60, 0, btnHeight)
+SpeedPlus.Position = UDim2.new(0.74, 0, 0, yPos)
+SpeedPlus.Text = "+"
+SpeedPlus.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+SpeedPlus.BorderColor3 = Color3.fromRGB(255, 255, 255)
+SpeedPlus.BorderSizePixel = 2
+SpeedPlus.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedPlus.Font = Enum.Font.GothamBold
+SpeedPlus.TextScaled = true
+SpeedPlus.Name = "SpeedPlus"
+
+yPos = yPos + btnHeight + 10
+
+-- УПРАВЛЕНИЕ ДЖОЙСТИКОМ (ТЕЛЕФОН)
+local JoystickLabel = Instance.new("TextLabel")
+JoystickLabel.Parent = MainFrame
+JoystickLabel.Size = UDim2.new(1, 0, 0, 30)
+JoystickLabel.Position = UDim2.new(0, 0, 0, yPos)
+JoystickLabel.Text = "👆 ТЯНИ ПАЛЕЦ ПО ЭКРАНУ ДЛЯ ДВИЖЕНИЯ"
+JoystickLabel.BackgroundTransparency = 1
+JoystickLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+JoystickLabel.Font = Enum.Font.Code
+JoystickLabel.TextScaled = true
+
+-- // ========== ПЕРЕМЕННЫЕ ========== //
 local flying = false
-local flyBV
-MainFrame.fly.MouseButton1Click:Connect(function()
-    flying = not flying
-    MainFrame.fly.BackgroundColor3 = flying and Color3.fromRGB(50,0,0) or Color3.fromRGB(12,0,18)
-    if flying then
-        flyBV = Instance.new("BodyVelocity")
-        flyBV.MaxForce = Vector3.new(4000, 4000, 4000)
-        flyBV.Velocity = Vector3.new(0, 20, 0)
-        flyBV.Parent = Player.Character.HumanoidRootPart
-    else
-        if flyBV then flyBV:Destroy() end
-    end
-end)
+local flySpeed = 5
+local currentSpeed = 5
+local flyBV = nil
+local flyBG = nil
+local isR6 = false
+local moveDirection = Vector3.new(0, 0, 0)
+local touchPos = nil
+local joystickActive = false
 
--- 4. НОКЛИП
-local noclip = false
-MainFrame.noclip.MouseButton1Click:Connect(function()
-    noclip = not noclip
-    MainFrame.noclip.BackgroundColor3 = noclip and Color3.fromRGB(50,0,0) or Color3.fromRGB(12,0,18)
-    if noclip then
-        RunService.Stepped:Connect(function()
-            if Player.Character then
-                for _, part in ipairs(Player.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = false
-                    end
-                end
-            end
-        end)
-    else
-        if Player.Character then
-            for _, part in ipairs(Player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = true
-                end
-            end
-        end
-    end
-end)
-
--- 5. АИМБОТ (ГОЛОВА)
-MainFrame.aim.MouseButton1Click:Connect(function()
-    local target = nil
-    local minDist = math.huge
-    for _, plr in pairs(Player:GetPlayers()) do
-        if plr ~= Player and plr.Character and plr.Character:FindFirstChild("Head") then
-            local dist = (plr.Character.Head.Position - Player.Character.Head.Position).Magnitude
-            if dist < minDist then
-                minDist = dist
-                target = plr
-            end
-        end
-    end
-    if target and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-        Player.Character.HumanoidRootPart.CFrame = CFrame.new(
-            Player.Character.HumanoidRootPart.Position,
-            target.Character.Head.Position
-        )
-        if Player.Character:FindFirstChild("Head") then
-            Player.Character.Head.CFrame = CFrame.new(
-                Player.Character.Head.Position,
-                target.Character.Head.Position
-            )
-        end
-        MainFrame.aim.BackgroundColor3 = Color3.fromRGB(50,0,0)
-    end
-end)
-
--- 6. ESP
-MainFrame.esp.MouseButton1Click:Connect(function()
-    for _, plr in pairs(Player:GetPlayers()) do
-        if plr ~= Player and plr.Character then
-            for _, part in ipairs(plr.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    local hl = Instance.new("Highlight")
-                    hl.Parent = part
-                    hl.FillColor = Color3.fromRGB(255,0,0)
-                    hl.OutlineColor = Color3.fromRGB(255,0,0)
-                    hl.FillTransparency = 0.5
-                end
-            end
-        end
-    end
-    MainFrame.esp.BackgroundColor3 = Color3.fromRGB(50,0,0)
-end)
-
--- 7. БЕСКОНЕЧНЫЕ ПАТРОНЫ
-MainFrame.ammo.MouseButton1Click:Connect(function()
-    local tool = Player.Character and Player.Character:FindFirstChildOfClass("Tool")
-    if tool and tool:FindFirstChild("Ammo") then
-        tool.Ammo.Value = 9999
-    end
-    MainFrame.ammo.BackgroundColor3 = Color3.fromRGB(50,0,0)
-end)
-
--- 8. КИЛЛ ВСЕХ
-MainFrame.killall.MouseButton1Click:Connect(function()
-    local killed = 0
-    for _, plr in pairs(Player:GetPlayers()) do
-        if plr ~= Player and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            plr.Character.Humanoid.Health = 0
-            killed = killed + 1
-        end
-    end
-    MainFrame.killall.BackgroundColor3 = Color3.fromRGB(50,0,0)
-end)
-
--- 9. ТЕЛЕПОРТ К ИГРОКУ
-local function teleportToPlayer()
-    local players = {}
-    for _, plr in pairs(Player:GetPlayers()) do
-        if plr ~= Player and plr.Character then
-            table.insert(players, plr)
-        end
-    end
-    if #players == 0 then return end
+-- // ========== ФУНКЦИИ ПОЛЁТА ========== //
+local function startFly()
+    if not Player.Character then return end
+    local chr = Player.Character
+    local hum = chr:FindFirstChildWhichIsA("Humanoid")
+    if not hum then return end
     
-    local selectGui = Instance.new("ScreenGui")
-    selectGui.Parent = CoreGui
-    local frame = Instance.new("Frame")
-    frame.Parent = selectGui
-    frame.Size = UDim2.new(0, 250, 0, 300)
-    frame.Position = UDim2.new(0.5, -125, 0.5, -150)
-    frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    frame.BorderColor3 = Color3.fromRGB(255,0,0)
-    frame.BorderSizePixel = 2
+    isR6 = hum.RigType == Enum.HumanoidRigType.R6
     
-    local title = Instance.new("TextLabel")
-    title.Parent = frame
-    title.Size = UDim2.new(1,0,0,30)
-    title.Text = "ВЫБЕРИ ИГРОКА"
-    title.TextColor3 = Color3.fromRGB(255,0,0)
-    title.BackgroundTransparency = 1
+    local anim = chr:FindFirstChild("Animate")
+    if anim then anim.Disabled = true end
     
-    local yPos2 = 35
-    for _, plr in ipairs(players) do
-        local btn = Instance.new("TextButton")
-        btn.Parent = frame
-        btn.Size = UDim2.new(0, 230, 0, 25)
-        btn.Position = UDim2.new(0.5, -115, 0, yPos2)
-        btn.Text = plr.Name
-        btn.BackgroundColor3 = Color3.fromRGB(20,0,20)
-        btn.TextColor3 = Color3.fromRGB(200,50,50)
-        btn.BorderColor3 = Color3.fromRGB(255,0,0)
-        btn.MouseButton1Click:Connect(function()
-            if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-                Player.Character.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0)
-            end
-            selectGui:Destroy()
-        end)
-        yPos2 = yPos2 + 30
-    end
+    local torso = isR6 and chr:FindFirstChild("Torso") or chr:FindFirstChild("UpperTorso")
+    if not torso then return end
     
-    local closeBtn = Instance.new("TextButton")
-    closeBtn.Parent = frame
-    closeBtn.Size = UDim2.new(0, 230, 0, 25)
-    closeBtn.Position = UDim2.new(0.5, -115, 0, yPos2 + 5)
-    closeBtn.Text = "✖ ЗАКРЫТЬ"
-    closeBtn.BackgroundColor3 = Color3.fromRGB(30,0,0)
-    closeBtn.TextColor3 = Color3.fromRGB(255,0,0)
-    closeBtn.BorderColor3 = Color3.fromRGB(255,0,0)
-    closeBtn.MouseButton1Click:Connect(function() selectGui:Destroy() end)
+    flyBV = Instance.new("BodyVelocity")
+    flyBV.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    flyBV.Velocity = Vector3.new(0, 0.1, 0)
+    flyBV.Parent = torso
+    
+    flyBG = Instance.new("BodyGyro")
+    flyBG.P = 9e4
+    flyBG.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+    flyBG.CFrame = torso.CFrame
+    flyBG.Parent = torso
+    
+    hum.PlatformStand = true
+    flying = true
+    FlyBtn.Text = "🌀 FLY ON"
+    FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
 end
-MainFrame.tpto.MouseButton1Click:Connect(teleportToPlayer)
 
--- 10. ПРИТЯНУТЬ И КРУЖИТЬ
-local circleTargets = {}
-local circling = false
-MainFrame.tpcircle.MouseButton1Click:Connect(function()
-    circling = not circling
-    MainFrame.tpcircle.BackgroundColor3 = circling and Color3.fromRGB(50,0,0) or Color3.fromRGB(12,0,18)
-    if circling then
-        local center = Player.Character.HumanoidRootPart.Position
-        local radius = 8
-        for _, plr in pairs(Player:GetPlayers()) do
-            if plr ~= Player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                local angle = math.random(0, 360)
-                local x = center.X + radius * math.cos(angle)
-                local z = center.Z + radius * math.sin(angle)
-                plr.Character.HumanoidRootPart.CFrame = CFrame.new(x, center.Y + 2, z)
-                table.insert(circleTargets, {player = plr, angle = angle, radius = radius})
-            end
-        end
-        spawn(function()
-            while circling do
-                for _, data in ipairs(circleTargets) do
-                    if data.player.Character and data.player.Character:FindFirstChild("HumanoidRootPart") then
-                        local centerPos = Player.Character.HumanoidRootPart.Position
-                        data.angle = data.angle + 0.05
-                        local x = centerPos.X + data.radius * math.cos(data.angle)
-                        local z = centerPos.Z + data.radius * math.sin(data.angle)
-                        data.player.Character.HumanoidRootPart.CFrame = CFrame.new(x, centerPos.Y + 2, z)
-                    end
-                end
-                wait(0.05)
-            end
-        end)
-    else
-        circleTargets = {}
-    end
-end)
-
--- 11. ХОДЬБА ПО ВОДЕ
-local waterWalk = false
-MainFrame.water.MouseButton1Click:Connect(function()
-    waterWalk = not waterWalk
-    MainFrame.water.BackgroundColor3 = waterWalk and Color3.fromRGB(50,0,0) or Color3.fromRGB(12,0,18)
-    if waterWalk then
-        RunService.Stepped:Connect(function()
-            if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-                local hrp = Player.Character.HumanoidRootPart
-                if hrp.Position.Y < 0 then
-                    hrp.CFrame = hrp.CFrame + Vector3.new(0, 5, 0)
-                end
-            end
-        end)
-    end
-end)
-
--- 12. НЕВИДИМОСТЬ
-MainFrame.invis.MouseButton1Click:Connect(function()
+local function stopFly()
+    flying = false
+    if flyBV then flyBV:Destroy() flyBV = nil end
+    if flyBG then flyBG:Destroy() flyBG = nil end
+    
     if Player.Character then
-        for _, part in ipairs(Player.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.Transparency = 1
-            end
+        local hum = Player.Character:FindFirstChildWhichIsA("Humanoid")
+        if hum then hum.PlatformStand = false end
+        local anim = Player.Character:FindFirstChild("Animate")
+        if anim then anim.Disabled = false end
+    end
+    
+    FlyBtn.Text = "🌀 FLY"
+    FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
+end
+
+local function updateFly()
+    if not flying or not flyBV or not flyBG then return end
+    if not Player.Character then return end
+    
+    local torso = isR6 and Player.Character:FindFirstChild("Torso") or Player.Character:FindFirstChild("UpperTorso")
+    if not torso then return end
+    
+    local camera = Workspace.CurrentCamera
+    if not camera then return end
+    
+    local speed = flySpeed * 2
+    local move = moveDirection * speed
+    
+    -- Если джойстик не активен, плавно останавливаемся
+    if not joystickActive then
+        move = move * 0.9
+        if move.Magnitude < 0.1 then move = Vector3.new(0, 0, 0) end
+    end
+    
+    flyBV.Velocity = move
+    if move.Magnitude > 0.1 then
+        flyBG.CFrame = CFrame.new(torso.Position, torso.Position + move)
+    end
+end
+
+-- // ========== ОБРАБОТЧИКИ КНОПОК ========== //
+
+-- FLY
+FlyBtn.MouseButton1Click:Connect(function()
+    if flying then stopFly() else startFly() end
+end)
+
+-- UP (удержание)
+local upHold = false
+local upConn = nil
+
+UpBtn.MouseButton1Down:Connect(function()
+    upHold = true
+    upConn = RunService.Heartbeat:Connect(function()
+        if upHold and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            Player.Character.HumanoidRootPart.CFrame = Player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 2, 0)
         end
-        MainFrame.invis.BackgroundColor3 = Color3.fromRGB(50,0,0)
+    end)
+end)
+
+UpBtn.MouseButton1Up:Connect(function() upHold = false if upConn then upConn:Disconnect() upConn = nil end end)
+UpBtn.MouseLeave:Connect(function() upHold = false if upConn then upConn:Disconnect() upConn = nil end end)
+
+-- DOWN (удержание)
+local downHold = false
+local downConn = nil
+
+DownBtn.MouseButton1Down:Connect(function()
+    downHold = true
+    downConn = RunService.Heartbeat:Connect(function()
+        if downHold and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            Player.Character.HumanoidRootPart.CFrame = Player.Character.HumanoidRootPart.CFrame * CFrame.new(0, -2, 0)
+        end
+    end)
+end)
+
+DownBtn.MouseButton1Up:Connect(function() downHold = false if downConn then downConn:Disconnect() downConn = nil end end)
+DownBtn.MouseLeave:Connect(function() downHold = false if downConn then downConn:Disconnect() downConn = nil end end)
+
+-- СКОРОСТЬ
+SpeedPlus.MouseButton1Click:Connect(function()
+    flySpeed = math.min(flySpeed + 1, 20)
+    SpeedLabel.Text = tostring(flySpeed)
+end)
+
+SpeedMinus.MouseButton1Click:Connect(function()
+    flySpeed = math.max(flySpeed - 1, 1)
+    SpeedLabel.Text = tostring(flySpeed)
+end)
+
+-- // ========== ДЖОЙСТИК ДЛЯ ТЕЛЕФОНА ========== //
+local function handleTouch(input)
+    if not flying then return end
+    if input.UserInputType == Enum.UserInputType.Touch then
+        joystickActive = true
+        local screenSize = UIS:GetMouseLocation()
+        local center = Vector2.new(screenSize.X / 2, screenSize.Y / 2)
+        local delta = input.Position - center
+        local maxDist = 300
+        
+        local clamped = delta.Unit * math.min(delta.Magnitude, maxDist) / maxDist
+        moveDirection = Vector3.new(clamped.X, 0, -clamped.Y)
+    end
+end
+
+local function handleTouchEnd(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        joystickActive = false
+        moveDirection = Vector3.new(0, 0, 0)
+    end
+end
+
+-- Отслеживаем касания на всём экране (кроме GUI)
+UIS.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        -- Проверяем, не нажата ли кнопка GUI
+        local guiObject = CoreGui:FindFirstChild("RussianYadGUI")
+        if guiObject then
+            -- Если коснулись вне кнопок GUI — активируем джойстик
+            handleTouch(input)
+        end
     end
 end)
 
--- 13. ЗАМОРОЗКА
-MainFrame.freeze.MouseButton1Click:Connect(function()
-    for _, plr in pairs(Player:GetPlayers()) do
-        if plr ~= Player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local bv = Instance.new("BodyVelocity")
-            bv.MaxForce = Vector3.new(4000, 4000, 4000)
-            bv.Velocity = Vector3.new(0, 0, 0)
-            bv.Parent = plr.Character.HumanoidRootPart
-            game:GetService("Debris"):AddItem(bv, 5)
-        end
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        handleTouchEnd(input)
     end
-    MainFrame.freeze.BackgroundColor3 = Color3.fromRGB(50,0,0)
 end)
 
--- 14. МУЗЫКА ДЛЯ ВСЕХ
-local musicAll = false
-local musicLoop
-MainFrame.musicall.MouseButton1Click:Connect(function()
-    musicAll = not musicAll
-    MainFrame.musicall.BackgroundColor3 = musicAll and Color3.fromRGB(50,0,0) or Color3.fromRGB(12,0,18)
-    if musicAll then
-        local sound = Instance.new("Sound")
-        sound.SoundId = "rbxassetid://1838134491"
-        sound.Volume = 0.5
-        sound.Looped = true
-        sound.Parent = Workspace
-        local soundService = game:GetService("SoundService")
-        soundService.RespectFilteringEnabled = false
-        sound:Play()
-        musicLoop = RunService.Heartbeat:Connect(function()
-            if not musicAll then
-                sound:Stop()
-                sound:Destroy()
-                musicLoop:Disconnect()
-            end
-        end)
+-- Альтернатива: кнопки движения на экране (простое управление)
+local moveUpBtn = Instance.new("TextButton")
+moveUpBtn.Parent = ScreenGui
+moveUpBtn.Size = UDim2.new(0, 60, 0, 60)
+moveUpBtn.Position = UDim2.new(0.02, 0, 0.7, 0)
+moveUpBtn.Text = "▲"
+moveUpBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
+moveUpBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+moveUpBtn.BorderSizePixel = 2
+moveUpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+moveUpBtn.Font = Enum.Font.GothamBold
+moveUpBtn.TextScaled = true
+moveUpBtn.Visible = false
+moveUpBtn.Name = "MoveUp"
+
+local moveDownBtn = Instance.new("TextButton")
+moveDownBtn.Parent = ScreenGui
+moveDownBtn.Size = UDim2.new(0, 60, 0, 60)
+moveDownBtn.Position = UDim2.new(0.02, 0, 0.85, 0)
+moveDownBtn.Text = "▼"
+moveDownBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
+moveDownBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+moveDownBtn.BorderSizePixel = 2
+moveDownBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+moveDownBtn.Font = Enum.Font.GothamBold
+moveDownBtn.TextScaled = true
+moveDownBtn.Visible = false
+moveDownBtn.Name = "MoveDown"
+
+local moveLeftBtn = Instance.new("TextButton")
+moveLeftBtn.Parent = ScreenGui
+moveLeftBtn.Size = UDim2.new(0, 60, 0, 60)
+moveLeftBtn.Position = UDim2.new(0.15, 0, 0.775, 0)
+moveLeftBtn.Text = "◄"
+moveLeftBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
+moveLeftBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+moveLeftBtn.BorderSizePixel = 2
+moveLeftBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+moveLeftBtn.Font = Enum.Font.GothamBold
+moveLeftBtn.TextScaled = true
+moveLeftBtn.Visible = false
+moveLeftBtn.Name = "MoveLeft"
+
+local moveRightBtn = Instance.new("TextButton")
+moveRightBtn.Parent = ScreenGui
+moveRightBtn.Size = UDim2.new(0, 60, 0, 60)
+moveRightBtn.Position = UDim2.new(0.25, 0, 0.775, 0)
+moveRightBtn.Text = "►"
+moveRightBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
+moveRightBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+moveRightBtn.BorderSizePixel = 2
+moveRightBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+moveRightBtn.Font = Enum.Font.GothamBold
+moveRightBtn.TextScaled = true
+moveRightBtn.Visible = false
+moveRightBtn.Name = "MoveRight"
+
+-- Обработчики кнопок движения (для тех, у кого нет джойстика)
+moveUpBtn.MouseButton1Down:Connect(function() if flying then moveDirection = Vector3.new(0, 0, -1) end end)
+moveUpBtn.MouseButton1Up:Connect(function() moveDirection = Vector3.new(0, 0, 0) end)
+
+moveDownBtn.MouseButton1Down:Connect(function() if flying then moveDirection = Vector3.new(0, 0, 1) end end)
+moveDownBtn.MouseButton1Up:Connect(function() moveDirection = Vector3.new(0, 0, 0) end)
+
+moveLeftBtn.MouseButton1Down:Connect(function() if flying then moveDirection = Vector3.new(-1, 0, 0) end end)
+moveLeftBtn.MouseButton1Up:Connect(function() moveDirection = Vector3.new(0, 0, 0) end)
+
+moveRightBtn.MouseButton1Down:Connect(function() if flying then moveDirection = Vector3.new(1, 0, 0) end end)
+moveRightBtn.MouseButton1Up:Connect(function() moveDirection = Vector3.new(0, 0, 0) end)
+
+-- // ========== ПОКАЗЫВАТЬ КНОПКИ ДВИЖЕНИЯ ПРИ ПОЛЁТЕ ========== //
+local function showMoveButtons(show)
+    moveUpBtn.Visible = show
+    moveDownBtn.Visible = show
+    moveLeftBtn.Visible = show
+    moveRightBtn.Visible = show
+end
+
+-- // ========== ОБНОВЛЕНИЕ В ЦИКЛЕ ========== //
+RunService.Heartbeat:Connect(function()
+    if flying then
+        updateFly()
+        if not moveUpBtn.Visible then
+            showMoveButtons(true)
+        end
     else
-        if Workspace:FindFirstChildOfClass("Sound") then
-            Workspace:FindFirstChildOfClass("Sound"):Stop()
-            Workspace:FindFirstChildOfClass("Sound"):Destroy()
+        if moveUpBtn.Visible then
+            showMoveButtons(false)
         end
-        if musicLoop then musicLoop:Disconnect() end
+    end
+end)
+
+-- // ========== СБРОС ПРИ СМЕРТИ ========== //
+Player.CharacterAdded:Connect(function()
+    wait(0.5)
+    if flying then
+        stopFly()
+        showMoveButtons(false)
     end
 end)
 
 -- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ ПО ИКОНКЕ ========== //
 local menuOpen = false
-
 IconButton.MouseButton1Click:Connect(function()
     menuOpen = not menuOpen
     MainFrame.Visible = menuOpen
     IconButton.Visible = not menuOpen
-    if menuOpen then
-        -- Эффект появления
-        MainFrame.BackgroundTransparency = 0.05
-        MainFrame.Size = UDim2.new(0, 350, 0, 500)
-    end
 end)
 
--- ПЕРЕТАСКИВАНИЕ МЕНЮ (ПАЛЬЦЕМ)
+-- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ ========== //
 local dragToggle = nil
-local dragSpeed = 0.5
 local dragStart = nil
 local startPos = nil
 
@@ -512,14 +528,15 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
--- // ========== ПАНИКА (CTRL + P) ========== //
+-- // ========== ПАНИКА ========== //
 UIS.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.P and UIS:IsKeyDown(Enum.KeyCode.LeftControl) then
+    if input.KeyCode == Enum.KeyCode.P then
         ScreenGui:Destroy()
-        print("☠ ПАНИКА АКТИВИРОВАНА")
+        print("☠ ПАНИКА")
     end
 end)
 
-print("☠ RUSSIAN YAD v5.0 ЗАГРУЖЕН")
-print("📌 НАЖМИ НА ИКОНКУ ☠ ЧТОБЫ ОТКРЫТЬ/ЗАКРЫТЬ МЕНЮ")
-print("👆 ТЯНИ ПАЛЬЦЕМ ЗА ЗАГОЛОВОК ДЛЯ ПЕРЕМЕЩЕНИЯ")
+print("☠ RUSSIAN YAD v7.0 ДЛЯ DELTA ТЕЛЕФОН")
+print("📌 НАЖМИ НА ИКОНКУ ☠")
+print("👆 ТЯНИ ПАЛЕЦ ПО ЭКРАНУ — ЛЕТИШЬ")
+print("⬆⬇ КНОПКИ В МЕНЮ — ВВЕРХ/ВНИЗ")
