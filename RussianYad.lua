@@ -1,4 +1,4 @@
--- // RUSSIAN YAD v14.0 // FLY GUI V3 + ОСТАНОВКА //
+-- // RUSSIAN YAD v15.0 // ПРОСТО ЗАПУСК FLY //
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
@@ -18,7 +18,7 @@ pcall(function()
     end
 end)
 
--- // ========== GUI ========== //
+-- // ========== ГЛАВНЫЙ GUI ========== //
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = CoreGui
 ScreenGui.Name = "RussianYadGUI"
@@ -96,11 +96,11 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
--- // ========== МЕНЮ ========== //
+-- // ========== МЕНЮ (КОМПАКТНОЕ) ========== //
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 240, 0, 180)
-MainFrame.Position = UDim2.new(0.5, -120, 0.5, -90)
+MainFrame.Size = UDim2.new(0, 240, 0, 140)
+MainFrame.Position = UDim2.new(0.5, -120, 0.5, -70)
 MainFrame.BackgroundColor3 = Color3.fromRGB(8, 0, 18)
 MainFrame.BorderSizePixel = 0
 MainFrame.BackgroundTransparency = 0.1
@@ -123,6 +123,7 @@ borderGlow.ImageColor3 = Color3.fromRGB(255, 0, 80)
 borderGlow.ImageTransparency = 0.6
 borderGlow.ZIndex = 0
 
+-- ЗАГОЛОВОК
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
 Title.Size = UDim2.new(1, 0, 0, 40)
@@ -134,6 +135,7 @@ Title.Font = Enum.Font.GothamBold
 Title.TextScaled = true
 Title.ZIndex = 2
 
+-- КРЕСТИК
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = MainFrame
 CloseBtn.Size = UDim2.new(0, 35, 0, 35)
@@ -157,12 +159,12 @@ end)
 local yPos = 45
 local btnH = 38
 
--- FLY (теперь запускает FlyGuiV3)
+-- ЗАПУСТИТЬ FLY
 local FlyBtn = Instance.new("TextButton")
 FlyBtn.Parent = MainFrame
 FlyBtn.Size = UDim2.new(0, 210, 0, btnH)
 FlyBtn.Position = UDim2.new(0.05, 0, 0, yPos)
-FlyBtn.Text = "🌀 FLY"
+FlyBtn.Text = "🚀 ЗАПУСТИТЬ FLY"
 FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
 FlyBtn.BorderSizePixel = 0
 FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -189,115 +191,65 @@ local cornerNoclip = Instance.new("UICorner")
 cornerNoclip.Parent = NoclipBtn
 cornerNoclip.CornerRadius = UDim.new(0, 10)
 
-yPos = yPos + btnH + 8
-
--- ВЫСОТА (+ и -)
-local HeightFrame = Instance.new("Frame")
-HeightFrame.Parent = MainFrame
-HeightFrame.Size = UDim2.new(0, 210, 0, btnH)
-HeightFrame.Position = UDim2.new(0.05, 0, 0, yPos)
-HeightFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-HeightFrame.BorderSizePixel = 0
-local cornerHeight = Instance.new("UICorner")
-cornerHeight.Parent = HeightFrame
-cornerHeight.CornerRadius = UDim.new(0, 10)
-
-local HeightMinus = Instance.new("TextButton")
-HeightMinus.Parent = HeightFrame
-HeightMinus.Size = UDim2.new(0, 60, 0, btnH)
-HeightMinus.Position = UDim2.new(0, 0, 0, 0)
-HeightMinus.Text = "▼"
-HeightMinus.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
-HeightMinus.BorderSizePixel = 0
-HeightMinus.TextColor3 = Color3.fromRGB(255, 255, 255)
-HeightMinus.Font = Enum.Font.GothamBold
-HeightMinus.TextScaled = true
-local cornerMinus = Instance.new("UICorner")
-cornerMinus.Parent = HeightMinus
-cornerMinus.CornerRadius = UDim.new(0, 8)
-
-local HeightLabel = Instance.new("TextLabel")
-HeightLabel.Parent = HeightFrame
-HeightLabel.Size = UDim2.new(0, 90, 0, btnH)
-HeightLabel.Position = UDim2.new(0.28, 0, 0, 0)
-HeightLabel.Text = "ВЫСОТА 0"
-HeightLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-HeightLabel.BorderSizePixel = 0
-HeightLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
-HeightLabel.Font = Enum.Font.GothamBold
-HeightLabel.TextScaled = true
-local cornerLabel = Instance.new("UICorner")
-cornerLabel.Parent = HeightLabel
-cornerLabel.CornerRadius = UDim.new(0, 8)
-
-local HeightPlus = Instance.new("TextButton")
-HeightPlus.Parent = HeightFrame
-HeightPlus.Size = UDim2.new(0, 60, 0, btnH)
-HeightPlus.Position = UDim2.new(0.71, 0, 0, 0)
-HeightPlus.Text = "▲"
-HeightPlus.BackgroundColor3 = Color3.fromRGB(0, 80, 0)
-HeightPlus.BorderSizePixel = 0
-HeightPlus.TextColor3 = Color3.fromRGB(255, 255, 255)
-HeightPlus.Font = Enum.Font.GothamBold
-HeightPlus.TextScaled = true
-local cornerPlus = Instance.new("UICorner")
-cornerPlus.Parent = HeightPlus
-cornerPlus.CornerRadius = UDim.new(0, 8)
-
--- // ========== ПЕРЕМЕННЫЕ ДЛЯ FLY GUI V3 ========== //
-local flyGuiInstance = nil
-local isFlyGuiRunning = false
-
--- // ========== ФУНКЦИЯ ЗАПУСКА FLY GUI V3 ========== //
-local function startFlyGuiV3()
-    if isFlyGuiRunning then return end
-    isFlyGuiRunning = true
-    FlyBtn.Text = "🌀 FLY ON"
-    FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
-    
-    -- Загружаем и выполняем скрипт XNEOFF
-    local success, err = pcall(function()
-        local script = game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt")
-        flyGuiInstance = loadstring(script)()
-    end)
-    
-    if not success then
-        isFlyGuiRunning = false
-        FlyBtn.Text = "🌀 FLY"
-        FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
-        print("Ошибка загрузки FlyGuiV3: " .. tostring(err))
-    end
-end
-
--- // ========== ФУНКЦИЯ ОСТАНОВКИ FLY GUI V3 ========== //
-local function stopFlyGuiV3()
-    if not isFlyGuiRunning then return end
-    
-    -- Удаляем GUI, созданный скриптом XNEOFF
-    if flyGuiInstance then
-        if flyGuiInstance.Parent then
-            flyGuiInstance:Destroy()
-        end
-        flyGuiInstance = nil
-    end
-    
-    -- Также удаляем любые другие GUI с именем "main"
-    local gui = CoreGui:FindFirstChild("main")
-    if gui then gui:Destroy() end
-    
-    isFlyGuiRunning = false
-    FlyBtn.Text = "🌀 FLY"
-    FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
-end
-
--- // ========== КНОПКА FLY ========== //
-FlyBtn.MouseButton1Click:Connect(function()
-    if isFlyGuiRunning then
-        stopFlyGuiV3()
-    else
-        startFlyGuiV3()
+-- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ ========== //
+local menuDragToggle, menuDragStart, menuStartPos = false
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        menuDragToggle = true
+        menuDragStart = input.Position
+        menuStartPos = MainFrame.Position
     end
 end)
+MainFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        menuDragToggle = false
+    end
+end)
+UIS.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch and menuDragToggle then
+        local delta = input.Position - menuDragStart
+        MainFrame.Position = UDim2.new(menuStartPos.X.Scale, menuStartPos.X.Offset + delta.X, menuStartPos.Y.Scale, menuStartPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- // ========== ПЕРЕМЕННЫЕ ДЛЯ FLY ========== //
+local flyGuiInstance = nil
+local isFlyRunning = false
+
+-- // ========== ЗАПУСК FLY ========== //
+local function toggleFly()
+    if isFlyRunning then
+        -- ВЫКЛЮЧАЕМ
+        if flyGuiInstance then
+            if flyGuiInstance.Parent then
+                flyGuiInstance:Destroy()
+            end
+            flyGuiInstance = nil
+        end
+        local gui = CoreGui:FindFirstChild("main")
+        if gui then gui:Destroy() end
+        isFlyRunning = false
+        FlyBtn.Text = "🚀 ЗАПУСТИТЬ FLY"
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
+        print("☠ FLY ОСТАНОВЛЕН")
+    else
+        -- ЗАПУСКАЕМ
+        local success, err = pcall(function()
+            local script = game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt")
+            flyGuiInstance = loadstring(script)()
+        end)
+        if success then
+            isFlyRunning = true
+            FlyBtn.Text = "🛑 ОСТАНОВИТЬ FLY"
+            FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+            print("☠ FLY ЗАПУЩЕН")
+        else
+            print("Ошибка: " .. tostring(err))
+        end
+    end
+end
+
+FlyBtn.MouseButton1Click:Connect(toggleFly)
 
 -- // ========== НОКЛИП ========== //
 local noclipActive = false
@@ -323,41 +275,6 @@ local function toggleNoclip()
 end
 NoclipBtn.MouseButton1Click:Connect(toggleNoclip)
 
--- // ========== УПРАВЛЕНИЕ ВЫСОТОЙ (для совместимости) ========== //
--- Эти кнопки теперь управляют высотой в стандартном скрипте, если он запущен отдельно.
--- Если ты хочешь использовать их для FlyGuiV3, они не будут работать,
--- потому что FlyGuiV3 имеет свои собственные кнопки UP/DOWN.
--- Я оставляю их для общего интерфейса, но они не влияют на FlyGuiV3.
-
-HeightPlus.MouseButton1Click:Connect(function()
-    print("▲ (Для FlyGuiV3 используйте кнопки в его меню)")
-end)
-
-HeightMinus.MouseButton1Click:Connect(function()
-    print("▼ (Для FlyGuiV3 используйте кнопки в его меню)")
-end)
-
--- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ ========== //
-local menuDragToggle, menuDragStart, menuStartPos = false
-MainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        menuDragToggle = true
-        menuDragStart = input.Position
-        menuStartPos = MainFrame.Position
-    end
-end)
-MainFrame.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        menuDragToggle = false
-    end
-end)
-UIS.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch and menuDragToggle then
-        local delta = input.Position - menuDragStart
-        MainFrame.Position = UDim2.new(menuStartPos.X.Scale, menuStartPos.X.Offset + delta.X, menuStartPos.Y.Scale, menuStartPos.Y.Offset + delta.Y)
-    end
-end)
-
 -- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ ========== //
 local menuOpen = false
 IconButton.MouseButton1Click:Connect(function()
@@ -370,10 +287,15 @@ end)
 UIS.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.P then
         ScreenGui:Destroy()
-        stopFlyGuiV3()
+        if isFlyRunning then
+            if flyGuiInstance then flyGuiInstance:Destroy() end
+            local gui = CoreGui:FindFirstChild("main")
+            if gui then gui:Destroy() end
+        end
         print("☠ ПАНИКА")
     end
 end)
 
-print("☠ RUSSIAN YAD v14.0 ЗАГРУЖЕН")
-print("📌 КНОПКА FLY ЗАПУСКАЕТ FlyGuiV3 И ОСТАНАВЛИВАЕТ ЕГО")
+print("☠ RUSSIAN YAD v15.0 ЗАГРУЖЕН")
+print("📌 ОДНА КНОПКА — ЗАПУСК/ОСТАНОВКА FLY")
+print("⬜ НОКЛИП — ВКЛ/ВЫКЛ")
