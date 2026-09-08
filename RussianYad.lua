@@ -1,4 +1,4 @@
--- // RUSSIAN YAD v21.0 // С ТВОИМ АИМБОТОМ //
+-- // RUSSIAN YAD v24.0 // НОВЫЙ СТИЛЬ + МОЛОТОК //
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
@@ -24,33 +24,44 @@ ScreenGui.Parent = CoreGui
 ScreenGui.Name = "RussianYadGUI"
 ScreenGui.ResetOnSpawn = false
 
--- // ========== ИКОНКА ========== //
+-- // ========== НОВАЯ ИКОНКА ========== //
 local IconButton = Instance.new("ImageButton")
 IconButton.Parent = ScreenGui
-IconButton.Size = UDim2.new(0, 70, 0, 70)
-IconButton.Position = UDim2.new(0.85, -35, 0.85, -35)
-IconButton.BackgroundColor3 = Color3.fromRGB(20, 0, 30)
+IconButton.Size = UDim2.new(0, 80, 0, 80)
+IconButton.Position = UDim2.new(0.85, -40, 0.85, -40)
+IconButton.BackgroundColor3 = Color3.fromRGB(10, 0, 20)
 IconButton.BorderSizePixel = 0
 IconButton.Image = "rbxassetid://123456789"
-IconButton.ImageColor3 = Color3.fromRGB(255, 0, 80)
+IconButton.ImageColor3 = Color3.fromRGB(255, 50, 100)
 IconButton.ScaleType = Enum.ScaleType.Fit
 IconButton.ClipsDescendants = true
 IconButton.ZIndex = 10
+
+-- Стеклянный эффект
+local glassEffect = Instance.new("Frame")
+glassEffect.Parent = IconButton
+glassEffect.Size = UDim2.new(1, 0, 1, 0)
+glassEffect.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+glassEffect.BackgroundTransparency = 0.8
+glassEffect.ZIndex = 1
 
 local cornerIcon = Instance.new("UICorner")
 cornerIcon.Parent = IconButton
 cornerIcon.CornerRadius = UDim.new(1, 0)
 
+-- Неоновое свечение
 local glowIcon = Instance.new("ImageLabel")
 glowIcon.Parent = IconButton
-glowIcon.Size = UDim2.new(1.4, 0, 1.4, 0)
-glowIcon.Position = UDim2.new(-0.2, 0, -0.2, 0)
+glowIcon.Size = UDim2.new(1.6, 0, 1.6, 0)
+glowIcon.Position = UDim2.new(-0.3, 0, -0.3, 0)
 glowIcon.BackgroundTransparency = 1
 glowIcon.Image = "rbxassetid://13158748277"
-glowIcon.ImageColor3 = Color3.fromRGB(255, 0, 80)
-glowIcon.ImageTransparency = 0.7
+glowIcon.ImageColor3 = Color3.fromRGB(255, 50, 100)
+glowIcon.ImageTransparency = 0.6
 glowIcon.ZIndex = 0
+glowIcon.Name = "Glow"
 
+-- Текст иконки
 local IconText = Instance.new("TextLabel")
 IconText.Parent = IconButton
 IconText.Size = UDim2.new(1, 0, 1, 0)
@@ -61,15 +72,26 @@ IconText.TextScaled = true
 IconText.Font = Enum.Font.GothamBold
 IconText.ZIndex = 11
 
--- ПУЛЬСАЦИЯ
+-- Вращение иконки
 spawn(function()
     while IconButton and IconButton.Parent do
-        local tween = TweenService:Create(IconButton, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {Size = UDim2.new(0, 75, 0, 75)})
-        tween:Play()
-        wait(0.6)
-        local tween2 = TweenService:Create(IconButton, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {Size = UDim2.new(0, 65, 0, 65)})
+        for i = 0, 360, 2 do
+            wait(0.01)
+            IconButton.Rotation = i
+            glowIcon.Rotation = i * 0.5
+        end
+    end
+end)
+
+-- Пульсация размера
+spawn(function()
+    while IconButton and IconButton.Parent do
+        local tween1 = TweenService:Create(IconButton, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {Size = UDim2.new(0, 85, 0, 85)})
+        tween1:Play()
+        wait(0.8)
+        local tween2 = TweenService:Create(IconButton, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {Size = UDim2.new(0, 75, 0, 75)})
         tween2:Play()
-        wait(0.6)
+        wait(0.8)
     end
 end)
 
@@ -90,61 +112,73 @@ end)
 UIS.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch and iconDragToggle then
         local delta = input.Position - iconDragStart
-        local newX = math.clamp(iconStartPos.X.Offset + delta.X, 0, UIS:GetMouseLocation().X - 70)
-        local newY = math.clamp(iconStartPos.Y.Offset + delta.Y, 0, UIS:GetMouseLocation().Y - 70)
+        local newX = math.clamp(iconStartPos.X.Offset + delta.X, 0, UIS:GetMouseLocation().X - 80)
+        local newY = math.clamp(iconStartPos.Y.Offset + delta.Y, 0, UIS:GetMouseLocation().Y - 80)
         IconButton.Position = UDim2.new(0, newX, 0, newY)
     end
 end)
 
--- // ========== ГЛАВНОЕ МЕНЮ ========== //
+-- // ========== НОВОЕ МЕНЮ (СТЕКЛЯННЫЙ СТИЛЬ) ========== //
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 260, 0, 220)
-MainFrame.Position = UDim2.new(0.5, -130, 0.5, -110)
-MainFrame.BackgroundColor3 = Color3.fromRGB(8, 0, 18)
+MainFrame.Size = UDim2.new(0, 280, 0, 220)
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -110)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 0, 25)
+MainFrame.BackgroundTransparency = 0.15
 MainFrame.BorderSizePixel = 0
-MainFrame.BackgroundTransparency = 0.1
 MainFrame.Visible = false
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.ClipsDescendants = true
 
+-- Стеклянный эффект для меню
+local menuGlass = Instance.new("Frame")
+menuGlass.Parent = MainFrame
+menuGlass.Size = UDim2.new(1, 0, 1, 0)
+menuGlass.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+menuGlass.BackgroundTransparency = 0.9
+menuGlass.ZIndex = 0
+
 local cornerMenu = Instance.new("UICorner")
 cornerMenu.Parent = MainFrame
 cornerMenu.CornerRadius = UDim.new(0, 20)
 
+-- Неоновая рамка
 local borderGlow = Instance.new("ImageLabel")
 borderGlow.Parent = MainFrame
 borderGlow.Size = UDim2.new(1.1, 0, 1.1, 0)
 borderGlow.Position = UDim2.new(-0.05, 0, -0.05, 0)
 borderGlow.BackgroundTransparency = 1
 borderGlow.Image = "rbxassetid://13158748277"
-borderGlow.ImageColor3 = Color3.fromRGB(255, 0, 80)
-borderGlow.ImageTransparency = 0.6
-borderGlow.ZIndex = 0
+borderGlow.ImageColor3 = Color3.fromRGB(255, 50, 100)
+borderGlow.ImageTransparency = 0.5
+borderGlow.ZIndex = 2
 
+-- Заголовок с градиентом
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
-Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Size = UDim2.new(1, 0, 0, 45)
 Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "☠ RUSSIAN YAD"
-Title.TextColor3 = Color3.fromRGB(255, 0, 80)
+Title.TextColor3 = Color3.fromRGB(255, 80, 120)
 Title.Font = Enum.Font.GothamBold
 Title.TextScaled = true
-Title.ZIndex = 2
+Title.ZIndex = 3
 
+-- Крестик закрытия
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = MainFrame
 CloseBtn.Size = UDim2.new(0, 35, 0, 35)
-CloseBtn.Position = UDim2.new(1, -40, 0, 3)
+CloseBtn.Position = UDim2.new(1, -40, 0, 5)
 CloseBtn.Text = "✖"
-CloseBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
+CloseBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+CloseBtn.BackgroundTransparency = 0.5
 CloseBtn.BorderSizePixel = 0
 CloseBtn.TextScaled = true
 CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.ZIndex = 2
+CloseBtn.ZIndex = 3
 local cornerClose = Instance.new("UICorner")
 cornerClose.Parent = CloseBtn
 cornerClose.CornerRadius = UDim.new(0, 10)
@@ -153,87 +187,44 @@ CloseBtn.MouseButton1Click:Connect(function()
     IconButton.Visible = true
 end)
 
--- // ========== КНОПКИ ========== //
-local yPos = 45
-local btnH = 32
+-- // ========== КНОПКИ МЕНЮ ========== //
+local yPos = 50
+local btnH = 35
 local btnW = 120
 
--- РЯД 1: FLY + НОКЛИП
-local FlyBtn = Instance.new("TextButton")
-FlyBtn.Parent = MainFrame
-FlyBtn.Size = UDim2.new(0, btnW, 0, btnH)
-FlyBtn.Position = UDim2.new(0.03, 0, 0, yPos)
-FlyBtn.Text = "🚀 FLY"
-FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
-FlyBtn.BorderSizePixel = 0
-FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-FlyBtn.Font = Enum.Font.GothamBold
-FlyBtn.TextScaled = true
-local cornerFly = Instance.new("UICorner")
-cornerFly.Parent = FlyBtn
-cornerFly.CornerRadius = UDim.new(0, 8)
+-- Функция создания стильной кнопки
+local function createStyledButton(parent, text, x, y, w, h, color)
+    local btn = Instance.new("TextButton")
+    btn.Parent = parent
+    btn.Size = UDim2.new(0, w, 0, h)
+    btn.Position = UDim2.new(x, 0, 0, y)
+    btn.Text = text
+    btn.BackgroundColor3 = color or Color3.fromRGB(30, 15, 40)
+    btn.BackgroundTransparency = 0.3
+    btn.BorderSizePixel = 1
+    btn.BorderColor3 = Color3.fromRGB(255, 50, 100)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextScaled = true
+    local corner = Instance.new("UICorner")
+    corner.Parent = btn
+    corner.CornerRadius = UDim.new(0, 10)
+    return btn
+end
 
-local NoclipBtn = Instance.new("TextButton")
-NoclipBtn.Parent = MainFrame
-NoclipBtn.Size = UDim2.new(0, btnW, 0, btnH)
-NoclipBtn.Position = UDim2.new(0.53, 0, 0, yPos)
-NoclipBtn.Text = "⬜ НОКЛИП"
-NoclipBtn.BackgroundColor3 = Color3.fromRGB(80, 30, 30)
-NoclipBtn.BorderSizePixel = 0
-NoclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-NoclipBtn.Font = Enum.Font.GothamBold
-NoclipBtn.TextScaled = true
-local cornerNoclip = Instance.new("UICorner")
-cornerNoclip.Parent = NoclipBtn
-cornerNoclip.CornerRadius = UDim.new(0, 8)
+-- КНОПКИ
+local FlyBtn = createStyledButton(MainFrame, "🚀 FLY", 0.04, yPos, btnW, btnH, Color3.fromRGB(30, 30, 80))
+local NoclipBtn = createStyledButton(MainFrame, "⬜ НОКЛИП", 0.54, yPos, btnW, btnH, Color3.fromRGB(80, 30, 30))
 
-yPos = yPos + btnH + 5
+yPos = yPos + btnH + 8
 
--- РЯД 2: ESP + АИМБОТ
-local EspBtn = Instance.new("TextButton")
-EspBtn.Parent = MainFrame
-EspBtn.Size = UDim2.new(0, btnW, 0, btnH)
-EspBtn.Position = UDim2.new(0.03, 0, 0, yPos)
-EspBtn.Text = "👁️ ESP"
-EspBtn.BackgroundColor3 = Color3.fromRGB(80, 30, 30)
-EspBtn.BorderSizePixel = 0
-EspBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-EspBtn.Font = Enum.Font.GothamBold
-EspBtn.TextScaled = true
-local cornerEsp = Instance.new("UICorner")
-cornerEsp.Parent = EspBtn
-cornerEsp.CornerRadius = UDim.new(0, 8)
+local EspBtn = createStyledButton(MainFrame, "👁️ ESP", 0.04, yPos, btnW, btnH, Color3.fromRGB(30, 50, 80))
+local AimBtn = createStyledButton(MainFrame, "🎯 АИМ", 0.54, yPos, btnW, btnH, Color3.fromRGB(50, 30, 80))
 
-local AimBtn = Instance.new("TextButton")
-AimBtn.Parent = MainFrame
-AimBtn.Size = UDim2.new(0, btnW, 0, btnH)
-AimBtn.Position = UDim2.new(0.53, 0, 0, yPos)
-AimBtn.Text = "🎯 АИМ"
-AimBtn.BackgroundColor3 = Color3.fromRGB(30, 50, 80)
-AimBtn.BorderSizePixel = 0
-AimBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-AimBtn.Font = Enum.Font.GothamBold
-AimBtn.TextScaled = true
-local cornerAim = Instance.new("UICorner")
-cornerAim.Parent = AimBtn
-cornerAim.CornerRadius = UDim.new(0, 8)
+yPos = yPos + btnH + 8
 
-yPos = yPos + btnH + 5
-
--- РЯД 3: ВЫКЛЮЧИТЬ ВСЁ
-local OffBtn = Instance.new("TextButton")
-OffBtn.Parent = MainFrame
-OffBtn.Size = UDim2.new(0, 250, 0, btnH)
-OffBtn.Position = UDim2.new(0.03, 0, 0, yPos)
-OffBtn.Text = "❌ ВЫКЛЮЧИТЬ ВСЁ"
-OffBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
-OffBtn.BorderSizePixel = 0
-OffBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-OffBtn.Font = Enum.Font.GothamBold
-OffBtn.TextScaled = true
-local cornerOff = Instance.new("UICorner")
-cornerOff.Parent = OffBtn
-cornerOff.CornerRadius = UDim.new(0, 8)
+local HammerBtn = createStyledButton(MainFrame, "🔨 МОЛОТОК", 0.04, yPos, btnW, btnH, Color3.fromRGB(80, 50, 30))
+local OffBtn = createStyledButton(MainFrame, "❌ ВЫКЛ ВСЁ", 0.54, yPos, btnW, btnH, Color3.fromRGB(80, 0, 0))
 
 -- // ========== ПЕРЕМЕННЫЕ ========== //
 local flyGuiInstance = nil
@@ -242,6 +233,152 @@ local noclipActive = false
 local espLoaded = false
 local aimbotLoaded = false
 local aimbotThread = nil
+local hammerActive = false
+local hammerTool = nil
+
+-- // ========== АИМБОТ (1 РАЗ) ========== //
+local function loadAimbot()
+    if aimbotLoaded then return end
+    local success, err = pcall(function()
+        aimbotThread = RunService.Heartbeat:Connect(function()
+            local aimScript = game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile")
+            loadstring(aimScript)()
+        end)
+    end)
+    if success then
+        aimbotLoaded = true
+        AimBtn.Text = "🎯 АИМ ON"
+        AimBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+        print("☠ АИМБОТ ЗАГРУЖЕН")
+    end
+end
+
+-- // ========== УЛУЧШЕННЫЙ МОЛОТОК ========== //
+local function createHammer()
+    if hammerActive then
+        if hammerTool then
+            hammerTool:Destroy()
+            hammerTool = nil
+        end
+        hammerActive = false
+        HammerBtn.Text = "🔨 МОЛОТОК"
+        HammerBtn.BackgroundColor3 = Color3.fromRGB(80, 50, 30)
+        print("☠ МОЛОТОК УБРАН")
+        return
+    end
+    
+    -- Создаём инструмент
+    hammerTool = Instance.new("Tool")
+    hammerTool.Name = "🔨 АДМИН-МОЛОТОК"
+    hammerTool.RequiresHandle = true
+    hammerTool.CanBeDropped = false
+    
+    -- Рукоятка
+    local handle = Instance.new("Part")
+    handle.Parent = hammerTool
+    handle.Size = Vector3.new(0.4, 0.4, 2)
+    handle.BrickColor = BrickColor.new("Dark stone grey")
+    handle.Material = Enum.Material.SmoothPlastic
+    
+    -- Головка молота
+    local head = Instance.new("Part")
+    head.Parent = hammerTool
+    head.Size = Vector3.new(2.5, 1.2, 1.5)
+    head.Position = Vector3.new(0, 1, 0)
+    head.BrickColor = BrickColor.new("Bright red")
+    head.Material = Enum.Material.Neon
+    
+    -- Свечение
+    local glow = Instance.new("Attachment")
+    glow.Parent = head
+    local beam = Instance.new("Beam")
+    beam.Parent = head
+    beam.Attachment0 = glow
+    beam.Attachment1 = glow
+    beam.Color = ColorSequence.new(Color3.fromRGB(255, 0, 0))
+    beam.Transparency = NumberSequence.new(0.3)
+    
+    -- Тултип
+    local tooltip = Instance.new("ToolTip")
+    tooltip.Parent = hammerTool
+    tooltip.Text = "🔨 ЛКМ — удалить объект | ПКМ — создать блок"
+    
+    -- Обработчик активации (ЛКМ)
+    hammerTool.Activated:Connect(function()
+        local char = Player.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        
+        local camera = Workspace.CurrentCamera
+        if not camera then return end
+        
+        -- Получаем объект под прицелом
+        local ray = Ray.new(camera.CFrame.Position, camera.CFrame.LookVector * 100)
+        local hit, pos = Workspace:FindPartOnRay(ray, char)
+        
+        if hit and hit ~= char and hit.Parent ~= char then
+            -- Удаляем объект
+            local parent = hit.Parent
+            if parent and parent:IsA("Model") then
+                parent:Destroy()
+            else
+                hit:Destroy()
+            end
+            
+            -- Эффект удаления
+            local explode = Instance.new("Explosion")
+            explode.Position = pos
+            explode.BlastRadius = 2
+            explode.BlastDamage = 0
+            explode.Parent = Workspace
+            game:GetService("Debris"):AddItem(explode, 0.5)
+        end
+    end)
+    
+    -- Обработчик ПКМ (создание блока)
+    hammerTool.SecondaryActivated:Connect(function()
+        local char = Player.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        
+        local camera = Workspace.CurrentCamera
+        if not camera then return end
+        
+        local ray = Ray.new(camera.CFrame.Position, camera.CFrame.LookVector * 50)
+        local hit, pos = Workspace:FindPartOnRay(ray, char)
+        
+        if pos then
+            local block = Instance.new("Part")
+            block.Size = Vector3.new(3, 3, 3)
+            block.Position = pos + Vector3.new(0, 1.5, 0)
+            block.BrickColor = BrickColor.new("Bright red")
+            block.Material = Enum.Material.Neon
+            block.Anchored = true
+            block.Parent = Workspace
+            block.Name = "AdminBlock"
+            
+            -- Свечение блока
+            local bg = Instance.new("BodyGyro")
+            bg.Parent = block
+            bg.MaxTorque = Vector3.new(4000, 4000, 4000)
+            bg.CFrame = block.CFrame
+            
+            -- Анимация появления
+            block.Size = Vector3.new(0.1, 0.1, 0.1)
+            TweenService:Create(block, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = Vector3.new(3, 3, 3)}):Play()
+            
+            game:GetService("Debris"):AddItem(block, 30)
+        end
+    end)
+    
+    hammerTool.Parent = Player.Backpack
+    hammerActive = true
+    HammerBtn.Text = "🔨 МОЛОТОК ON"
+    HammerBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+    print("☠ МОЛОТОК СОЗДАН")
+end
 
 -- // ========== ОБРАБОТЧИКИ КНОПОК ========== //
 
@@ -308,7 +445,7 @@ EspBtn.MouseButton1Click:Connect(function()
         end
         espLoaded = false
         EspBtn.Text = "👁️ ESP"
-        EspBtn.BackgroundColor3 = Color3.fromRGB(80, 30, 30)
+        EspBtn.BackgroundColor3 = Color3.fromRGB(30, 50, 80)
     else
         local success, err = pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/Yahahahau/Ultimate-Esp-v1/refs/heads/main/Ultimate%20esp%20v1.lua"))()
@@ -321,41 +458,20 @@ EspBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- АИМБОТ
+-- АИМ
 AimBtn.MouseButton1Click:Connect(function()
-    if aimbotLoaded then
-        -- Останавливаем аимбот
-        if aimbotThread then
-            aimbotThread:Disconnect()
-            aimbotThread = nil
-        end
-        aimbotLoaded = false
-        AimBtn.Text = "🎯 АИМ"
-        AimBtn.BackgroundColor3 = Color3.fromRGB(30, 50, 80)
-        print("☠ АИМБОТ ВЫКЛЮЧЕН")
+    if not aimbotLoaded then
+        loadAimbot()
     else
-        -- Загружаем аимбот в отдельном потоке, чтобы можно было отключить
-        local success, err = pcall(function()
-            aimbotThread = RunService.Heartbeat:Connect(function()
-                -- Загружаем скрипт аимбота и выполняем его
-                local aimScript = game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile")
-                loadstring(aimScript)()
-            end)
-        end)
-        if success then
-            aimbotLoaded = true
-            AimBtn.Text = "🎯 АИМ ON"
-            AimBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
-            print("☠ АИМБОТ ЗАГРУЖЕН")
-        else
-            print("Ошибка загрузки аимбота: " .. tostring(err))
-        end
+        print("☠ АИМБОТ УЖЕ ЗАГРУЖЕН")
     end
 end)
 
+-- МОЛОТОК
+HammerBtn.MouseButton1Click:Connect(createHammer)
+
 -- ВЫКЛЮЧИТЬ ВСЁ
 OffBtn.MouseButton1Click:Connect(function()
-    -- FLY
     if isFlyRunning then
         if flyGuiInstance then
             if flyGuiInstance.Parent then flyGuiInstance:Destroy() end
@@ -368,7 +484,6 @@ OffBtn.MouseButton1Click:Connect(function()
         FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
     end
     
-    -- НОКЛИП
     if noclipActive then
         noclipActive = false
         NoclipBtn.BackgroundColor3 = Color3.fromRGB(80, 30, 30)
@@ -380,7 +495,6 @@ OffBtn.MouseButton1Click:Connect(function()
         end
     end
     
-    -- ESP
     if espLoaded then
         for _, plr in pairs(Player:GetPlayers()) do
             if plr.Character then
@@ -395,18 +509,17 @@ OffBtn.MouseButton1Click:Connect(function()
         end
         espLoaded = false
         EspBtn.Text = "👁️ ESP"
-        EspBtn.BackgroundColor3 = Color3.fromRGB(80, 30, 30)
+        EspBtn.BackgroundColor3 = Color3.fromRGB(30, 50, 80)
     end
     
-    -- АИМБОТ
-    if aimbotLoaded then
-        if aimbotThread then
-            aimbotThread:Disconnect()
-            aimbotThread = nil
+    if hammerActive then
+        if hammerTool then
+            hammerTool:Destroy()
+            hammerTool = nil
         end
-        aimbotLoaded = false
-        AimBtn.Text = "🎯 АИМ"
-        AimBtn.BackgroundColor3 = Color3.fromRGB(30, 50, 80)
+        hammerActive = false
+        HammerBtn.Text = "🔨 МОЛОТОК"
+        HammerBtn.BackgroundColor3 = Color3.fromRGB(80, 50, 30)
     end
     
     print("☠ ВСЁ ВЫКЛЮЧЕНО")
@@ -450,9 +563,9 @@ UIS.InputBegan:Connect(function(input)
             local gui = CoreGui:FindFirstChild("main")
             if gui then gui:Destroy() end
         end
-        if aimbotThread then
-            aimbotThread:Disconnect()
-            aimbotThread = nil
+        if hammerTool then
+            hammerTool:Destroy()
+            hammerTool = nil
         end
         if espLoaded then
             for _, plr in pairs(Player:GetPlayers()) do
@@ -471,6 +584,6 @@ UIS.InputBegan:Connect(function(input)
     end
 end)
 
-print("☠ RUSSIAN YAD v21.0 ЗАГРУЖЕН")
-print("📌 КНОПКИ: FLY, НОКЛИП, ESP, АИМ")
-print("🎯 АИМБОТ ЗАГРУЖАЕТСЯ ОТДЕЛЬНО ПО КНОПКЕ")
+print("☠ RUSSIAN YAD v24.0 ЗАГРУЖЕН")
+print("📌 НОВЫЙ СТИЛЬ МЕНЮ И ИКОНКИ")
+print("🔨 МОЛОТОК: ЛКМ — УДАЛИТЬ, ПКМ — СОЗДАТЬ БЛОК")
