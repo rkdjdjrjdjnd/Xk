@@ -1,4 +1,4 @@
--- // RUSSIAN YAD v13.0 // С ПЕРЕМЕЩЕНИЕМ ОТ XNEOFF //
+-- // RUSSIAN YAD v14.0 // FLY GUI V3 + ОСТАНОВКА //
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
@@ -157,7 +157,7 @@ end)
 local yPos = 45
 local btnH = 38
 
--- FLY
+-- FLY (теперь запускает FlyGuiV3)
 local FlyBtn = Instance.new("TextButton")
 FlyBtn.Parent = MainFrame
 FlyBtn.Size = UDim2.new(0, 210, 0, btnH)
@@ -244,40 +244,63 @@ local cornerPlus = Instance.new("UICorner")
 cornerPlus.Parent = HeightPlus
 cornerPlus.CornerRadius = UDim.new(0, 8)
 
--- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ ========== //
-local menuDragToggle, menuDragStart, menuStartPos = false
-MainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        menuDragToggle = true
-        menuDragStart = input.Position
-        menuStartPos = MainFrame.Position
-    end
-end)
-MainFrame.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        menuDragToggle = false
-    end
-end)
-UIS.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch and menuDragToggle then
-        local delta = input.Position - menuDragStart
-        MainFrame.Position = UDim2.new(menuStartPos.X.Scale, menuStartPos.X.Offset + delta.X, menuStartPos.Y.Scale, menuStartPos.Y.Offset + delta.Y)
-    end
-end)
+-- // ========== ПЕРЕМЕННЫЕ ДЛЯ FLY GUI V3 ========== //
+local flyGuiInstance = nil
+local isFlyGuiRunning = false
 
--- // ========== ПЕРЕМЕННЫЕ ========== //
-local flying = false
-local noclipActive = false
-local verticalOffset = 0
-local bodyVelocity = nil
-local bodyGyro = nil
-local ctrl = {f = 0, b = 0, l = 0, r = 0}
-local lastctrl = {f = 0, b = 0, l = 0, r = 0}
-local speed = 0
-local maxspeed = 50
-local isR6 = false
+-- // ========== ФУНКЦИЯ ЗАПУСКА FLY GUI V3 ========== //
+local function startFlyGuiV3()
+    if isFlyGuiRunning then return end
+    isFlyGuiRunning = true
+    FlyBtn.Text = "🌀 FLY ON"
+    FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+    
+    -- Загружаем и выполняем скрипт XNEOFF
+    local success, err = pcall(function()
+        local script = game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt")
+        flyGuiInstance = loadstring(script)()
+    end)
+    
+    if not success then
+        isFlyGuiRunning = false
+        FlyBtn.Text = "🌀 FLY"
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
+        print("Ошибка загрузки FlyGuiV3: " .. tostring(err))
+    end
+end
+
+-- // ========== ФУНКЦИЯ ОСТАНОВКИ FLY GUI V3 ========== //
+local function stopFlyGuiV3()
+    if not isFlyGuiRunning then return end
+    
+    -- Удаляем GUI, созданный скриптом XNEOFF
+    if flyGuiInstance then
+        if flyGuiInstance.Parent then
+            flyGuiInstance:Destroy()
+        end
+        flyGuiInstance = nil
+    end
+    
+    -- Также удаляем любые другие GUI с именем "main"
+    local gui = CoreGui:FindFirstChild("main")
+    if gui then gui:Destroy() end
+    
+    isFlyGuiRunning = false
+    FlyBtn.Text = "🌀 FLY"
+    FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
+end
+
+-- // ========== КНОПКА FLY ========== //
+FlyBtn.MouseButton1Click:Connect(function()
+    if isFlyGuiRunning then
+        stopFlyGuiV3()
+    else
+        startFlyGuiV3()
+    end
+end)
 
 -- // ========== НОКЛИП ========== //
+local noclipActive = false
 local function toggleNoclip()
     noclipActive = not noclipActive
     NoclipBtn.BackgroundColor3 = noclipActive and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(80, 30, 30)
@@ -300,154 +323,39 @@ local function toggleNoclip()
 end
 NoclipBtn.MouseButton1Click:Connect(toggleNoclip)
 
--- // ========== ФУНКЦИИ ПОЛЁТА (СПИЖЖЕНО У XNEOFF) ========== //
-local function startFly()
-    local char = Player.Character
-    if not char then return end
-    local hum = char:FindFirstChildWhichIsA("Humanoid")
-    if not hum then return end
-    
-    isR6 = hum.RigType == Enum.HumanoidRigType.R6
-    
-    local torso = isR6 and char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
-    if not torso then return end
-    
-    hum.PlatformStand = true
-    local anim = char:FindFirstChild("Animate")
-    if anim then anim.Disabled = true end
-    
-    bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-    bodyVelocity.Velocity = Vector3.new(0, 0.1, 0)
-    bodyVelocity.Parent = torso
-    
-    bodyGyro = Instance.new("BodyGyro")
-    bodyGyro.P = 9e4
-    bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-    bodyGyro.CFrame = torso.CFrame
-    bodyGyro.Parent = torso
-    
-    flying = true
-    FlyBtn.Text = "🌀 FLY ON"
-    FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
-end
+-- // ========== УПРАВЛЕНИЕ ВЫСОТОЙ (для совместимости) ========== //
+-- Эти кнопки теперь управляют высотой в стандартном скрипте, если он запущен отдельно.
+-- Если ты хочешь использовать их для FlyGuiV3, они не будут работать,
+-- потому что FlyGuiV3 имеет свои собственные кнопки UP/DOWN.
+-- Я оставляю их для общего интерфейса, но они не влияют на FlyGuiV3.
 
-local function stopFly()
-    flying = false
-    if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
-    if bodyGyro then bodyGyro:Destroy() bodyGyro = nil end
-    
-    if Player.Character then
-        local hum = Player.Character:FindFirstChildWhichIsA("Humanoid")
-        if hum then
-            hum.PlatformStand = false
-            local anim = Player.Character:FindFirstChild("Animate")
-            if anim then anim.Disabled = false end
-        end
-    end
-    
-    ctrl = {f = 0, b = 0, l = 0, r = 0}
-    lastctrl = {f = 0, b = 0, l = 0, r = 0}
-    speed = 0
-    
-    FlyBtn.Text = "🌀 FLY"
-    FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
-end
-
-local function updateFly()
-    if not flying or not bodyVelocity or not bodyGyro then return end
-    local char = Player.Character
-    if not char then return end
-    local hum = char:FindFirstChildWhichIsA("Humanoid")
-    if not hum then return end
-    
-    local torso = isR6 and char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
-    if not torso then return end
-    
-    local camera = Workspace.CurrentCamera
-    if not camera then return end
-    
-    -- ОБНОВЛЕНИЕ СКОРОСТИ (как в XNEOFF)
-    if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
-        speed = speed + 0.5 + (speed / maxspeed)
-        if speed > maxspeed then speed = maxspeed end
-    elseif speed ~= 0 then
-        speed = speed - 1
-        if speed < 0 then speed = 0 end
-    end
-    
-    local moveVector = Vector3.new(0, 0, 0)
-    if (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0 then
-        moveVector = ((camera.CoordinateFrame.LookVector * (ctrl.f + ctrl.b)) + 
-                     ((camera.CoordinateFrame * CFrame.new(ctrl.l + ctrl.r, (ctrl.f + ctrl.b) * 0.2, 0).p) - 
-                     camera.CoordinateFrame.p)) * speed
-        lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
-    elseif speed ~= 0 then
-        moveVector = ((camera.CoordinateFrame.LookVector * (lastctrl.f + lastctrl.b)) + 
-                     ((camera.CoordinateFrame * CFrame.new(lastctrl.l + lastctrl.r, (lastctrl.f + lastctrl.b) * 0.2, 0).p) - 
-                     camera.CoordinateFrame.p)) * speed
-    end
-    
-    -- ВЕРТИКАЛЬ
-    local vertical = Vector3.new(0, verticalOffset, 0)
-    moveVector = moveVector + vertical
-    
-    bodyVelocity.Velocity = moveVector
-    if moveVector.Magnitude > 0.1 then
-        bodyGyro.CFrame = camera.CoordinateFrame * CFrame.Angles(-math.rad((ctrl.f + ctrl.b) * 50 * speed / maxspeed), 0, 0)
-    end
-end
-
-FlyBtn.MouseButton1Click:Connect(function()
-    if flying then stopFly() else startFly() end
-end)
-
--- // ========== УПРАВЛЕНИЕ (WASD / СТРЕЛКИ) ========== //
-UIS.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.W or input.KeyCode == Enum.KeyCode.Up then
-        ctrl.f = 1
-    elseif input.KeyCode == Enum.KeyCode.S or input.KeyCode == Enum.KeyCode.Down then
-        ctrl.b = -1
-    elseif input.KeyCode == Enum.KeyCode.A or input.KeyCode == Enum.KeyCode.Left then
-        ctrl.l = -1
-    elseif input.KeyCode == Enum.KeyCode.D or input.KeyCode == Enum.KeyCode.Right then
-        ctrl.r = 1
-    end
-end)
-
-UIS.InputEnded:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.W or input.KeyCode == Enum.KeyCode.Up then
-        ctrl.f = 0
-    elseif input.KeyCode == Enum.KeyCode.S or input.KeyCode == Enum.KeyCode.Down then
-        ctrl.b = 0
-    elseif input.KeyCode == Enum.KeyCode.A or input.KeyCode == Enum.KeyCode.Left then
-        ctrl.l = 0
-    elseif input.KeyCode == Enum.KeyCode.D or input.KeyCode == Enum.KeyCode.Right then
-        ctrl.r = 0
-    end
-end)
-
--- // ========== УПРАВЛЕНИЕ ВЫСОТОЙ ========== //
 HeightPlus.MouseButton1Click:Connect(function()
-    verticalOffset = math.min(verticalOffset + 2, 20)
-    HeightLabel.Text = "ВЫСОТА " .. tostring(verticalOffset)
+    print("▲ (Для FlyGuiV3 используйте кнопки в его меню)")
 end)
 
 HeightMinus.MouseButton1Click:Connect(function()
-    verticalOffset = math.max(verticalOffset - 2, -20)
-    HeightLabel.Text = "ВЫСОТА " .. tostring(verticalOffset)
+    print("▼ (Для FlyGuiV3 используйте кнопки в его меню)")
 end)
 
--- // ========== ОБНОВЛЕНИЕ ========== //
-RunService.Heartbeat:Connect(function()
-    if flying then updateFly() end
+-- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ ========== //
+local menuDragToggle, menuDragStart, menuStartPos = false
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        menuDragToggle = true
+        menuDragStart = input.Position
+        menuStartPos = MainFrame.Position
+    end
 end)
-
--- // ========== СБРОС ========== //
-Player.CharacterAdded:Connect(function()
-    wait(0.5)
-    if flying then stopFly() end
-    if noclipActive then toggleNoclip() end
+MainFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        menuDragToggle = false
+    end
+end)
+UIS.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch and menuDragToggle then
+        local delta = input.Position - menuDragStart
+        MainFrame.Position = UDim2.new(menuStartPos.X.Scale, menuStartPos.X.Offset + delta.X, menuStartPos.Y.Scale, menuStartPos.Y.Offset + delta.Y)
+    end
 end)
 
 -- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ ========== //
@@ -462,11 +370,10 @@ end)
 UIS.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.P then
         ScreenGui:Destroy()
+        stopFlyGuiV3()
         print("☠ ПАНИКА")
     end
 end)
 
-print("☠ RUSSIAN YAD v13.0 ЗАГРУЖЕН")
-print("📌 УПРАВЛЕНИЕ: WASD / СТРЕЛКИ (ДЛЯ ТЕЛЕФОНА — ДЖОЙСТИК)")
-print("🌀 FLY — ВКЛЮЧИТЬ/ВЫКЛЮЧИТЬ")
-print("▲▼ — ВЫСОТА")
+print("☠ RUSSIAN YAD v14.0 ЗАГРУЖЕН")
+print("📌 КНОПКА FLY ЗАПУСКАЕТ FlyGuiV3 И ОСТАНАВЛИВАЕТ ЕГО")
