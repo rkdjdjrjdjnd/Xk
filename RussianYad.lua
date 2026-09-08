@@ -1,4 +1,4 @@
--- // RUSSIAN YAD v30.0 // РЕАЛЬНО КРАСИВОЕ МЕНЮ //
+-- // RUSSIAN YAD v30.1 // ДЛЯ ТЕЛЕФОНА (ИСПРАВЛЕН) //
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
@@ -106,7 +106,7 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
--- // ========== МЕНЮ (ТЁМНЫЙ НЕОН) ========== //
+-- // ========== МЕНЮ ========== //
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
 MainFrame.Size = UDim2.new(0, 350, 0, 300)
@@ -123,7 +123,6 @@ local cornerMenu = Instance.new("UICorner")
 cornerMenu.Parent = MainFrame
 cornerMenu.CornerRadius = UDim.new(0, 20)
 
--- Неоновая рамка
 local borderGlow = Instance.new("ImageLabel")
 borderGlow.Parent = MainFrame
 borderGlow.Size = UDim2.new(1.1, 0, 1.1, 0)
@@ -134,7 +133,6 @@ borderGlow.ImageColor3 = Color3.fromRGB(0, 150, 255)
 borderGlow.ImageTransparency = 0.5
 borderGlow.ZIndex = 0
 
--- Анимация рамки
 spawn(function()
     while borderGlow and borderGlow.Parent do
         for i = 0.3, 0.7, 0.02 do
@@ -148,7 +146,6 @@ spawn(function()
     end
 end)
 
--- Заголовок
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
 Title.Size = UDim2.new(1, 0, 0, 45)
@@ -160,7 +157,6 @@ Title.Font = Enum.Font.GothamBold
 Title.TextScaled = true
 Title.ZIndex = 3
 
--- Крестик
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = MainFrame
 CloseBtn.Size = UDim2.new(0, 35, 0, 35)
@@ -176,12 +172,17 @@ CloseBtn.ZIndex = 3
 local cornerClose = Instance.new("UICorner")
 cornerClose.Parent = CloseBtn
 cornerClose.CornerRadius = UDim.new(0, 10)
+
 CloseBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
     IconButton.Visible = true
 end)
+CloseBtn.TouchTap:Connect(function()
+    MainFrame.Visible = false
+    IconButton.Visible = true
+end)
 
--- // ========== КНОПКИ (КРАСИВЫЕ) ========== //
+-- // ========== КНОПКИ ========== //
 local function createButton(text, x, y, color)
     local btn = Instance.new("TextButton")
     btn.Parent = MainFrame
@@ -199,7 +200,6 @@ local function createButton(text, x, y, color)
     corner.Parent = btn
     corner.CornerRadius = UDim.new(0, 10)
     
-    -- Анимация наведения
     btn.MouseEnter:Connect(function()
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundTransparency = 0.1}):Play()
         TweenService:Create(btn, TweenInfo.new(0.2), {BorderSizePixel = 2}):Play()
@@ -208,7 +208,12 @@ local function createButton(text, x, y, color)
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundTransparency = 0.3}):Play()
         TweenService:Create(btn, TweenInfo.new(0.2), {BorderSizePixel = 1}):Play()
     end)
-    
+    -- Для телефона: касание
+    btn.TouchTap:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundTransparency = 0.1}):Play()
+        wait(0.1)
+        TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundTransparency = 0.3}):Play()
+    end)
     return btn
 end
 
@@ -240,6 +245,27 @@ UIS.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch and menuDragToggle then
         local delta = input.Position - menuDragStart
         MainFrame.Position = UDim2.new(menuStartPos.X.Scale, menuStartPos.X.Offset + delta.X, menuStartPos.Y.Scale, menuStartPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- // ========== ОТКРЫТИЕ МЕНЮ (ДЛЯ ТЕЛЕФОНА И ПК) ========== //
+local function toggleMenu()
+    local newState = not MainFrame.Visible
+    MainFrame.Visible = newState
+    IconButton.Visible = not newState
+end
+
+-- Для ПК
+IconButton.MouseButton1Click:Connect(toggleMenu)
+-- Для телефона
+IconButton.TouchTap:Connect(toggleMenu)
+-- Также через InputBegan (на случай, если TouchTap не сработает)
+IconButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        -- Если это касание, но не перетаскивание
+        if not iconDragToggle then
+            toggleMenu()
+        end
     end
 end)
 
@@ -339,12 +365,55 @@ local function setupSpeedHack()
             input.Text = ""
         end
     end)
+    applyBtn.TouchTap:Connect(function()
+        local speed = tonumber(input.Text)
+        if speed and speed >= 16 and speed <= 500 then
+            currentSpeed = speed
+            SpeedBtn.Text = "⚡ СПИД: " .. speed
+            SpeedBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+            speedActive = true
+            if speedConnection then speedConnection:Disconnect() end
+            speedConnection = RunService.Heartbeat:Connect(function()
+                if speedActive and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                    Player.Character.Humanoid.WalkSpeed = currentSpeed
+                end
+            end)
+            inputGui:Destroy()
+        else
+            input.Text = "ОШИБКА!"
+            wait(1)
+            input.Text = ""
+        end
+    end)
 end
 
 -- // ========== ОБРАБОТЧИКИ КНОПОК ========== //
 
 -- FLY
 FlyBtn.MouseButton1Click:Connect(function()
+    if isFlyRunning then
+        if flyGuiInstance then
+            if flyGuiInstance.Parent then flyGuiInstance:Destroy() end
+            flyGuiInstance = nil
+        end
+        local gui = CoreGui:FindFirstChild("main")
+        if gui then gui:Destroy() end
+        isFlyRunning = false
+        FlyBtn.Text = "🚀 FLY"
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 80)
+    else
+        local success = pcall(function()
+            local script = game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt")
+            flyGuiInstance = loadstring(script)()
+        end)
+        if success then
+            isFlyRunning = true
+            FlyBtn.Text = "🛑 FLY"
+            FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+        end
+    end
+end)
+FlyBtn.TouchTap:Connect(function()
     if isFlyRunning then
         if flyGuiInstance then
             if flyGuiInstance.Parent then flyGuiInstance:Destroy() end
@@ -389,9 +458,30 @@ NoclipBtn.MouseButton1Click:Connect(function()
         end
     end
 end)
+NoclipBtn.TouchTap:Connect(function()
+    noclipActive = not noclipActive
+    NoclipBtn.BackgroundColor3 = noclipActive and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(80, 30, 30)
+    NoclipBtn.Text = noclipActive and "⬜ НОКЛИП ON" or "⬜ НОКЛИП"
+    if noclipActive then
+        RunService.Stepped:Connect(function()
+            if noclipActive and Player.Character then
+                for _, part in ipairs(Player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then part.CanCollide = false end
+                end
+            end
+        end)
+    else
+        if Player.Character then
+            for _, part in ipairs(Player.Character:GetDescendants()) do
+                if part:IsA("BasePart") then part.CanCollide = true end
+            end
+        end
+    end
+end)
 
 -- KILLALL
 KillallBtn.MouseButton1Click:Connect(killAll)
+KillallBtn.TouchTap:Connect(killAll)
 
 -- СПИДХАК
 SpeedBtn.MouseButton1Click:Connect(function()
@@ -410,15 +500,22 @@ SpeedBtn.MouseButton1Click:Connect(function()
         setupSpeedHack()
     end
 end)
-
--- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ ========== //
-local menuOpen = false
-IconButton.MouseButton1Click:Connect(function()
-    menuOpen = not menuOpen
-    MainFrame.Visible = menuOpen
-    IconButton.Visible = not menuOpen
+SpeedBtn.TouchTap:Connect(function()
+    if speedActive then
+        speedActive = false
+        if speedConnection then
+            speedConnection:Disconnect()
+            speedConnection = nil
+        end
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.WalkSpeed = 16
+        end
+        SpeedBtn.Text = "⚡ СПИДХАК"
+        SpeedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 30)
+    else
+        setupSpeedHack()
+    end
 end)
 
-print("☠ RUSSIAN YAD v30.0 ЗАГРУЖЕН")
-print("📌 МЕНЮ В СТИЛЕ НЕОН")
-print("📌 ИКОНКА ПЕРЕТАСКИВАЕТСЯ")
+print("☠ RUSSIAN YAD v30.1 ЗАГРУЖЕН")
+print("📌 НАЖМИ НА ИКОНКУ ☠, ЧТОБЫ ОТКРЫТЬ МЕНЮ")
