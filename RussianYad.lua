@@ -1,8 +1,10 @@
---// TEST GUI: FLY + NOCLIP + SPEED
---// Для собственного Roblox-проекта
+--==================================================
+-- SNAP-STYLE TEST GUI
+-- Только интерфейс и тестовая логика
+--==================================================
 
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Player = Players.LocalPlayer
@@ -11,418 +13,336 @@ local Player = Players.LocalPlayer
 -- SETTINGS
 --==================================================
 
-local DEFAULT_SPEED = 16
-local FLY_SPEED = 70
+local gui = Instance.new("ScreenGui")
+gui.Name = "SnapStyleTestGUI"
+gui.ResetOnSpawn = false
+gui.Parent = Player:WaitForChild("PlayerGui")
 
-local speedEnabled = false
-local noclipEnabled = false
-local flyEnabled = false
-
-local speedConnection = nil
-local noclipConnection = nil
-local flyConnection = nil
-
-local flyVelocity = nil
-local flyAttachment = nil
+local flyRunning = false
 
 --==================================================
--- GUI
+-- COLORS
 --==================================================
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "TestUtilityGUI"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = Player:WaitForChild("PlayerGui")
-
--- Main button
-
-local OpenButton = Instance.new("TextButton")
-OpenButton.Parent = ScreenGui
-OpenButton.Size = UDim2.fromOffset(60, 60)
-OpenButton.Position = UDim2.new(1, -80, 1, -100)
-OpenButton.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-OpenButton.Text = "☠"
-OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-OpenButton.TextScaled = true
-OpenButton.Font = Enum.Font.GothamBold
-OpenButton.BorderSizePixel = 0
-
-local OpenCorner = Instance.new("UICorner")
-OpenCorner.CornerRadius = UDim.new(1, 0)
-OpenCorner.Parent = OpenButton
-
--- Main frame
-
-local MainFrame = Instance.new("Frame")
-MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.fromOffset(300, 250)
-MainFrame.Position = UDim2.new(0.5, -150, 0.5, -125)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
-MainFrame.BorderSizePixel = 0
-MainFrame.Visible = false
-
-local FrameCorner = Instance.new("UICorner")
-FrameCorner.CornerRadius = UDim.new(0, 16)
-FrameCorner.Parent = MainFrame
+local BG = Color3.fromRGB(12, 12, 18)
+local PANEL = Color3.fromRGB(20, 20, 30)
+local BUTTON = Color3.fromRGB(30, 30, 43)
+local ACCENT = Color3.fromRGB(160, 80, 255)
+local TEXT = Color3.fromRGB(245, 245, 250)
+local SUBTEXT = Color3.fromRGB(160, 160, 175)
 
 --==================================================
--- TITLE
+-- MAIN WINDOW
 --==================================================
+
+local Main = Instance.new("Frame")
+Main.Parent = gui
+Main.Size = UDim2.fromOffset(330, 330)
+Main.Position = UDim2.new(0.5, -165, 0.5, -165)
+Main.BackgroundColor3 = BG
+Main.BorderSizePixel = 0
+Main.Active = true
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 18)
+MainCorner.Parent = Main
+
+--==================================================
+-- TOP BAR
+--==================================================
+
+local Top = Instance.new("Frame")
+Top.Parent = Main
+Top.Size = UDim2.new(1, 0, 0, 55)
+Top.BackgroundColor3 = PANEL
+Top.BorderSizePixel = 0
+
+local TopCorner = Instance.new("UICorner")
+TopCorner.CornerRadius = UDim.new(0, 18)
+TopCorner.Parent = Top
 
 local Title = Instance.new("TextLabel")
-Title.Parent = MainFrame
-Title.Size = UDim2.new(1, -50, 0, 45)
-Title.Position = UDim2.fromOffset(15, 5)
+Title.Parent = Top
 Title.BackgroundTransparency = 1
-Title.Text = "TEST CONTROL"
-Title.TextColor3 = Color3.fromRGB(255, 90, 130)
+Title.Position = UDim2.fromOffset(18, 7)
+Title.Size = UDim2.new(1, -70, 0, 25)
+Title.Text = "SNAP TEST"
+Title.TextColor3 = TEXT
+Title.TextSize = 20
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 22
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Close
+local Subtitle = Instance.new("TextLabel")
+Subtitle.Parent = Top
+Subtitle.BackgroundTransparency = 1
+Subtitle.Position = UDim2.fromOffset(19, 31)
+Subtitle.Size = UDim2.new(1, -70, 0, 17)
+Subtitle.Text = "CONTROL PANEL"
+Subtitle.TextColor3 = SUBTEXT
+Subtitle.TextSize = 10
+Subtitle.Font = Enum.Font.Gotham
 
-local CloseButton = Instance.new("TextButton")
-CloseButton.Parent = MainFrame
-CloseButton.Size = UDim2.fromOffset(35, 35)
-CloseButton.Position = UDim2.new(1, -42, 0, 7)
-CloseButton.BackgroundColor3 = Color3.fromRGB(50, 20, 25)
-CloseButton.Text = "X"
-CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseButton.TextSize = 18
-CloseButton.Font = Enum.Font.GothamBold
-CloseButton.BorderSizePixel = 0
+--==================================================
+-- CLOSE
+--==================================================
+
+local Close = Instance.new("TextButton")
+Close.Parent = Top
+Close.Size = UDim2.fromOffset(34, 34)
+Close.Position = UDim2.new(1, -45, 0, 10)
+Close.BackgroundColor3 = Color3.fromRGB(40, 30, 45)
+Close.Text = "×"
+Close.TextColor3 = TEXT
+Close.TextSize = 23
+Close.Font = Enum.Font.GothamBold
+Close.BorderSizePixel = 0
 
 local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 8)
-CloseCorner.Parent = CloseButton
+CloseCorner.CornerRadius = UDim.new(0, 10)
+CloseCorner.Parent = Close
+
+Close.MouseButton1Click:Connect(function()
+    Main.Visible = false
+end)
 
 --==================================================
--- BUTTON CREATOR
+-- TABS
 --==================================================
 
-local function createButton(text, y)
+local Tabs = Instance.new("Frame")
+Tabs.Parent = Main
+Tabs.Position = UDim2.fromOffset(12, 65)
+Tabs.Size = UDim2.new(1, -24, 0, 38)
+Tabs.BackgroundTransparency = 1
+
+local function createTab(text, x)
+    local tab = Instance.new("TextButton")
+
+    tab.Parent = Tabs
+    tab.Size = UDim2.new(0.32, -4, 1, 0)
+    tab.Position = UDim2.new(x, 0, 0, 0)
+
+    tab.BackgroundColor3 = BUTTON
+    tab.Text = text
+    tab.TextColor3 = TEXT
+    tab.TextSize = 12
+    tab.Font = Enum.Font.GothamBold
+    tab.BorderSizePixel = 0
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 9)
+    corner.Parent = tab
+
+    return tab
+end
+
+local HomeTab = createTab("HOME", 0)
+local PlayerTab = createTab("PLAYER", 0.34)
+local InfoTab = createTab("INFO", 0.68)
+
+--==================================================
+-- CONTENT
+--==================================================
+
+local Content = Instance.new("Frame")
+Content.Parent = Main
+Content.Position = UDim2.fromOffset(12, 112)
+Content.Size = UDim2.new(1, -24, 1, -124)
+Content.BackgroundTransparency = 1
+
+local function createAction(text, y)
     local button = Instance.new("TextButton")
 
-    button.Parent = MainFrame
-    button.Size = UDim2.new(1, -30, 0, 40)
-    button.Position = UDim2.fromOffset(15, y)
+    button.Parent = Content
+    button.Size = UDim2.new(1, 0, 0, 45)
+    button.Position = UDim2.fromOffset(0, y)
 
-    button.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-
+    button.BackgroundColor3 = BUTTON
     button.Text = text
+    button.TextColor3 = TEXT
+    button.TextSize = 15
     button.Font = Enum.Font.GothamBold
-    button.TextSize = 17
-
     button.BorderSizePixel = 0
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 10)
+    corner.CornerRadius = UDim.new(0, 11)
     corner.Parent = button
 
     return button
 end
 
-local FlyButton = createButton("FLY: OFF", 55)
-local NoclipButton = createButton("NOCLIP: OFF", 102)
-local SpeedButton = createButton("SPEED: OFF", 149)
+local FlyButton = createAction("FLY", 0)
+local NoclipButton = createAction("NOCLIP", 55)
+local SpeedButton = createAction("SPEED", 110)
 
 --==================================================
--- SPEED
+-- LOADING SCREEN
 --==================================================
 
-local function stopSpeed()
-    speedEnabled = false
+local function showLoading()
+    local Overlay = Instance.new("Frame")
 
-    if speedConnection then
-        speedConnection:Disconnect()
-        speedConnection = nil
+    Overlay.Parent = gui
+    Overlay.Size = UDim2.fromScale(1, 1)
+    Overlay.BackgroundColor3 = Color3.fromRGB(5, 5, 9)
+    Overlay.BackgroundTransparency = 0.08
+    Overlay.ZIndex = 100
+
+    local Box = Instance.new("Frame")
+    Box.Parent = Overlay
+    Box.Size = UDim2.fromOffset(240, 145)
+    Box.Position = UDim2.new(0.5, -120, 0.5, -72)
+    Box.BackgroundColor3 = PANEL
+    Box.BorderSizePixel = 0
+    Box.ZIndex = 101
+
+    local BoxCorner = Instance.new("UICorner")
+    BoxCorner.CornerRadius = UDim.new(0, 16)
+    BoxCorner.Parent = Box
+
+    local LoadingText = Instance.new("TextLabel")
+    LoadingText.Parent = Box
+    LoadingText.BackgroundTransparency = 1
+    LoadingText.Position = UDim2.fromOffset(10, 15)
+    LoadingText.Size = UDim2.new(1, -20, 0, 25)
+    LoadingText.Text = "LOADING"
+    LoadingText.TextColor3 = TEXT
+    LoadingText.TextSize = 19
+    LoadingText.Font = Enum.Font.GothamBold
+    LoadingText.ZIndex = 102
+
+    local Counter = Instance.new("TextLabel")
+    Counter.Parent = Box
+    Counter.BackgroundTransparency = 1
+    Counter.Position = UDim2.fromOffset(10, 45)
+    Counter.Size = UDim2.new(1, -20, 0, 50)
+    Counter.Text = "3"
+    Counter.TextColor3 = ACCENT
+    Counter.TextSize = 42
+    Counter.Font = Enum.Font.GothamBold
+    Counter.ZIndex = 102
+
+    local BarBackground = Instance.new("Frame")
+    BarBackground.Parent = Box
+    BarBackground.Position = UDim2.fromOffset(20, 108)
+    BarBackground.Size = UDim2.new(1, -40, 0, 7)
+    BarBackground.BackgroundColor3 = BUTTON
+    BarBackground.BorderSizePixel = 0
+    BarBackground.ZIndex = 102
+
+    local BarCorner = Instance.new("UICorner")
+    BarCorner.CornerRadius = UDim.new(1, 0)
+    BarCorner.Parent = BarBackground
+
+    local Bar = Instance.new("Frame")
+    Bar.Parent = BarBackground
+    Bar.Size = UDim2.new(0, 0, 1, 0)
+    Bar.BackgroundColor3 = ACCENT
+    Bar.BorderSizePixel = 0
+    Bar.ZIndex = 103
+
+    local BarCorner2 = Instance.new("UICorner")
+    BarCorner2.CornerRadius = UDim.new(1, 0)
+    BarCorner2.Parent = Bar
+
+    TweenService:Create(
+        Bar,
+        TweenInfo.new(3, Enum.EasingStyle.Linear),
+        {Size = UDim2.fromScale(1, 1)}
+    ):Play()
+
+    for i = 3, 1, -1 do
+        Counter.Text = tostring(i)
+        task.wait(1)
     end
 
-    local character = Player.Character
+    Counter.Text = "READY"
 
-    if character then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
+    task.wait(0.3)
 
-        if humanoid then
-            humanoid.WalkSpeed = DEFAULT_SPEED
-        end
-    end
-
-    SpeedButton.Text = "SPEED: OFF"
-    SpeedButton.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-end
-
-local function startSpeed()
-    stopSpeed()
-
-    speedEnabled = true
-
-    SpeedButton.Text = "SPEED: ON"
-    SpeedButton.BackgroundColor3 = Color3.fromRGB(30, 100, 55)
-
-    speedConnection = RunService.Heartbeat:Connect(function()
-        if not speedEnabled then
-            return
-        end
-
-        local character = Player.Character
-
-        if not character then
-            return
-        end
-
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-        if humanoid then
-            humanoid.WalkSpeed = 40
-        end
-    end)
-end
-
---==================================================
--- NOCLIP
---==================================================
-
-local function stopNoclip()
-    noclipEnabled = false
-
-    if noclipConnection then
-        noclipConnection:Disconnect()
-        noclipConnection = nil
-    end
-
-    local character = Player.Character
-
-    if character then
-        for _, object in ipairs(character:GetDescendants()) do
-            if object:IsA("BasePart") then
-                object.CanCollide = true
-            end
-        end
-    end
-
-    NoclipButton.Text = "NOCLIP: OFF"
-    NoclipButton.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-end
-
-local function startNoclip()
-    stopNoclip()
-
-    noclipEnabled = true
-
-    NoclipButton.Text = "NOCLIP: ON"
-    NoclipButton.BackgroundColor3 = Color3.fromRGB(30, 100, 55)
-
-    noclipConnection = RunService.Stepped:Connect(function()
-        if not noclipEnabled then
-            return
-        end
-
-        local character = Player.Character
-
-        if not character then
-            return
-        end
-
-        for _, object in ipairs(character:GetDescendants()) do
-            if object:IsA("BasePart") then
-                object.CanCollide = false
-            end
-        end
-    end)
+    Overlay:Destroy()
 end
 
 --==================================================
--- FLY
---==================================================
-
-local function stopFly()
-    flyEnabled = false
-
-    if flyConnection then
-        flyConnection:Disconnect()
-        flyConnection = nil
-    end
-
-    if flyVelocity then
-        flyVelocity:Destroy()
-        flyVelocity = nil
-    end
-
-    if flyAttachment then
-        flyAttachment:Destroy()
-        flyAttachment = nil
-    end
-
-    FlyButton.Text = "FLY: OFF"
-    FlyButton.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-end
-
-local function startFly()
-    stopFly()
-
-    local character = Player.Character
-
-    if not character then
-        return
-    end
-
-    local root = character:FindFirstChild("HumanoidRootPart")
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-    if not root or not humanoid then
-        return
-    end
-
-    flyEnabled = true
-
-    FlyButton.Text = "FLY: ON"
-    FlyButton.BackgroundColor3 = Color3.fromRGB(30, 100, 55)
-
-    flyAttachment = Instance.new("Attachment")
-    flyAttachment.Name = "TestFlyAttachment"
-    flyAttachment.Parent = root
-
-    flyVelocity = Instance.new("LinearVelocity")
-    flyVelocity.Name = "TestFlyVelocity"
-    flyVelocity.Attachment0 = flyAttachment
-    flyVelocity.MaxForce = math.huge
-    flyVelocity.VectorVelocity = Vector3.zero
-    flyVelocity.Parent = root
-
-    humanoid.PlatformStand = true
-
-    flyConnection = RunService.RenderStepped:Connect(function()
-        if not flyEnabled then
-            return
-        end
-
-        if not root.Parent then
-            return
-        end
-
-        local camera = workspace.CurrentCamera
-
-        if not camera then
-            return
-        end
-
-        local direction = Vector3.zero
-
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-            direction += camera.CFrame.LookVector
-        end
-
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-            direction -= camera.CFrame.LookVector
-        end
-
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-            direction -= camera.CFrame.RightVector
-        end
-
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-            direction += camera.CFrame.RightVector
-        end
-
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-            direction += Vector3.yAxis
-        end
-
-        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-            direction -= Vector3.yAxis
-        end
-
-        if direction.Magnitude > 0 then
-            direction = direction.Unit * FLY_SPEED
-        end
-
-        flyVelocity.VectorVelocity = direction
-    end)
-end
-
---==================================================
--- BUTTON EVENTS
+-- FLY TEST BUTTON
 --==================================================
 
 FlyButton.MouseButton1Click:Connect(function()
-    if flyEnabled then
-        stopFly()
+
+    if not flyRunning then
+        flyRunning = true
+
+        task.spawn(function()
+            showLoading()
+
+            FlyButton.BackgroundColor3 = Color3.fromRGB(50, 35, 70)
+
+            -- Здесь можно подключить
+            -- безопасную Fly-систему твоего собственного проекта.
+        end)
+
     else
-        startFly()
+        flyRunning = false
+        FlyButton.BackgroundColor3 = BUTTON
+
+        -- Здесь выключается Fly
+        -- твоего собственного проекта.
     end
 end)
+
+--==================================================
+-- NOCLIP TEST
+--==================================================
+
+local noclip = false
 
 NoclipButton.MouseButton1Click:Connect(function()
-    if noclipEnabled then
-        stopNoclip()
+    noclip = not noclip
+
+    if noclip then
+        NoclipButton.BackgroundColor3 = Color3.fromRGB(45, 80, 55)
     else
-        startNoclip()
+        NoclipButton.BackgroundColor3 = BUTTON
     end
 end)
+
+--==================================================
+-- SPEED TEST
+--==================================================
+
+local speed = false
 
 SpeedButton.MouseButton1Click:Connect(function()
-    if speedEnabled then
-        stopSpeed()
+    speed = not speed
+
+    if speed then
+        SpeedButton.BackgroundColor3 = Color3.fromRGB(45, 80, 55)
     else
-        startSpeed()
+        SpeedButton.BackgroundColor3 = BUTTON
     end
 end)
 
 --==================================================
--- OPEN / CLOSE
---==================================================
-
-OpenButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-end)
-
-CloseButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = false
-end)
-
---==================================================
--- CHARACTER RESPAWN
---==================================================
-
-Player.CharacterAdded:Connect(function()
-    stopFly()
-    stopNoclip()
-    stopSpeed()
-end)
-
---==================================================
--- MOBILE DRAG
+-- DRAG
 --==================================================
 
 local dragging = false
 local dragStart
 local startPosition
 
-local function updateDrag(input)
-    local delta = input.Position - dragStart
+Top.InputBegan:Connect(function(input)
 
-    MainFrame.Position = UDim2.new(
-        startPosition.X.Scale,
-        startPosition.X.Offset + delta.X,
-        startPosition.Y.Scale,
-        startPosition.Y.Offset + delta.Y
-    )
-end
-
-MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch
         or input.UserInputType == Enum.UserInputType.MouseButton1 then
 
         dragging = true
         dragStart = input.Position
-        startPosition = MainFrame.Position
+        startPosition = Main.Position
     end
 end)
 
-MainFrame.InputEnded:Connect(function(input)
+Top.InputEnded:Connect(function(input)
+
     if input.UserInputType == Enum.UserInputType.Touch
         or input.UserInputType == Enum.UserInputType.MouseButton1 then
 
@@ -431,6 +351,7 @@ MainFrame.InputEnded:Connect(function(input)
 end)
 
 UserInputService.InputChanged:Connect(function(input)
+
     if not dragging then
         return
     end
@@ -438,8 +359,15 @@ UserInputService.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch
         or input.UserInputType == Enum.UserInputType.MouseMovement then
 
-        updateDrag(input)
+        local delta = input.Position - dragStart
+
+        Main.Position = UDim2.new(
+            startPosition.X.Scale,
+            startPosition.X.Offset + delta.X,
+            startPosition.Y.Scale,
+            startPosition.Y.Offset + delta.Y
+        )
     end
 end)
 
-print("TEST CONTROL GUI loaded")
+print("SNAP STYLE TEST GUI loaded")
