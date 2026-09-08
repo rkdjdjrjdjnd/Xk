@@ -1,10 +1,11 @@
--- // RUSSIAN YAD v24.0 // НОВЫЙ СТИЛЬ + МОЛОТОК //
+-- // RUSSIAN YAD v26.0 // МЕНЬШАЯ ИКОНКА + СПИДХАК //
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- // ========== ОБХОД АНТИЧИТА ========== //
 pcall(function()
@@ -24,11 +25,11 @@ ScreenGui.Parent = CoreGui
 ScreenGui.Name = "RussianYadGUI"
 ScreenGui.ResetOnSpawn = false
 
--- // ========== НОВАЯ ИКОНКА ========== //
+-- // ========== МАЛЕНЬКАЯ ИКОНКА (60x60) ========== //
 local IconButton = Instance.new("ImageButton")
 IconButton.Parent = ScreenGui
-IconButton.Size = UDim2.new(0, 80, 0, 80)
-IconButton.Position = UDim2.new(0.85, -40, 0.85, -40)
+IconButton.Size = UDim2.new(0, 60, 0, 60)
+IconButton.Position = UDim2.new(0.85, -30, 0.85, -30)
 IconButton.BackgroundColor3 = Color3.fromRGB(10, 0, 20)
 IconButton.BorderSizePixel = 0
 IconButton.Image = "rbxassetid://123456789"
@@ -75,7 +76,7 @@ IconText.ZIndex = 11
 -- Вращение иконки
 spawn(function()
     while IconButton and IconButton.Parent do
-        for i = 0, 360, 2 do
+        for i = 0, 360, 3 do
             wait(0.01)
             IconButton.Rotation = i
             glowIcon.Rotation = i * 0.5
@@ -86,12 +87,12 @@ end)
 -- Пульсация размера
 spawn(function()
     while IconButton and IconButton.Parent do
-        local tween1 = TweenService:Create(IconButton, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {Size = UDim2.new(0, 85, 0, 85)})
+        local tween1 = TweenService:Create(IconButton, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {Size = UDim2.new(0, 65, 0, 65)})
         tween1:Play()
-        wait(0.8)
-        local tween2 = TweenService:Create(IconButton, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {Size = UDim2.new(0, 75, 0, 75)})
+        wait(0.6)
+        local tween2 = TweenService:Create(IconButton, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {Size = UDim2.new(0, 55, 0, 55)})
         tween2:Play()
-        wait(0.8)
+        wait(0.6)
     end
 end)
 
@@ -112,17 +113,17 @@ end)
 UIS.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch and iconDragToggle then
         local delta = input.Position - iconDragStart
-        local newX = math.clamp(iconStartPos.X.Offset + delta.X, 0, UIS:GetMouseLocation().X - 80)
-        local newY = math.clamp(iconStartPos.Y.Offset + delta.Y, 0, UIS:GetMouseLocation().Y - 80)
+        local newX = math.clamp(iconStartPos.X.Offset + delta.X, 0, UIS:GetMouseLocation().X - 60)
+        local newY = math.clamp(iconStartPos.Y.Offset + delta.Y, 0, UIS:GetMouseLocation().Y - 60)
         IconButton.Position = UDim2.new(0, newX, 0, newY)
     end
 end)
 
--- // ========== НОВОЕ МЕНЮ (СТЕКЛЯННЫЙ СТИЛЬ) ========== //
+-- // ========== НОВОЕ МЕНЮ ========== //
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 280, 0, 220)
-MainFrame.Position = UDim2.new(0.5, -140, 0.5, -110)
+MainFrame.Size = UDim2.new(0, 280, 0, 260)
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -130)
 MainFrame.BackgroundColor3 = Color3.fromRGB(10, 0, 25)
 MainFrame.BackgroundTransparency = 0.15
 MainFrame.BorderSizePixel = 0
@@ -131,7 +132,6 @@ MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.ClipsDescendants = true
 
--- Стеклянный эффект для меню
 local menuGlass = Instance.new("Frame")
 menuGlass.Parent = MainFrame
 menuGlass.Size = UDim2.new(1, 0, 1, 0)
@@ -143,7 +143,6 @@ local cornerMenu = Instance.new("UICorner")
 cornerMenu.Parent = MainFrame
 cornerMenu.CornerRadius = UDim.new(0, 20)
 
--- Неоновая рамка
 local borderGlow = Instance.new("ImageLabel")
 borderGlow.Parent = MainFrame
 borderGlow.Size = UDim2.new(1.1, 0, 1.1, 0)
@@ -154,7 +153,6 @@ borderGlow.ImageColor3 = Color3.fromRGB(255, 50, 100)
 borderGlow.ImageTransparency = 0.5
 borderGlow.ZIndex = 2
 
--- Заголовок с градиентом
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
 Title.Size = UDim2.new(1, 0, 0, 45)
@@ -166,7 +164,6 @@ Title.Font = Enum.Font.GothamBold
 Title.TextScaled = true
 Title.ZIndex = 3
 
--- Крестик закрытия
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = MainFrame
 CloseBtn.Size = UDim2.new(0, 35, 0, 35)
@@ -189,10 +186,9 @@ end)
 
 -- // ========== КНОПКИ МЕНЮ ========== //
 local yPos = 50
-local btnH = 35
+local btnH = 32
 local btnW = 120
 
--- Функция создания стильной кнопки
 local function createStyledButton(parent, text, x, y, w, h, color)
     local btn = Instance.new("TextButton")
     btn.Parent = parent
@@ -212,48 +208,177 @@ local function createStyledButton(parent, text, x, y, w, h, color)
     return btn
 end
 
--- КНОПКИ
+-- РЯД 1: FLY + НОКЛИП
 local FlyBtn = createStyledButton(MainFrame, "🚀 FLY", 0.04, yPos, btnW, btnH, Color3.fromRGB(30, 30, 80))
 local NoclipBtn = createStyledButton(MainFrame, "⬜ НОКЛИП", 0.54, yPos, btnW, btnH, Color3.fromRGB(80, 30, 30))
+yPos = yPos + btnH + 6
 
-yPos = yPos + btnH + 8
-
+-- РЯД 2: ESP + АИМ
 local EspBtn = createStyledButton(MainFrame, "👁️ ESP", 0.04, yPos, btnW, btnH, Color3.fromRGB(30, 50, 80))
 local AimBtn = createStyledButton(MainFrame, "🎯 АИМ", 0.54, yPos, btnW, btnH, Color3.fromRGB(50, 30, 80))
+yPos = yPos + btnH + 6
 
-yPos = yPos + btnH + 8
+-- РЯД 3: СПИДХАК + МОЛОТОК
+local SpeedBtn = createStyledButton(MainFrame, "⚡ СПИДХАК", 0.04, yPos, btnW, btnH, Color3.fromRGB(50, 50, 30))
+local HammerBtn = createStyledButton(MainFrame, "🔨 МОЛОТОК", 0.54, yPos, btnW, btnH, Color3.fromRGB(80, 50, 30))
+yPos = yPos + btnH + 6
 
-local HammerBtn = createStyledButton(MainFrame, "🔨 МОЛОТОК", 0.04, yPos, btnW, btnH, Color3.fromRGB(80, 50, 30))
-local OffBtn = createStyledButton(MainFrame, "❌ ВЫКЛ ВСЁ", 0.54, yPos, btnW, btnH, Color3.fromRGB(80, 0, 0))
+-- РЯД 4: ВЫКЛЮЧИТЬ ВСЁ
+local OffBtn = createStyledButton(MainFrame, "❌ ВЫКЛ ВСЁ", 0.04, yPos, 250, btnH, Color3.fromRGB(80, 0, 0))
+
+-- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ ========== //
+local menuDragToggle, menuDragStart, menuStartPos = false
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        menuDragToggle = true
+        menuDragStart = input.Position
+        menuStartPos = MainFrame.Position
+    end
+end)
+MainFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        menuDragToggle = false
+    end
+end)
+UIS.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch and menuDragToggle then
+        local delta = input.Position - menuDragStart
+        MainFrame.Position = UDim2.new(menuStartPos.X.Scale, menuStartPos.X.Offset + delta.X, menuStartPos.Y.Scale, menuStartPos.Y.Offset + delta.Y)
+    end
+end)
 
 -- // ========== ПЕРЕМЕННЫЕ ========== //
 local flyGuiInstance = nil
 local isFlyRunning = false
 local noclipActive = false
 local espLoaded = false
-local aimbotLoaded = false
-local aimbotThread = nil
 local hammerActive = false
 local hammerTool = nil
+local speedActive = false
+local currentSpeed = 16
+local speedConnection = nil
+
+-- // ========== СПИДХАК С ВВОДОМ СКОРОСТИ ========== //
+local function setupSpeedHack()
+    -- Создаём GUI для ввода скорости
+    local inputGui = Instance.new("ScreenGui")
+    inputGui.Parent = CoreGui
+    inputGui.Name = "SpeedInput"
+    
+    local frame = Instance.new("Frame")
+    frame.Parent = inputGui
+    frame.Size = UDim2.new(0, 250, 0, 120)
+    frame.Position = UDim2.new(0.5, -125, 0.5, -60)
+    frame.BackgroundColor3 = Color3.fromRGB(10, 0, 20)
+    frame.BorderSizePixel = 2
+    frame.BorderColor3 = Color3.fromRGB(255, 50, 100)
+    
+    local corner = Instance.new("UICorner")
+    corner.Parent = frame
+    corner.CornerRadius = UDim.new(0, 10)
+    
+    local title = Instance.new("TextLabel")
+    title.Parent = frame
+    title.Size = UDim2.new(1, 0, 0, 30)
+    title.Text = "⚡ ВВЕДИТЕ СКОРОСТЬ"
+    title.TextColor3 = Color3.fromRGB(255, 80, 120)
+    title.BackgroundTransparency = 1
+    title.Font = Enum.Font.GothamBold
+    title.TextScaled = true
+    
+    local input = Instance.new("TextBox")
+    input.Parent = frame
+    input.Size = UDim2.new(0, 150, 0, 30)
+    input.Position = UDim2.new(0.5, -75, 0, 40)
+    input.PlaceholderText = "от 16 до 500"
+    input.BackgroundColor3 = Color3.fromRGB(30, 15, 40)
+    input.BorderColor3 = Color3.fromRGB(255, 50, 100)
+    input.TextColor3 = Color3.fromRGB(255, 255, 255)
+    input.Font = Enum.Font.GothamBold
+    input.TextScaled = true
+    local cornerInput = Instance.new("UICorner")
+    cornerInput.Parent = input
+    cornerInput.CornerRadius = UDim.new(0, 8)
+    
+    local applyBtn = Instance.new("TextButton")
+    applyBtn.Parent = frame
+    applyBtn.Size = UDim2.new(0, 100, 0, 30)
+    applyBtn.Position = UDim2.new(0.5, -50, 0, 80)
+    applyBtn.Text = "ПРИМЕНИТЬ"
+    applyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+    applyBtn.BorderSizePixel = 0
+    applyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    applyBtn.Font = Enum.Font.GothamBold
+    applyBtn.TextScaled = true
+    local cornerApply = Instance.new("UICorner")
+    cornerApply.Parent = applyBtn
+    cornerApply.CornerRadius = UDim.new(0, 8)
+    
+    applyBtn.MouseButton1Click:Connect(function()
+        local speed = tonumber(input.Text)
+        if speed and speed >= 16 and speed <= 500 then
+            currentSpeed = speed
+            SpeedBtn.Text = "⚡ СПИД: " .. tostring(speed)
+            SpeedBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+            speedActive = true
+            print("☠ СКОРОСТЬ УСТАНОВЛЕНА: " .. tostring(speed))
+            
+            if speedConnection then speedConnection:Disconnect() end
+            speedConnection = RunService.Heartbeat:Connect(function()
+                if speedActive and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                    Player.Character.Humanoid.WalkSpeed = currentSpeed
+                end
+            end)
+            inputGui:Destroy()
+        else
+            input.Text = "ОШИБКА! ВВЕДИ ЧИСЛО (16-500)"
+            wait(1)
+            input.Text = ""
+        end
+    end)
+    
+    -- Закрытие по клику вне
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            local pos = UIS:GetMouseLocation()
+            local framePos = frame.AbsolutePosition
+            local frameSize = frame.AbsoluteSize
+            if pos.X < framePos.X or pos.X > framePos.X + frameSize.X or
+               pos.Y < framePos.Y or pos.Y > framePos.Y + frameSize.Y then
+                inputGui:Destroy()
+            end
+        end
+    end)
+end
 
 -- // ========== АИМБОТ (1 РАЗ) ========== //
+local aimbotLoaded = false
+local aimbotThread = nil
+
 local function loadAimbot()
-    if aimbotLoaded then return end
+    if aimbotLoaded then
+        print("☠ АИМБОТ УЖЕ АКТИВЕН!")
+        return
+    end
+    
     local success, err = pcall(function()
         aimbotThread = RunService.Heartbeat:Connect(function()
             local aimScript = game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile")
             loadstring(aimScript)()
         end)
     end)
+    
     if success then
         aimbotLoaded = true
         AimBtn.Text = "🎯 АИМ ON"
         AimBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
-        print("☠ АИМБОТ ЗАГРУЖЕН")
+        print("☠ АИМБОТ АКТИВИРОВАН (ТОЛЬКО 1 РАЗ)")
+    else
+        print("Ошибка загрузки аимбота: " .. tostring(err))
     end
 end
 
--- // ========== УЛУЧШЕННЫЙ МОЛОТОК ========== //
+-- // ========== МОЛОТОК ========== //
 local function createHammer()
     if hammerActive then
         if hammerTool then
@@ -267,20 +392,17 @@ local function createHammer()
         return
     end
     
-    -- Создаём инструмент
     hammerTool = Instance.new("Tool")
     hammerTool.Name = "🔨 АДМИН-МОЛОТОК"
     hammerTool.RequiresHandle = true
     hammerTool.CanBeDropped = false
     
-    -- Рукоятка
     local handle = Instance.new("Part")
     handle.Parent = hammerTool
     handle.Size = Vector3.new(0.4, 0.4, 2)
     handle.BrickColor = BrickColor.new("Dark stone grey")
     handle.Material = Enum.Material.SmoothPlastic
     
-    -- Головка молота
     local head = Instance.new("Part")
     head.Parent = hammerTool
     head.Size = Vector3.new(2.5, 1.2, 1.5)
@@ -288,7 +410,6 @@ local function createHammer()
     head.BrickColor = BrickColor.new("Bright red")
     head.Material = Enum.Material.Neon
     
-    -- Свечение
     local glow = Instance.new("Attachment")
     glow.Parent = head
     local beam = Instance.new("Beam")
@@ -298,12 +419,6 @@ local function createHammer()
     beam.Color = ColorSequence.new(Color3.fromRGB(255, 0, 0))
     beam.Transparency = NumberSequence.new(0.3)
     
-    -- Тултип
-    local tooltip = Instance.new("ToolTip")
-    tooltip.Parent = hammerTool
-    tooltip.Text = "🔨 ЛКМ — удалить объект | ПКМ — создать блок"
-    
-    -- Обработчик активации (ЛКМ)
     hammerTool.Activated:Connect(function()
         local char = Player.Character
         if not char then return end
@@ -313,12 +428,10 @@ local function createHammer()
         local camera = Workspace.CurrentCamera
         if not camera then return end
         
-        -- Получаем объект под прицелом
         local ray = Ray.new(camera.CFrame.Position, camera.CFrame.LookVector * 100)
         local hit, pos = Workspace:FindPartOnRay(ray, char)
         
         if hit and hit ~= char and hit.Parent ~= char then
-            -- Удаляем объект
             local parent = hit.Parent
             if parent and parent:IsA("Model") then
                 parent:Destroy()
@@ -326,7 +439,6 @@ local function createHammer()
                 hit:Destroy()
             end
             
-            -- Эффект удаления
             local explode = Instance.new("Explosion")
             explode.Position = pos
             explode.BlastRadius = 2
@@ -336,7 +448,6 @@ local function createHammer()
         end
     end)
     
-    -- Обработчик ПКМ (создание блока)
     hammerTool.SecondaryActivated:Connect(function()
         local char = Player.Character
         if not char then return end
@@ -359,16 +470,13 @@ local function createHammer()
             block.Parent = Workspace
             block.Name = "AdminBlock"
             
-            -- Свечение блока
             local bg = Instance.new("BodyGyro")
             bg.Parent = block
             bg.MaxTorque = Vector3.new(4000, 4000, 4000)
             bg.CFrame = block.CFrame
             
-            -- Анимация появления
             block.Size = Vector3.new(0.1, 0.1, 0.1)
             TweenService:Create(block, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = Vector3.new(3, 3, 3)}):Play()
-            
             game:GetService("Debris"):AddItem(block, 30)
         end
     end)
@@ -458,12 +566,25 @@ EspBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- АИМ
-AimBtn.MouseButton1Click:Connect(function()
-    if not aimbotLoaded then
-        loadAimbot()
+-- АИМ (1 РАЗ)
+AimBtn.MouseButton1Click:Connect(loadAimbot)
+
+-- СПИДХАК
+SpeedBtn.MouseButton1Click:Connect(function()
+    if speedActive then
+        speedActive = false
+        if speedConnection then
+            speedConnection:Disconnect()
+            speedConnection = nil
+        end
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.WalkSpeed = 16
+        end
+        SpeedBtn.Text = "⚡ СПИДХАК"
+        SpeedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 30)
+        print("☠ СПИДХАК ВЫКЛЮЧЕН")
     else
-        print("☠ АИМБОТ УЖЕ ЗАГРУЖЕН")
+        setupSpeedHack()
     end
 end)
 
@@ -512,6 +633,19 @@ OffBtn.MouseButton1Click:Connect(function()
         EspBtn.BackgroundColor3 = Color3.fromRGB(30, 50, 80)
     end
     
+    if speedActive then
+        speedActive = false
+        if speedConnection then
+            speedConnection:Disconnect()
+            speedConnection = nil
+        end
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.WalkSpeed = 16
+        end
+        SpeedBtn.Text = "⚡ СПИДХАК"
+        SpeedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 30)
+    end
+    
     if hammerActive then
         if hammerTool then
             hammerTool:Destroy()
@@ -522,28 +656,7 @@ OffBtn.MouseButton1Click:Connect(function()
         HammerBtn.BackgroundColor3 = Color3.fromRGB(80, 50, 30)
     end
     
-    print("☠ ВСЁ ВЫКЛЮЧЕНО")
-end)
-
--- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ ========== //
-local menuDragToggle, menuDragStart, menuStartPos = false
-MainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        menuDragToggle = true
-        menuDragStart = input.Position
-        menuStartPos = MainFrame.Position
-    end
-end)
-MainFrame.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        menuDragToggle = false
-    end
-end)
-UIS.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch and menuDragToggle then
-        local delta = input.Position - menuDragStart
-        MainFrame.Position = UDim2.new(menuStartPos.X.Scale, menuStartPos.X.Offset + delta.X, menuStartPos.Y.Scale, menuStartPos.Y.Offset + delta.Y)
-    end
+    print("☠ ВСЁ ВЫКЛЮЧЕНО (КРОМЕ АИМБОТА)")
 end)
 
 -- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ ========== //
@@ -567,6 +680,16 @@ UIS.InputBegan:Connect(function(input)
             hammerTool:Destroy()
             hammerTool = nil
         end
+        if speedActive then
+            speedActive = false
+            if speedConnection then
+                speedConnection:Disconnect()
+                speedConnection = nil
+            end
+            if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                Player.Character.Humanoid.WalkSpeed = 16
+            end
+        end
         if espLoaded then
             for _, plr in pairs(Player:GetPlayers()) do
                 if plr.Character then
@@ -584,6 +707,7 @@ UIS.InputBegan:Connect(function(input)
     end
 end)
 
-print("☠ RUSSIAN YAD v24.0 ЗАГРУЖЕН")
-print("📌 НОВЫЙ СТИЛЬ МЕНЮ И ИКОНКИ")
-print("🔨 МОЛОТОК: ЛКМ — УДАЛИТЬ, ПКМ — СОЗДАТЬ БЛОК")
+print("☠ RUSSIAN YAD v26.0 ЗАГРУЖЕН")
+print("📌 ИКОНКА 60x60 — МОЖНО ТАСКАТЬ")
+print("⚡ СПИДХАК С ВВОДОМ СКОРОСТИ")
+print("🎯 АИМБОТ АКТИВИРУЕТСЯ ТОЛЬКО 1 РАЗ")
