@@ -1,4 +1,5 @@
--- // RUSSIAN YAD v33.0 // МЕНЮ С ВКЛАДКАМИ //
+-- // RUSSIAN YAD v34.0 // СВЕТЛОЕ МЕНЮ ДЛЯ ТЕЛЕФОНА // ЧАСТЬ 1 //
+
 local Player = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
@@ -37,15 +38,15 @@ ScreenGui.Parent = CoreGui
 ScreenGui.Name = "RussianYadGUI"
 ScreenGui.ResetOnSpawn = false
 
--- // ========== ИКОНКА (КАК У ПОПУЛЯРНЫХ ХАКЕРОВ) ========== //
+-- // ========== ИКОНКА 40x40 ========== //
 local IconButton = Instance.new("ImageButton")
 IconButton.Parent = ScreenGui
-IconButton.Size = UDim2.new(0, 65, 0, 65)
-IconButton.Position = UDim2.new(0.85, -32, 0.85, -32)
-IconButton.BackgroundColor3 = Color3.fromRGB(10, 0, 25)
+IconButton.Size = UDim2.new(0, 40, 0, 40)
+IconButton.Position = UDim2.new(0.85, -20, 0.85, -20)
+IconButton.BackgroundColor3 = Color3.fromRGB(220, 200, 255)
 IconButton.BorderSizePixel = 0
 IconButton.Image = "rbxassetid://123456789"
-IconButton.ImageColor3 = Color3.fromRGB(255, 50, 150)
+IconButton.ImageColor3 = Color3.fromRGB(80, 40, 180)
 IconButton.ScaleType = Enum.ScaleType.Fit
 IconButton.ClipsDescendants = true
 IconButton.ZIndex = 10
@@ -60,7 +61,7 @@ iconGlow.Size = UDim2.new(1.8, 0, 1.8, 0)
 iconGlow.Position = UDim2.new(-0.4, 0, -0.4, 0)
 iconGlow.BackgroundTransparency = 1
 iconGlow.Image = "rbxassetid://13158748277"
-iconGlow.ImageColor3 = Color3.fromRGB(255, 50, 150)
+iconGlow.ImageColor3 = Color3.fromRGB(80, 40, 180)
 iconGlow.ImageTransparency = 0.4
 iconGlow.ZIndex = 0
 iconGlow.Name = "Glow"
@@ -85,14 +86,14 @@ end)
 -- Пульсация
 spawn(function()
     while IconButton and IconButton.Parent do
-        TweenService:Create(IconButton, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = UDim2.new(0, 70, 0, 70)}):Play()
-        wait(0.6)
-        TweenService:Create(IconButton, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = UDim2.new(0, 60, 0, 60)}):Play()
-        wait(0.6)
+        TweenService:Create(IconButton, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = UDim2.new(0, 45, 0, 45)}):Play()
+        wait(0.5)
+        TweenService:Create(IconButton, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = UDim2.new(0, 35, 0, 35)}):Play()
+        wait(0.5)
     end
 end)
 
--- // ========== ПЕРЕТАСКИВАНИЕ ИКОНКИ ========== //
+-- // ========== ПЕРЕТАСКИВАНИЕ ИКОНКИ (ТЕЛЕФОН) ========== //
 local iconDragToggle, iconDragStart, iconStartPos = false
 IconButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch then
@@ -109,19 +110,19 @@ end)
 UIS.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch and iconDragToggle then
         local delta = input.Position - iconDragStart
-        local newX = math.clamp(iconStartPos.X.Offset + delta.X, 0, UIS:GetMouseLocation().X - 65)
-        local newY = math.clamp(iconStartPos.Y.Offset + delta.Y, 0, UIS:GetMouseLocation().Y - 65)
+        local newX = math.clamp(iconStartPos.X.Offset + delta.X, 0, UIS:GetMouseLocation().X - 40)
+        local newY = math.clamp(iconStartPos.Y.Offset + delta.Y, 0, UIS:GetMouseLocation().Y - 40)
         IconButton.Position = UDim2.new(0, newX, 0, newY)
     end
 end)
 
--- // ========== ОСНОВНОЕ МЕНЮ (БОЛЬШОЕ) ========== //
+-- // ========== СВЕТЛОЕ МЕНЮ ========== //
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 400, 0, 350)
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
-MainFrame.BackgroundColor3 = Color3.fromRGB(8, 0, 18)
-MainFrame.BackgroundTransparency = 0.08
+MainFrame.Size = UDim2.new(0, 380, 0, 340)
+MainFrame.Position = UDim2.new(0.5, -190, 0.5, -170)
+MainFrame.BackgroundColor3 = Color3.fromRGB(240, 230, 255)
+MainFrame.BackgroundTransparency = 0.05
 MainFrame.BorderSizePixel = 0
 MainFrame.Visible = false
 MainFrame.Active = true
@@ -133,34 +134,34 @@ local mainCorner = Instance.new("UICorner")
 mainCorner.Parent = MainFrame
 mainCorner.CornerRadius = UDim.new(0, 25)
 
--- Неоновая рамка
+-- Светлая рамка
 local borderGlow = Instance.new("ImageLabel")
 borderGlow.Parent = MainFrame
 borderGlow.Size = UDim2.new(1.1, 0, 1.1, 0)
 borderGlow.Position = UDim2.new(-0.05, 0, -0.05, 0)
 borderGlow.BackgroundTransparency = 1
 borderGlow.Image = "rbxassetid://13158748277"
-borderGlow.ImageColor3 = Color3.fromRGB(255, 50, 150)
-borderGlow.ImageTransparency = 0.4
+borderGlow.ImageColor3 = Color3.fromRGB(180, 140, 255)
+borderGlow.ImageTransparency = 0.3
 borderGlow.ZIndex = 0
 borderGlow.Name = "BorderGlow"
 
 -- Анимация рамки
 spawn(function()
     while borderGlow and borderGlow.Parent do
-        for i = 0.3, 0.7, 0.02 do wait(0.02) borderGlow.ImageTransparency = i end
-        for i = 0.7, 0.3, -0.02 do wait(0.02) borderGlow.ImageTransparency = i end
+        for i = 0.2, 0.6, 0.02 do wait(0.02) borderGlow.ImageTransparency = i end
+        for i = 0.6, 0.2, -0.02 do wait(0.02) borderGlow.ImageTransparency = i end
     end
 end)
 
 -- Заголовок
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
-Title.Size = UDim2.new(1, 0, 0, 50)
+Title.Size = UDim2.new(1, 0, 0, 45)
 Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "☠ RUSSIAN YAD"
-Title.TextColor3 = Color3.fromRGB(255, 80, 150)
+Title.TextColor3 = Color3.fromRGB(80, 40, 180)
 Title.Font = Enum.Font.GothamBold
 Title.TextScaled = true
 Title.ZIndex = 3
@@ -169,11 +170,11 @@ Title.ZIndex = 3
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = MainFrame
 CloseBtn.Size = UDim2.new(0, 35, 0, 35)
-CloseBtn.Position = UDim2.new(1, -40, 0, 8)
+CloseBtn.Position = UDim2.new(1, -40, 0, 5)
 CloseBtn.Text = "✖"
-CloseBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
-CloseBtn.BackgroundTransparency = 0.4
+CloseBtn.TextColor3 = Color3.fromRGB(180, 80, 80)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 220, 220)
+CloseBtn.BackgroundTransparency = 0.3
 CloseBtn.BorderSizePixel = 0
 CloseBtn.TextScaled = true
 CloseBtn.Font = Enum.Font.GothamBold
@@ -188,7 +189,7 @@ CloseBtn.TouchTap:Connect(function() MainFrame.Visible = false IconButton.Visibl
 local TabFrame = Instance.new("Frame")
 TabFrame.Parent = MainFrame
 TabFrame.Size = UDim2.new(1, 0, 0, 35)
-TabFrame.Position = UDim2.new(0, 0, 0, 50)
+TabFrame.Position = UDim2.new(0, 0, 0, 45)
 TabFrame.BackgroundTransparency = 1
 
 local tabs = {"Движение", "Игроки", "Визуал", "Настройки"}
@@ -198,13 +199,13 @@ local contentFrames = {}
 for i, name in ipairs(tabs) do
     local btn = Instance.new("TextButton")
     btn.Parent = TabFrame
-    btn.Size = UDim2.new(0, 100, 1, 0)
+    btn.Size = UDim2.new(0, 95, 1, 0)
     btn.Position = UDim2.new((i-1) * 0.25, 0, 0, 0)
     btn.Text = name
-    btn.BackgroundColor3 = i == 1 and Color3.fromRGB(255, 50, 150) or Color3.fromRGB(20, 0, 40)
-    btn.BackgroundTransparency = 0.3
+    btn.BackgroundColor3 = i == 1 and Color3.fromRGB(180, 140, 255) or Color3.fromRGB(230, 215, 255)
+    btn.BackgroundTransparency = 0.2
     btn.BorderSizePixel = 0
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextColor3 = i == 1 and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(80, 40, 180)
     btn.Font = Enum.Font.GothamBold
     btn.TextScaled = true
     btn.ZIndex = 3
@@ -216,16 +217,17 @@ for i, name in ipairs(tabs) do
     local content = Instance.new("Frame")
     content.Parent = MainFrame
     content.Size = UDim2.new(1, -10, 1, -85)
-    content.Position = UDim2.new(0, 5, 0, 85)
+    content.Position = UDim2.new(0, 5, 0, 80)
     content.BackgroundTransparency = 1
     content.Visible = (i == 1)
     contentFrames[i] = content
 end
 
--- // ========== ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК ========== //
+-- // ========== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ========== //
 local function switchTab(index)
     for i, btn in ipairs(tabButtons) do
-        btn.BackgroundColor3 = (i == index) and Color3.fromRGB(255, 50, 150) or Color3.fromRGB(20, 0, 40)
+        btn.BackgroundColor3 = (i == index) and Color3.fromRGB(180, 140, 255) or Color3.fromRGB(230, 215, 255)
+        btn.TextColor3 = (i == index) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(80, 40, 180)
         contentFrames[i].Visible = (i == index)
     end
 end
@@ -235,60 +237,26 @@ for i, btn in ipairs(tabButtons) do
     btn.TouchTap:Connect(function() switchTab(i) end)
 end
 
--- // ========== КОНТЕНТ ВКЛАДОК ========== //
-local function createContent(parent, yStart)
-    local y = yStart or 10
-    local function addButton(text, color, callback)
-        local btn = Instance.new("TextButton")
-        btn.Parent = parent
-        btn.Size = UDim2.new(0, 180, 0, 30)
-        btn.Position = UDim2.new(0.05, 0, 0, y)
-        btn.Text = text
-        btn.BackgroundColor3 = color or Color3.fromRGB(30, 15, 50)
-        btn.BackgroundTransparency = 0.3
-        btn.BorderSizePixel = 1
-        btn.BorderColor3 = Color3.fromRGB(255, 50, 150)
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        btn.Font = Enum.Font.GothamBold
-        btn.TextScaled = true
-        local corner = Instance.new("UICorner")
-        corner.Parent = btn
-        corner.CornerRadius = UDim.new(0, 10)
-        btn.MouseButton1Click:Connect(callback)
-        btn.TouchTap:Connect(callback)
-        y = y + 38
-        return btn
-    end
-    
-    -- Вкладка "Движение"
-    if parent == contentFrames[1] then
-        local flyBtn = addButton("🚀 FLY", Color3.fromRGB(30, 30, 80), function() toggleFly() end)
-        local noclipBtn = addButton("⬜ НОКЛИП", Color3.fromRGB(80, 30, 30), function() toggleNoclip() end)
-        local speedBtn = addButton("⚡ СПИДХАК", Color3.fromRGB(50, 50, 30), function() toggleSpeed() end)
-        return {flyBtn, noclipBtn, speedBtn}
-    end
-    
-    -- Вкладка "Игроки"
-    if parent == contentFrames[2] then
-        local killBtn = addButton("💀 KILLALL", Color3.fromRGB(80, 0, 0), function() killAll() end)
-        local tpBtn = addButton("🌀 ТЕЛЕПОРТ К СЕБЕ", Color3.fromRGB(0, 80, 80), function() teleportAll() end)
-        local freezeBtn = addButton("🧊 ЗАМОРОЗИТЬ", Color3.fromRGB(0, 80, 0), function() freezeAll() end)
-        return {killBtn, tpBtn, freezeBtn}
-    end
-    
-    -- Вкладка "Визуал"
-    if parent == contentFrames[3] then
-        local espBtn = addButton("👁️ ESP", Color3.fromRGB(30, 50, 80), function() toggleEsp() end)
-        local chamsBtn = addButton("🌈 CHAMS", Color3.fromRGB(80, 50, 80), function() toggleChams() end)
-        return {espBtn, chamsBtn}
-    end
-    
-    -- Вкладка "Настройки"
-    if parent == contentFrames[4] then
-        local resetBtn = addButton("🔄 СБРОСИТЬ ВСЁ", Color3.fromRGB(80, 30, 0), function() resetAll() end)
-        local closeBtn = addButton("❌ ЗАКРЫТЬ МЕНЮ", Color3.fromRGB(80, 0, 0), function() MainFrame.Visible = false IconButton.Visible = true end)
-        return {resetBtn, closeBtn}
-    end
+-- // ========== ФУНКЦИЯ СОЗДАНИЯ КНОПОК (СВЕТЛАЯ) ========== //
+local function createButton(parent, text, y, color, callback)
+    local btn = Instance.new("TextButton")
+    btn.Parent = parent
+    btn.Size = UDim2.new(0, 170, 0, 30)
+    btn.Position = UDim2.new(0.05, 0, 0, y)
+    btn.Text = text
+    btn.BackgroundColor3 = color or Color3.fromRGB(230, 215, 255)
+    btn.BackgroundTransparency = 0.2
+    btn.BorderSizePixel = 1
+    btn.BorderColor3 = Color3.fromRGB(180, 140, 255)
+    btn.TextColor3 = Color3.fromRGB(80, 40, 180)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextScaled = true
+    local corner = Instance.new("UICorner")
+    corner.Parent = btn
+    corner.CornerRadius = UDim.new(0, 10)
+    btn.MouseButton1Click:Connect(callback)
+    btn.TouchTap:Connect(callback)
+    return btn
 end
 
 -- // ========== ПЕРЕМЕННЫЕ ========== //
@@ -303,9 +271,11 @@ local espActive = false
 local chamsActive = false
 local espObjects = {}
 
--- // ========== ФУНКЦИИ ========== //
+-- // ========== ФУНКЦИИ (БУДУТ В ЧАСТИ 2) ========== --
+-- (продолжение в части 2)
+-- // RUSSIAN YAD v34.0 // СВЕТЛОЕ МЕНЮ // ЧАСТЬ 2 //
 
--- FLY
+-- // ========== FLY ========== //
 function toggleFly()
     if isFlyRunning then
         if flyGuiInstance then
@@ -324,7 +294,7 @@ function toggleFly()
     end
 end
 
--- НОКЛИП
+-- // ========== НОКЛИП ========== //
 function toggleNoclip()
     noclipActive = not noclipActive
     if noclipActive then
@@ -346,7 +316,7 @@ function toggleNoclip()
     end
 end
 
--- СПИДХАК
+-- // ========== СПИДХАК ========== //
 function toggleSpeed()
     if speedActive then
         speedActive = false
@@ -361,9 +331,9 @@ function toggleSpeed()
         frame.Parent = inputGui
         frame.Size = UDim2.new(0, 250, 0, 120)
         frame.Position = UDim2.new(0.5, -125, 0.5, -60)
-        frame.BackgroundColor3 = Color3.fromRGB(10, 0, 20)
+        frame.BackgroundColor3 = Color3.fromRGB(240, 230, 255)
         frame.BorderSizePixel = 2
-        frame.BorderColor3 = Color3.fromRGB(255, 50, 150)
+        frame.BorderColor3 = Color3.fromRGB(180, 140, 255)
         local corner = Instance.new("UICorner")
         corner.Parent = frame
         corner.CornerRadius = UDim.new(0, 10)
@@ -371,7 +341,7 @@ function toggleSpeed()
         title.Parent = frame
         title.Size = UDim2.new(1, 0, 0, 30)
         title.Text = "⚡ ВВЕДИТЕ СКОРОСТЬ"
-        title.TextColor3 = Color3.fromRGB(255, 80, 150)
+        title.TextColor3 = Color3.fromRGB(80, 40, 180)
         title.BackgroundTransparency = 1
         title.Font = Enum.Font.GothamBold
         title.TextScaled = true
@@ -380,9 +350,9 @@ function toggleSpeed()
         input.Size = UDim2.new(0, 150, 0, 30)
         input.Position = UDim2.new(0.5, -75, 0, 40)
         input.PlaceholderText = "16-500"
-        input.BackgroundColor3 = Color3.fromRGB(30, 15, 40)
-        input.BorderColor3 = Color3.fromRGB(255, 50, 150)
-        input.TextColor3 = Color3.fromRGB(255, 255, 255)
+        input.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        input.BorderColor3 = Color3.fromRGB(180, 140, 255)
+        input.TextColor3 = Color3.fromRGB(80, 40, 180)
         input.Font = Enum.Font.GothamBold
         input.TextScaled = true
         local cornerInput = Instance.new("UICorner")
@@ -393,7 +363,7 @@ function toggleSpeed()
         applyBtn.Size = UDim2.new(0, 100, 0, 30)
         applyBtn.Position = UDim2.new(0.5, -50, 0, 80)
         applyBtn.Text = "OK"
-        applyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+        applyBtn.BackgroundColor3 = Color3.fromRGB(180, 140, 255)
         applyBtn.BorderSizePixel = 0
         applyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
         applyBtn.Font = Enum.Font.GothamBold
@@ -401,7 +371,7 @@ function toggleSpeed()
         local cornerApply = Instance.new("UICorner")
         cornerApply.Parent = applyBtn
         cornerApply.CornerRadius = UDim.new(0, 8)
-        applyBtn.MouseButton1Click:Connect(function()
+        local function applySpeed()
             local speed = tonumber(input.Text)
             if speed and speed >= 16 and speed <= 500 then
                 currentSpeed = speed
@@ -418,12 +388,13 @@ function toggleSpeed()
                 wait(1)
                 input.Text = ""
             end
-        end)
-        applyBtn.TouchTap:Connect(applyBtn.MouseButton1Click._connect)
+        end
+        applyBtn.MouseButton1Click:Connect(applySpeed)
+        applyBtn.TouchTap:Connect(applySpeed)
     end
 end
 
--- KILLALL
+-- // ========== KILLALL ========== //
 function killAll()
     local count = 0
     for _, plr in pairs(Player:GetPlayers()) do
@@ -435,7 +406,7 @@ function killAll()
     print("☠ УБИТО: " .. count)
 end
 
--- ТЕЛЕПОРТ ВСЕХ К СЕБЕ
+-- // ========== ТЕЛЕПОРТ ВСЕХ К СЕБЕ ========== //
 function teleportAll()
     if not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") then return end
     local pos = Player.Character.HumanoidRootPart.Position
@@ -446,7 +417,7 @@ function teleportAll()
     end
 end
 
--- ЗАМОРОЗКА
+-- // ========== ЗАМОРОЗКА ========== //
 function freezeAll()
     for _, plr in pairs(Player:GetPlayers()) do
         if plr ~= Player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
@@ -459,7 +430,7 @@ function freezeAll()
     end
 end
 
--- ESP (простейший)
+-- // ========== ESP ========== //
 function toggleEsp()
     espActive = not espActive
     if espActive then
@@ -469,7 +440,7 @@ function toggleEsp()
                     if part:IsA("BasePart") then
                         local hl = Instance.new("Highlight")
                         hl.Parent = part
-                        hl.FillColor = Color3.fromRGB(255, 0, 0)
+                        hl.FillColor = Color3.fromRGB(180, 140, 255)
                         hl.OutlineColor = Color3.fromRGB(255, 255, 255)
                         hl.FillTransparency = 0.5
                         table.insert(espObjects, hl)
@@ -483,7 +454,7 @@ function toggleEsp()
     end
 end
 
--- CHAMS (простейшие)
+-- // ========== CHAMS ========== //
 function toggleChams()
     chamsActive = not chamsActive
     if chamsActive then
@@ -492,7 +463,7 @@ function toggleChams()
                 for _, part in ipairs(plr.Character:GetDescendants()) do
                     if part:IsA("BasePart") then
                         part.Material = Enum.Material.Neon
-                        part.Color = Color3.fromRGB(0, 255, 0)
+                        part.Color = Color3.fromRGB(180, 140, 255)
                     end
                 end
             end
@@ -511,7 +482,7 @@ function toggleChams()
     end
 end
 
--- СБРОС ВСЕГО
+-- // ========== СБРОС ВСЕГО ========== //
 function resetAll()
     if isFlyRunning then
         if flyGuiInstance then flyGuiInstance:Destroy() end
@@ -534,11 +505,82 @@ function resetAll()
     print("☠ ВСЁ СБРОШЕНО")
 end
 
--- // ========== ИНИЦИАЛИЗАЦИЯ КНОПОК ========== //
-createContent(contentFrames[1], 10)
-createContent(contentFrames[2], 10)
-createContent(contentFrames[3], 10)
-createContent(contentFrames[4], 10)
+-- (продолжение в части 3)
+-- // RUSSIAN YAD v34.0 // СВЕТЛОЕ МЕНЮ // ЧАСТЬ 3 //
+
+-- // ========== ЗАПОЛНЯЕМ ВКЛАДКИ ========== //
+
+-- Вкладка "Движение"
+local y = 10
+local flyBtn = createButton(contentFrames[1], "🚀 FLY", y, Color3.fromRGB(200, 230, 255), function()
+    toggleFly()
+    flyBtn.Text = isFlyRunning and "🛑 FLY" or "🚀 FLY"
+    flyBtn.BackgroundColor3 = isFlyRunning and Color3.fromRGB(180, 255, 180) or Color3.fromRGB(200, 230, 255)
+end)
+y = y + 38
+local noclipBtn = createButton(contentFrames[1], "⬜ НОКЛИП", y, Color3.fromRGB(255, 200, 200), function()
+    toggleNoclip()
+    noclipBtn.Text = noclipActive and "⬜ НОКЛИП ON" or "⬜ НОКЛИП"
+    noclipBtn.BackgroundColor3 = noclipActive and Color3.fromRGB(180, 255, 180) or Color3.fromRGB(255, 200, 200)
+end)
+y = y + 38
+local speedBtn = createButton(contentFrames[1], "⚡ СПИДХАК", y, Color3.fromRGB(255, 255, 200), function()
+    toggleSpeed()
+    speedBtn.Text = speedActive and "⚡ СПИД: " .. currentSpeed or "⚡ СПИДХАК"
+    speedBtn.BackgroundColor3 = speedActive and Color3.fromRGB(180, 255, 180) or Color3.fromRGB(255, 255, 200)
+end)
+
+-- Вкладка "Игроки"
+y = 10
+local killBtn = createButton(contentFrames[2], "💀 KILLALL", y, Color3.fromRGB(255, 200, 200), killAll)
+y = y + 38
+local tpBtn = createButton(contentFrames[2], "🌀 ТЕЛЕПОРТ ВСЕХ", y, Color3.fromRGB(200, 255, 255), teleportAll)
+y = y + 38
+local freezeBtn = createButton(contentFrames[2], "🧊 ЗАМОРОЗИТЬ", y, Color3.fromRGB(200, 255, 200), freezeAll)
+
+-- Вкладка "Визуал"
+y = 10
+local espBtn = createButton(contentFrames[3], "👁️ ESP", y, Color3.fromRGB(200, 220, 255), function()
+    toggleEsp()
+    espBtn.Text = espActive and "👁️ ESP ON" or "👁️ ESP"
+    espBtn.BackgroundColor3 = espActive and Color3.fromRGB(180, 255, 180) or Color3.fromRGB(200, 220, 255)
+end)
+y = y + 38
+local chamsBtn = createButton(contentFrames[3], "🌈 CHAMS", y, Color3.fromRGB(220, 200, 255), function()
+    toggleChams()
+    chamsBtn.Text = chamsActive and "🌈 CHAMS ON" or "🌈 CHAMS"
+    chamsBtn.BackgroundColor3 = chamsActive and Color3.fromRGB(180, 255, 180) or Color3.fromRGB(220, 200, 255)
+end)
+
+-- Вкладка "Настройки"
+y = 10
+local resetBtn = createButton(contentFrames[4], "🔄 СБРОСИТЬ ВСЁ", y, Color3.fromRGB(255, 220, 180), resetAll)
+y = y + 38
+local closeMenuBtn = createButton(contentFrames[4], "❌ ЗАКРЫТЬ МЕНЮ", y, Color3.fromRGB(255, 200, 200), function()
+    MainFrame.Visible = false
+    IconButton.Visible = true
+end)
+
+-- // ========== ПЕРЕТАСКИВАНИЕ МЕНЮ (ТЕЛЕФОН) ========== //
+local menuDragToggle, menuDragStart, menuStartPos = false
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        menuDragToggle = true
+        menuDragStart = input.Position
+        menuStartPos = MainFrame.Position
+    end
+end)
+MainFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        menuDragToggle = false
+    end
+end)
+UIS.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch and menuDragToggle then
+        local delta = input.Position - menuDragStart
+        MainFrame.Position = UDim2.new(menuStartPos.X.Scale, menuStartPos.X.Offset + delta.X, menuStartPos.Y.Scale, menuStartPos.Y.Offset + delta.Y)
+    end
+end)
 
 -- // ========== ОТКРЫТИЕ/ЗАКРЫТИЕ МЕНЮ ========== //
 local function toggleMenu()
@@ -551,7 +593,10 @@ IconButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch and not iconDragToggle then toggleMenu() end
 end)
 
--- // ========== ПАНИКА ========== //
+-- (продолжение в части 4)
+-- // RUSSIAN YAD v34.0 // СВЕТЛОЕ МЕНЮ // ЧАСТЬ 4 //
+
+-- // ========== ПАНИКА (P) ========== //
 UIS.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.P then
         ScreenGui:Destroy()
@@ -562,5 +607,42 @@ UIS.InputBegan:Connect(function(input)
     end
 end)
 
-print("☠ RUSSIAN YAD v33.0 ЗАГРУЖЕН")
-print("📌 МЕНЮ С ВКЛАДКАМИ В СТИЛЕ ПОПУЛЯРНЫХ ХАКЕРОВ")
+-- // ========== АВТООБНОВЛЕНИЕ ПРИ РЕСПАВНЕ ========== //
+Player.CharacterAdded:Connect(function()
+    wait(0.5)
+    if noclipActive then
+        if noclipConnection then noclipConnection:Disconnect() end
+        noclipConnection = RunService.Stepped:Connect(function()
+            if noclipActive and Player.Character then
+                for _, part in ipairs(Player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then part.CanCollide = false end
+                end
+            end
+        end)
+    end
+    if speedActive then
+        if speedConnection then speedConnection:Disconnect() end
+        speedConnection = RunService.Heartbeat:Connect(function()
+            if speedActive and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                Player.Character.Humanoid.WalkSpeed = currentSpeed
+            end
+        end)
+    end
+end)
+
+-- // ========== ЗАЩИТА ОТ ВЫЛЕТА ========== //
+pcall(function()
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "☠ RUSSIAN YAD",
+        Text = "СВЕТЛОЕ МЕНЮ ЗАГРУЖЕНО",
+        Icon = "rbxthumb://type=Asset&id=5107182114&w=150&h=150"
+    })
+end)
+
+-- // ========== ИНФО В КОНСОЛЬ ========== //
+print("☠ RUSSIAN YAD v34.0 ЗАГРУЖЕН")
+print("📌 СВЕТЛОЕ МЕНЮ С ВКЛАДКАМИ")
+print("📌 ИКОНКА 40x40, ПЕРЕТАСКИВАНИЕ")
+print("📌 ВСЕ ФУНКЦИИ РАБОТАЮТ НА ТЕЛЕФОНЕ")
+
+-- // ========== КОНЕЦ ========== //
