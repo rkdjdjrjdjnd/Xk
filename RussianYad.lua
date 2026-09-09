@@ -1,13 +1,16 @@
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local Tween = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
 
+local player = Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
 gui.Name = "ADMenu"
 gui.ResetOnSpawn = false
-gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+gui.Parent = player:WaitForChild("PlayerGui")
 
--- ЗАГРУЗКА
+-- ========== ЗАГРУЗКА (без изменений) ==========
 local loading = Instance.new("TextLabel")
 loading.Size = UDim2.new(1,0,1,0)
 loading.BackgroundColor3 = Color3.fromRGB(8,8,10)
@@ -19,19 +22,19 @@ loading.ZIndex = 10
 loading.Parent = gui
 
 task.spawn(function()
-for i = 0,100,5 do
-loading.Text = "LOADING "..i.."%"
-task.wait(0.15)
-end
-Tween:Create(loading,TweenInfo.new(.4),{
-TextTransparency=1,
-BackgroundTransparency=1
-}):Play()
-task.wait(.4)
-loading:Destroy()
+    for i = 0,100,5 do
+        loading.Text = "LOADING "..i.."%"
+        task.wait(0.15)
+    end
+    Tween:Create(loading,TweenInfo.new(.4),{
+        TextTransparency=1,
+        BackgroundTransparency=1
+    }):Play()
+    task.wait(.4)
+    loading:Destroy()
 end)
 
--- ИКОНКА
+-- ========== ИКОНКА (без изменений) ==========
 local icon = Instance.new("TextButton")
 icon.Size = UDim2.fromOffset(64,64)
 icon.Position = UDim2.new(0,20,.5,-32)
@@ -45,33 +48,28 @@ icon.Parent = gui
 
 local c = Instance.new("UICorner",icon)
 c.CornerRadius = UDim.new(1,0)
-
 local s = Instance.new("UIStroke",icon)
 s.Thickness = 2
 s.Color = Color3.fromRGB(255,255,255)
 
--- КРАСНАЯ ТОЧКА
 local dot = Instance.new("Frame")
 dot.Size = UDim2.fromOffset(10,10)
 dot.Position = UDim2.new(1,-13,0,4)
 dot.BackgroundColor3 = Color3.fromRGB(255,40,40)
 dot.Parent = icon
-
 local dc = Instance.new("UICorner",dot)
 dc.CornerRadius = UDim.new(1,0)
 
--- МЕНЮ
+-- ========== ГЛАВНОЕ МЕНЮ (добавлена 4-я кнопка) ==========
 local menu = Instance.new("Frame")
 menu.Size = UDim2.fromOffset(300,300)
 menu.Position = UDim2.new(.5,-150,.5,-150)
 menu.BackgroundColor3 = Color3.fromRGB(12,12,16)
 menu.Visible = false
 menu.Parent = gui
-
 local mc = Instance.new("UICorner",menu)
 mc.CornerRadius = UDim.new(0,16)
 
--- ЗАГОЛОВОК
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1,-60,0,50)
 title.Position = UDim2.fromOffset(15,5)
@@ -83,7 +81,6 @@ title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = menu
 
--- КРЕСТИК
 local close = Instance.new("TextButton")
 close.Size = UDim2.fromOffset(40,40)
 close.Position = UDim2.new(1,-48,0,10)
@@ -93,75 +90,532 @@ close.TextColor3 = Color3.new(1,1,1)
 close.TextSize = 18
 close.Font = Enum.Font.GothamBold
 close.Parent = menu
-
 local cc = Instance.new("UICorner",close)
 cc.CornerRadius = UDim.new(0,10)
 
--- КНОПКИ
-for i,text in ipairs({"OPTION 1","OPTION 2","OPTION 3"}) do
-local b = Instance.new("TextButton")
-b.Size = UDim2.new(1,-30,0,55)
-b.Position = UDim2.fromOffset(15,65+(i-1)*65)
-b.BackgroundColor3 = Color3.fromRGB(28,28,35)
-b.Text = text
-b.TextColor3 = Color3.new(1,1,1)
-b.TextSize = 15
-b.Font = Enum.Font.GothamSemibold
-b.Parent = menu
-
-local bc = Instance.new("UICorner",b)  
-bc.CornerRadius = UDim.new(0,11)
-
+-- --ДОБАВЛЕНО: теперь 4 кнопки (последняя - ESP)
+local buttons = {}
+local buttonTexts = {"OPTION 1","OPTION 2","OPTION 3","ESP"}
+for i,text in ipairs(buttonTexts) do
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(1,-30,0,55)
+    b.Position = UDim2.fromOffset(15,65+(i-1)*65)
+    b.BackgroundColor3 = Color3.fromRGB(28,28,35)
+    b.Text = text
+    b.TextColor3 = Color3.new(1,1,1)
+    b.TextSize = 15
+    b.Font = Enum.Font.GothamSemibold
+    b.Parent = menu
+    local bc = Instance.new("UICorner",b)  
+    bc.CornerRadius = UDim.new(0,11)
+    buttons[i] = b
 end
 
--- ОТКРЫТИЕ
-local function open()
-menu.Visible = true
-menu.Size = UDim2.fromOffset(270,270)
+-- ========== МЕНЮ ESP (новое подменю) ==========
+local espMenu = Instance.new("Frame")
+espMenu.Size = UDim2.fromOffset(0,0) -- скрыто
+espMenu.Position = UDim2.new(.5,-170,.5,-220)
+espMenu.BackgroundColor3 = Color3.fromRGB(18,18,24)
+espMenu.Visible = false
+espMenu.Parent = gui
+local espMc = Instance.new("UICorner",espMenu)
+espMc.CornerRadius = UDim.new(0,16)
 
-Tween:Create(menu,TweenInfo.new(.2,Enum.EasingStyle.Back),{  
-	Size=UDim2.fromOffset(300,300)  
-}):Play()
+-- Заголовок ESP
+local espTitle = Instance.new("TextLabel")
+espTitle.Size = UDim2.new(1,-60,0,50)
+espTitle.Position = UDim2.fromOffset(15,5)
+espTitle.BackgroundTransparency = 1
+espTitle.Text = "ESP SETTINGS"
+espTitle.TextColor3 = Color3.new(1,1,1)
+espTitle.TextSize = 20
+espTitle.Font = Enum.Font.GothamBold
+espTitle.TextXAlignment = Enum.TextXAlignment.Left
+espTitle.Parent = espMenu
 
+-- Кнопка назад (закрыть ESP меню)
+local espBack = Instance.new("TextButton")
+espBack.Size = UDim2.fromOffset(40,40)
+espBack.Position = UDim2.new(1,-48,0,10)
+espBack.BackgroundColor3 = Color3.fromRGB(35,35,40)
+espBack.Text = "<"
+espBack.TextColor3 = Color3.new(1,1,1)
+espBack.TextSize = 24
+espBack.Font = Enum.Font.GothamBold
+espBack.Parent = espMenu
+local espBackCorner = Instance.new("UICorner",espBack)
+espBackCorner.CornerRadius = UDim.new(0,10)
+
+-- Настройки ESP (переключатели и слайдеры)
+local espSettings = {
+    enabled = true,
+    boxes = true,
+    names = true,
+    health = true,
+    distance = true,
+    tracers = false,
+    teamColor = true, -- true = свои/враги, false = по здоровью
+    transparency = 0.5,
+    colorSelf = Color3.fromRGB(0,150,255),
+    colorEnemy = Color3.fromRGB(255,50,50)
+}
+
+-- Функция создания переключателя
+local function createSwitch(parent, y, labelText, getter, setter)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1,-30,0,40)
+    frame.Position = UDim2.fromOffset(15,y)
+    frame.BackgroundTransparency = 1
+    frame.Parent = parent
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.6,0,1,0)
+    label.Position = UDim2.new(0,0,0,0)
+    label.BackgroundTransparency = 1
+    label.Text = labelText
+    label.TextColor3 = Color3.new(1,1,1)
+    label.TextSize = 16
+    label.Font = Enum.Font.GothamSemibold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = frame
+
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0,60,0,30)
+    btn.Position = UDim2.new(1,-65,0.5,-15)
+    btn.BackgroundColor3 = getter() and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
+    btn.Text = getter() and "ON" or "OFF"
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.TextSize = 14
+    btn.Font = Enum.Font.GothamBold
+    btn.AutoButtonColor = false
+    btn.Parent = frame
+    local btnCorner = Instance.new("UICorner",btn)
+    btnCorner.CornerRadius = UDim.new(0,8)
+
+    btn.MouseButton1Click:Connect(function()
+        local newVal = not getter()
+        setter(newVal)
+        btn.BackgroundColor3 = newVal and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
+        btn.Text = newVal and "ON" or "OFF"
+        -- обновим состояние ESP
+        if labelText == "Enable ESP" then
+            espEnabled = newVal
+            if not newVal then
+                clearESP()
+            end
+        end
+    end)
+    return frame
 end
 
-local function hide()
-menu.Visible = false
+-- Создаём элементы управления в espMenu (смещение по Y)
+local yOffset = 65
+local switchEnable = createSwitch(espMenu, yOffset, "Enable ESP", function() return espSettings.enabled end, function(v) espSettings.enabled = v end)
+yOffset = yOffset + 50
+local switchBoxes = createSwitch(espMenu, yOffset, "Boxes", function() return espSettings.boxes end, function(v) espSettings.boxes = v end)
+yOffset = yOffset + 50
+local switchNames = createSwitch(espMenu, yOffset, "Names", function() return espSettings.names end, function(v) espSettings.names = v end)
+yOffset = yOffset + 50
+local switchHealth = createSwitch(espMenu, yOffset, "Health Bar", function() return espSettings.health end, function(v) espSettings.health = v end)
+yOffset = yOffset + 50
+local switchDistance = createSwitch(espMenu, yOffset, "Distance", function() return espSettings.distance end, function(v) espSettings.distance = v end)
+yOffset = yOffset + 50
+local switchTracers = createSwitch(espMenu, yOffset, "Tracers", function() return espSettings.tracers end, function(v) espSettings.tracers = v end)
+yOffset = yOffset + 50
+local switchTeamColor = createSwitch(espMenu, yOffset, "Team Color", function() return espSettings.teamColor end, function(v) espSettings.teamColor = v end)
+
+-- Слайдер прозрачности (упрощённый - две кнопки +/-)
+local transpFrame = Instance.new("Frame")
+transpFrame.Size = UDim2.new(1,-30,0,40)
+transpFrame.Position = UDim2.fromOffset(15, yOffset)
+transpFrame.BackgroundTransparency = 1
+transpFrame.Parent = espMenu
+
+local transpLabel = Instance.new("TextLabel")
+transpLabel.Size = UDim2.new(0.6,0,1,0)
+transpLabel.Position = UDim2.new(0,0,0,0)
+transpLabel.BackgroundTransparency = 1
+transpLabel.Text = "Transparency"
+transpLabel.TextColor3 = Color3.new(1,1,1)
+transpLabel.TextSize = 16
+transpLabel.Font = Enum.Font.GothamSemibold
+transpLabel.TextXAlignment = Enum.TextXAlignment.Left
+transpLabel.Parent = transpFrame
+
+local transpVal = Instance.new("TextLabel")
+transpVal.Size = UDim2.new(0,40,0,30)
+transpVal.Position = UDim2.new(0.7,0,0.5,-15)
+transpVal.BackgroundColor3 = Color3.fromRGB(40,40,50)
+transpVal.Text = string.format("%.1f", espSettings.transparency)
+transpVal.TextColor3 = Color3.new(1,1,1)
+transpVal.TextSize = 14
+transpVal.Font = Enum.Font.GothamBold
+transpVal.Parent = transpFrame
+local transpCorner = Instance.new("UICorner",transpVal)
+transpCorner.CornerRadius = UDim.new(0,6)
+
+local decBtn = Instance.new("TextButton")
+decBtn.Size = UDim2.fromOffset(30,30)
+decBtn.Position = UDim2.new(0.85,0,0.5,-15)
+decBtn.BackgroundColor3 = Color3.fromRGB(50,50,60)
+decBtn.Text = "-"
+decBtn.TextColor3 = Color3.new(1,1,1)
+decBtn.TextSize = 20
+decBtn.Font = Enum.Font.GothamBold
+decBtn.Parent = transpFrame
+local decCorner = Instance.new("UICorner",decBtn)
+decCorner.CornerRadius = UDim.new(0,8)
+
+local incBtn = Instance.new("TextButton")
+incBtn.Size = UDim2.fromOffset(30,30)
+incBtn.Position = UDim2.new(0.95,0,0.5,-15)
+incBtn.BackgroundColor3 = Color3.fromRGB(50,50,60)
+incBtn.Text = "+"
+incBtn.TextColor3 = Color3.new(1,1,1)
+incBtn.TextSize = 20
+incBtn.Font = Enum.Font.GothamBold
+incBtn.Parent = transpFrame
+local incCorner = Instance.new("UICorner",incBtn)
+incCorner.CornerRadius = UDim.new(0,8)
+
+decBtn.MouseButton1Click:Connect(function()
+    espSettings.transparency = math.max(0, espSettings.transparency - 0.1)
+    transpVal.Text = string.format("%.1f", espSettings.transparency)
+end)
+incBtn.MouseButton1Click:Connect(function()
+    espSettings.transparency = math.min(1, espSettings.transparency + 0.1)
+    transpVal.Text = string.format("%.1f", espSettings.transparency)
+end)
+
+-- (добавим кнопку для выбора цвета - упрощённо: свои и враги)
+-- Для демонстрации просто сделаем текстовые кнопки с предустановленными цветами
+local colorFrame = Instance.new("Frame")
+colorFrame.Size = UDim2.new(1,-30,0,40)
+colorFrame.Position = UDim2.fromOffset(15, yOffset + 50)
+colorFrame.BackgroundTransparency = 1
+colorFrame.Parent = espMenu
+
+local colorLabel = Instance.new("TextLabel")
+colorLabel.Size = UDim2.new(0.5,0,1,0)
+colorLabel.Position = UDim2.new(0,0,0,0)
+colorLabel.BackgroundTransparency = 1
+colorLabel.Text = "Team Colors"
+colorLabel.TextColor3 = Color3.new(1,1,1)
+colorLabel.TextSize = 16
+colorLabel.Font = Enum.Font.GothamSemibold
+colorLabel.TextXAlignment = Enum.TextXAlignment.Left
+colorLabel.Parent = colorFrame
+
+local function createColorButton(parent, x, color, label, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.fromOffset(40,30)
+    btn.Position = UDim2.new(0, x, 0.5, -15)
+    btn.BackgroundColor3 = color
+    btn.Text = label
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamBold
+    btn.AutoButtonColor = false
+    btn.Parent = parent
+    local corner = Instance.new("UICorner",btn)
+    corner.CornerRadius = UDim.new(0,6)
+    btn.MouseButton1Click:Connect(callback)
+    return btn
 end
 
-icon.Activated:Connect(open)
-close.Activated:Connect(hide)
+-- установим цвета для своих и врагов
+local colorSelf = espSettings.colorSelf
+local colorEnemy = espSettings.colorEnemy
 
--- ПЕРЕТАСКИВАНИЕ
+createColorButton(colorFrame, 180, colorSelf, "S", function()
+    -- просто пример: можно открыть диалог, но для простоты назначим заранее
+    espSettings.colorSelf = Color3.fromRGB(0,200,255)
+    -- обновим отображение
+end)
+createColorButton(colorFrame, 230, colorEnemy, "E", function()
+    espSettings.colorEnemy = Color3.fromRGB(255,80,80)
+end)
+
+-- ========== ЛОГИКА ESP ==========
+local espObjects = {} -- словарь игрок -> {box, name, health, distance, tracer}
+local espEnabled = true
+
+-- Очистка всех ESP-объектов
+local function clearESP()
+    for _, data in pairs(espObjects) do
+        if data.box then data.box:Destroy() end
+        if data.name then data.name:Destroy() end
+        if data.health then data.health:Destroy() end
+        if data.dist then data.dist:Destroy() end
+        if data.tracer then data.tracer:Destroy() end
+    end
+    espObjects = {}
+end
+
+-- Создание объектов для игрока
+local function createESPObjects(targetPlayer)
+    if espObjects[targetPlayer] then return end
+    local data = {}
+    local character = targetPlayer.Character
+    if not character or not character.PrimaryPart then return end
+
+    -- Бокс
+    local box = Instance.new("Frame")
+    box.Size = UDim2.fromOffset(0,0)
+    box.BackgroundTransparency = 0.4
+    box.BorderSizePixel = 2
+    box.BorderColor3 = Color3.new(1,1,1)
+    box.BackgroundColor3 = Color3.new(0,0,0)
+    box.Visible = true
+    box.Parent = gui
+
+    -- Имя
+    local name = Instance.new("TextLabel")
+    name.Size = UDim2.fromOffset(150,20)
+    name.BackgroundTransparency = 1
+    name.Text = targetPlayer.Name
+    name.TextColor3 = Color3.new(1,1,1)
+    name.TextSize = 14
+    name.Font = Enum.Font.GothamBold
+    name.TextStrokeTransparency = 0.5
+    name.Visible = true
+    name.Parent = gui
+
+    -- Здоровье (полоска)
+    local health = Instance.new("Frame")
+    health.Size = UDim2.fromOffset(0,4)
+    health.BackgroundColor3 = Color3.fromRGB(0,255,0)
+    health.BorderSizePixel = 0
+    health.Visible = true
+    health.Parent = gui
+
+    -- Дистанция
+    local dist = Instance.new("TextLabel")
+    dist.Size = UDim2.fromOffset(80,16)
+    dist.BackgroundTransparency = 1
+    dist.Text = ""
+    dist.TextColor3 = Color3.new(1,1,1)
+    dist.TextSize = 12
+    dist.Font = Enum.Font.Gotham
+    dist.Visible = true
+    dist.Parent = gui
+
+    -- Трейсер (линия) - используем Frame с тонкой высотой
+    local tracer = Instance.new("Frame")
+    tracer.Size = UDim2.fromOffset(0,2)
+    tracer.BackgroundColor3 = Color3.fromRGB(255,255,255)
+    tracer.BorderSizePixel = 0
+    tracer.Visible = true
+    tracer.Parent = gui
+
+    data.box = box
+    data.name = name
+    data.health = health
+    data.dist = dist
+    data.tracer = tracer
+    espObjects[targetPlayer] = data
+end
+
+-- Обновление позиций ESP
+local function updateESP()
+    if not espEnabled or not espSettings.enabled then
+        clearESP()
+        return
+    end
+
+    local myChar = player.Character
+    if not myChar or not myChar.PrimaryPart then return end
+    local myPos = myChar.PrimaryPart.Position
+
+    for _, target in ipairs(Players:GetPlayers()) do
+        if target ~= player then
+            local char = target.Character
+            if char and char.PrimaryPart and char:FindFirstChild("Head") then
+                local head = char.Head
+                local pos = head.Position
+                local screenPos, onScreen = Camera:WorldToViewportPoint(pos)
+                if onScreen then
+                    -- Создаём объекты, если их нет
+                    if not espObjects[target] then
+                        createESPObjects(target)
+                    end
+                    local data = espObjects[target]
+                    if data then
+                        -- Размер бокса
+                        local size = 2.5 / (pos - Camera.CFrame.Position).Magnitude * 500 -- приблизительный размер
+                        local boxSize = math.clamp(size, 20, 150)
+                        data.box.Size = UDim2.fromOffset(boxSize, boxSize * 1.5)
+                        data.box.Position = UDim2.new(0, screenPos.X - boxSize/2, 0, screenPos.Y - boxSize*0.75)
+
+                        -- Цвет бокса (по команде или здоровью)
+                        local isEnemy = false
+                        if target.Team and player.Team and target.Team ~= player.Team then
+                            isEnemy = true
+                        end
+                        local col = espSettings.teamColor and (isEnemy and espSettings.colorEnemy or espSettings.colorSelf) or Color3.fromRGB(255,255,255)
+                        data.box.BorderColor3 = col
+                        data.box.BackgroundTransparency = 1 - espSettings.transparency
+
+                        -- Имя
+                        data.name.Position = UDim2.new(0, screenPos.X - 75, 0, screenPos.Y - boxSize*0.75 - 20)
+                        data.name.Text = target.Name
+                        data.name.TextColor3 = col
+
+                        -- Здоровье
+                        local hum = char:FindFirstChildOfClass("Humanoid")
+                        if hum and hum.Health > 0 then
+                            local healthPercent = hum.Health / hum.MaxHealth
+                            local healthWidth = boxSize * healthPercent
+                            data.health.Size = UDim2.fromOffset(healthWidth, 4)
+                            data.health.Position = UDim2.new(0, screenPos.X - boxSize/2, 0, screenPos.Y + boxSize*0.75 - 10)
+                            data.health.BackgroundColor3 = Color3.fromRGB(255*(1-healthPercent), 255*healthPercent, 0)
+                            data.health.Visible = espSettings.health
+                        else
+                            data.health.Visible = false
+                        end
+
+                        -- Дистанция
+                        local distVal = (pos - myPos).Magnitude
+                        data.dist.Position = UDim2.new(0, screenPos.X - 40, 0, screenPos.Y + boxSize*0.75 + 6)
+                        data.dist.Text = string.format("%dm", distVal)
+                        data.dist.Visible = espSettings.distance
+
+                        -- Трейсер (линия от центра экрана до игрока)
+                        if espSettings.tracers then
+                            local centerX = Camera.ViewportSize.X / 2
+                            local centerY = Camera.ViewportSize.Y / 2
+                            local dx = screenPos.X - centerX
+                            local dy = screenPos.Y - centerY
+                            local angle = math.atan2(dy, dx)
+                            local length = math.sqrt(dx*dx + dy*dy)
+                            data.tracer.Size = UDim2.fromOffset(length, 2)
+                            data.tracer.Position = UDim2.new(0, centerX, 0, centerY)
+                            data.tracer.Rotation = math.deg(angle)
+                            data.tracer.BackgroundColor3 = col
+                            data.tracer.Visible = true
+                        else
+                            data.tracer.Visible = false
+                        end
+
+                        -- Видимость бокса и имени
+                        data.box.Visible = espSettings.boxes
+                        data.name.Visible = espSettings.names
+                    end
+                else
+                    -- Если игрок не на экране, удаляем его ESP объекты
+                    if espObjects[target] then
+                        local data = espObjects[target]
+                        if data.box then data.box:Destroy() end
+                        if data.name then data.name:Destroy() end
+                        if data.health then data.health:Destroy() end
+                        if data.dist then data.dist:Destroy() end
+                        if data.tracer then data.tracer:Destroy() end
+                        espObjects[target] = nil
+                    end
+                end
+            else
+                        -- Если персонаж отсутствует, удаляем объекты
+                if espObjects[target] then
+                    local data = espObjects[target]
+                    if data.box then data.box:Destroy() end
+                    if data.name then data.name:Destroy() end
+                    if data.health then data.health:Destroy() end
+                    if data.dist then data.dist:Destroy() end
+                    if data.tracer then data.tracer:Destroy() end
+                    espObjects[target] = nil
+                end
+            end
+        end
+    end
+end
+
+-- Обработка добавления/удаления игроков
+Players.PlayerAdded:Connect(function(p)
+    -- при появлении нового игрока, он будет создан при следующем обновлении
+end)
+Players.PlayerRemoving:Connect(function(p)
+    if espObjects[p] then
+        local data = espObjects[p]
+        if data.box then data.box:Destroy() end
+        if data.name then data.name:Destroy() end
+        if data.health then data.health:Destroy() end
+        if data.dist then data.dist:Destroy() end
+        if data.tracer then data.tracer:Destroy() end
+        espObjects[p] = nil
+    end
+end)
+
+-- Подключаем обновление в каждом кадре
+local espConnection
+espConnection = RunService.RenderStepped:Connect(updateESP)
+
+-- Остановка обновления при отключении ESP (можно добавить позже)
+
+-- ========== УПРАВЛЕНИЕ МЕНЮ ==========
+local function openMain()
+    menu.Visible = true
+    menu.Size = UDim2.fromOffset(270,270)
+    Tween:Create(menu,TweenInfo.new(.2,Enum.EasingStyle.Back),{  
+        Size=UDim2.fromOffset(300,300)  
+    }):Play()
+end
+
+local function hideMain()
+    menu.Visible = false
+end
+
+local function openESP()
+    espMenu.Visible = true
+    espMenu.Size = UDim2.fromOffset(0,0)
+    Tween:Create(espMenu,TweenInfo.new(.25,Enum.EasingStyle.Back),{
+        Size=UDim2.fromOffset(340,450)
+    }):Play()
+    hideMain()
+end
+
+local function hideESP()
+    Tween:Create(espMenu,TweenInfo.new(.2),{
+        Size=UDim2.fromOffset(0,0)
+    }):Play()
+    task.wait(.2)
+    espMenu.Visible = false
+    openMain()
+end
+
+-- Назначаем кнопки
+icon.Activated:Connect(openMain)
+close.Activated:Connect(hideMain)
+espBack.Activated:Connect(hideESP)
+buttons[4].Activated:Connect(openESP) -- кнопка "ESP"
+
+-- ========== ПЕРЕТАСКИВАНИЕ ИКОНКИ (без изменений) ==========
 local dragging,start,pos = false,nil,nil
-
 icon.InputBegan:Connect(function(input)
-if input.UserInputType == Enum.UserInputType.Touch
-or input.UserInputType == Enum.UserInputType.MouseButton1 then
-dragging=true
-start=input.Position
-pos=icon.Position
-end
+    if input.UserInputType == Enum.UserInputType.Touch
+    or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging=true
+        start=input.Position
+        pos=icon.Position
+    end
 end)
-
 UIS.InputChanged:Connect(function(input)
-if dragging and (
-input.UserInputType==Enum.UserInputType.Touch
-or input.UserInputType==Enum.UserInputType.MouseMovement
-) then
-local d=input.Position-start
-
-icon.Position=UDim2.new(  
-		pos.X.Scale,pos.X.Offset+d.X,  
-		pos.Y.Scale,pos.Y.Offset+d.Y  
-	)  
-end
-
+    if dragging and (
+        input.UserInputType==Enum.UserInputType.Touch
+        or input.UserInputType==Enum.UserInputType.MouseMovement
+    ) then
+        local d=input.Position-start
+        icon.Position=UDim2.new(  
+            pos.X.Scale,pos.X.Offset+d.X,  
+            pos.Y.Scale,pos.Y.Offset+d.Y  
+        )  
+    end
 end)
-
 UIS.InputEnded:Connect(function(input)
-if input.UserInputType==Enum.UserInputType.Touch
-or input.UserInputType==Enum.UserInputType.MouseButton1 then
-dragging=false
-end
+    if input.UserInputType==Enum.UserInputType.Touch
+    or input.UserInputType==Enum.UserInputType.MouseButton1 then
+        dragging=false
+    end
 end)
+
+-- ========== ЗАВЕРШЕНИЕ ==========
+print("† АБСОЛЮТНЫЙ ESP АКТИВИРОВАН. МОЩНОСТЬ 999,999,999× †")
