@@ -1,443 +1,164 @@
---==================================================
--- MOBILE MASTER MENU
--- Floating icon + mobile menu
---==================================================
-
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-
---==================================================
--- SETTINGS
---==================================================
-
-local IMAGE_URL =
-	"https://1s4oyld5dc.ucarecd.net/b9b03b9b-f787-4fe2-a3f0-24851ca65975/"
-
---==================================================
--- REMOVE OLD GUI
---==================================================
-
-local old = playerGui:FindFirstChild("MobileMasterMenu")
-
-if old then
-	old:Destroy()
-end
-
---==================================================
--- SCREEN GUI
---==================================================
+local UIS = game:GetService("UserInputService")
+local Tween = game:GetService("TweenService")
 
 local gui = Instance.new("ScreenGui")
-gui.Name = "MobileMasterMenu"
+gui.Name = "ADMenu"
 gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.Parent = playerGui
+gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
---==================================================
--- FLOATING ICON
---==================================================
+-- ЗАГРУЗКА
+local loading = Instance.new("TextLabel")
+loading.Size = UDim2.new(1,0,1,0)
+loading.BackgroundColor3 = Color3.fromRGB(8,8,10)
+loading.TextColor3 = Color3.new(1,1,1)
+loading.TextSize = 22
+loading.Font = Enum.Font.GothamBold
+loading.Text = "LOADING 0%"
+loading.ZIndex = 10
+loading.Parent = gui
 
-local icon = Instance.new("ImageButton")
+task.spawn(function()
+	for i = 0,100,5 do
+		loading.Text = "LOADING "..i.."%"
+		task.wait(0.15)
+	end
+	Tween:Create(loading,TweenInfo.new(.4),{
+		TextTransparency=1,
+		BackgroundTransparency=1
+	}):Play()
+	task.wait(.4)
+	loading:Destroy()
+end)
 
-icon.Name = "OpenMenu"
-icon.Size = UDim2.fromOffset(70, 70)
-icon.Position = UDim2.new(0, 20, 0.5, -35)
-
-icon.BackgroundColor3 = Color3.fromRGB(17, 18, 26)
-icon.BackgroundTransparency = 0.05
-
+-- ИКОНКА
+local icon = Instance.new("TextButton")
+icon.Size = UDim2.fromOffset(64,64)
+icon.Position = UDim2.new(0,20,.5,-32)
+icon.BackgroundColor3 = Color3.fromRGB(8,8,8)
+icon.Text = "AD"
+icon.TextColor3 = Color3.new(1,1,1)
+icon.TextSize = 21
+icon.Font = Enum.Font.GothamBold
 icon.AutoButtonColor = false
-icon.Image = ""
-
 icon.Parent = gui
 
-local iconCorner = Instance.new("UICorner")
-iconCorner.CornerRadius = UDim.new(1, 0)
-iconCorner.Parent = icon
+local c = Instance.new("UICorner",icon)
+c.CornerRadius = UDim.new(1,0)
 
-local iconStroke = Instance.new("UIStroke")
-iconStroke.Thickness = 3
-iconStroke.Transparency = 0.15
-iconStroke.Parent = icon
+local s = Instance.new("UIStroke",icon)
+s.Thickness = 2
+s.Color = Color3.fromRGB(255,255,255)
 
---==================================================
--- IMAGE INSIDE ICON
---==================================================
+-- КРАСНАЯ ТОЧКА
+local dot = Instance.new("Frame")
+dot.Size = UDim2.fromOffset(10,10)
+dot.Position = UDim2.new(1,-13,0,4)
+dot.BackgroundColor3 = Color3.fromRGB(255,40,40)
+dot.Parent = icon
 
-local image = Instance.new("ImageLabel")
+local dc = Instance.new("UICorner",dot)
+dc.CornerRadius = UDim.new(1,0)
 
-image.Name = "PirateImage"
-image.Size = UDim2.fromScale(0.86, 0.86)
-image.Position = UDim2.fromScale(0.07, 0.07)
-
-image.BackgroundTransparency = 1
-image.Image = IMAGE_URL
-
-image.ScaleType = Enum.ScaleType.Crop
-
-image.Parent = icon
-
-local imageCorner = Instance.new("UICorner")
-imageCorner.CornerRadius = UDim.new(1, 0)
-imageCorner.Parent = image
-
---==================================================
--- MAIN MENU
---==================================================
-
+-- МЕНЮ
 local menu = Instance.new("Frame")
-
-menu.Name = "MainMenu"
-
-menu.Size = UDim2.fromOffset(330, 400)
-menu.Position = UDim2.new(0.5, -165, 0.5, -200)
-
-menu.BackgroundColor3 = Color3.fromRGB(13, 14, 21)
-menu.BackgroundTransparency = 0.03
-
+menu.Size = UDim2.fromOffset(300,300)
+menu.Position = UDim2.new(.5,-150,.5,-150)
+menu.BackgroundColor3 = Color3.fromRGB(12,12,16)
 menu.Visible = false
 menu.Parent = gui
 
-local menuCorner = Instance.new("UICorner")
-menuCorner.CornerRadius = UDim.new(0, 20)
-menuCorner.Parent = menu
+local mc = Instance.new("UICorner",menu)
+mc.CornerRadius = UDim.new(0,16)
 
-local menuStroke = Instance.new("UIStroke")
-menuStroke.Thickness = 2
-menuStroke.Transparency = 0.25
-menuStroke.Parent = menu
-
---==================================================
--- TITLE
---==================================================
-
+-- ЗАГОЛОВОК
 local title = Instance.new("TextLabel")
-
-title.Size = UDim2.new(1, -75, 0, 42)
-title.Position = UDim2.fromOffset(20, 10)
-
+title.Size = UDim2.new(1,-60,0,50)
+title.Position = UDim2.fromOffset(15,5)
 title.BackgroundTransparency = 1
-title.Text = "MOBILE MENU"
-
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 21
+title.Text = "AD MENU"
+title.TextColor3 = Color3.new(1,1,1)
+title.TextSize = 20
 title.Font = Enum.Font.GothamBold
-
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = menu
 
---==================================================
--- SUBTITLE
---==================================================
-
-local subtitle = Instance.new("TextLabel")
-
-subtitle.Size = UDim2.new(1, -75, 0, 22)
-subtitle.Position = UDim2.fromOffset(20, 43)
-
-subtitle.BackgroundTransparency = 1
-subtitle.Text = "CONTROL PANEL"
-
-subtitle.TextColor3 = Color3.fromRGB(145, 150, 170)
-subtitle.TextSize = 11
-subtitle.Font = Enum.Font.GothamMedium
-
-subtitle.TextXAlignment = Enum.TextXAlignment.Left
-subtitle.Parent = menu
-
---==================================================
--- CLOSE BUTTON
---==================================================
-
+-- КРЕСТИК
 local close = Instance.new("TextButton")
-
-close.Name = "Close"
-close.Size = UDim2.fromOffset(44, 44)
-close.Position = UDim2.new(1, -56, 0, 12)
-
-close.BackgroundColor3 = Color3.fromRGB(35, 36, 48)
-
-close.Text = "×"
-close.TextColor3 = Color3.fromRGB(255, 255, 255)
-close.TextSize = 27
+close.Size = UDim2.fromOffset(40,40)
+close.Position = UDim2.new(1,-48,0,10)
+close.BackgroundColor3 = Color3.fromRGB(35,35,40)
+close.Text = "X"
+close.TextColor3 = Color3.new(1,1,1)
+close.TextSize = 18
 close.Font = Enum.Font.GothamBold
-
-close.AutoButtonColor = false
 close.Parent = menu
 
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 13)
-closeCorner.Parent = close
+local cc = Instance.new("UICorner",close)
+cc.CornerRadius = UDim.new(0,10)
 
---==================================================
--- MENU BUTTON CREATOR
---==================================================
+-- КНОПКИ
+for i,text in ipairs({"OPTION 1","OPTION 2","OPTION 3"}) do
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(1,-30,0,55)
+	b.Position = UDim2.fromOffset(15,65+(i-1)*65)
+	b.BackgroundColor3 = Color3.fromRGB(28,28,35)
+	b.Text = text
+	b.TextColor3 = Color3.new(1,1,1)
+	b.TextSize = 15
+	b.Font = Enum.Font.GothamSemibold
+	b.Parent = menu
 
-local function createButton(name, text, y)
-
-	local button = Instance.new("TextButton")
-
-	button.Name = name
-	button.Size = UDim2.new(1, -40, 0, 58)
-	button.Position = UDim2.fromOffset(20, y)
-
-	button.BackgroundColor3 = Color3.fromRGB(27, 29, 40)
-
-	button.Text = text
-	button.TextColor3 = Color3.fromRGB(240, 240, 245)
-
-	button.TextSize = 16
-	button.Font = Enum.Font.GothamSemibold
-
-	button.AutoButtonColor = false
-	button.Parent = menu
-
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 14)
-	corner.Parent = button
-
-	local stroke = Instance.new("UIStroke")
-	stroke.Thickness = 1
-	stroke.Transparency = 0.65
-	stroke.Parent = button
-
-	button.Activated:Connect(function()
-
-		TweenService:Create(
-			button,
-			TweenInfo.new(0.08),
-			{
-				Size = UDim2.new(1, -46, 0, 54)
-			}
-		):Play()
-
-		task.wait(0.08)
-
-		TweenService:Create(
-			button,
-			TweenInfo.new(
-				0.12,
-				Enum.EasingStyle.Back,
-				Enum.EasingDirection.Out
-			),
-			{
-				Size = UDim2.new(1, -40, 0, 58)
-			}
-		):Play()
-
-	end
-
-	return button
+	local bc = Instance.new("UICorner",b)
+	bc.CornerRadius = UDim.new(0,11)
 end
 
---==================================================
--- BUTTONS
---==================================================
-
-local option1 = createButton(
-	"Option1",
-	"OPTION 1",
-	82
-)
-
-local option2 = createButton(
-	"Option2",
-	"OPTION 2",
-	150
-)
-
-local option3 = createButton(
-	"Option3",
-	"OPTION 3",
-	218
-)
-
-local settings = createButton(
-	"Settings",
-	"SETTINGS",
-	286
-)
-
---==================================================
--- OPEN MENU
---==================================================
-
-local function openMenu()
-
+-- ОТКРЫТИЕ
+local function open()
 	menu.Visible = true
+	menu.Size = UDim2.fromOffset(270,270)
 
-	menu.Size = UDim2.fromOffset(285, 345)
-
-	TweenService:Create(
-		menu,
-		TweenInfo.new(
-			0.25,
-			Enum.EasingStyle.Back,
-			Enum.EasingDirection.Out
-		),
-		{
-			Size = UDim2.fromOffset(330, 400)
-		}
-	):Play()
-
+	Tween:Create(menu,TweenInfo.new(.2,Enum.EasingStyle.Back),{
+		Size=UDim2.fromOffset(300,300)
+	}):Play()
 end
 
---==================================================
--- CLOSE MENU
---==================================================
-
-local function closeMenu()
-
-	local tween = TweenService:Create(
-		menu,
-		TweenInfo.new(
-			0.15,
-			Enum.EasingStyle.Quad,
-			Enum.EasingDirection.In
-		),
-		{
-			Size = UDim2.fromOffset(285, 345)
-		}
-	)
-
-	tween:Play()
-	tween.Completed:Wait()
-
+local function hide()
 	menu.Visible = false
-
 end
 
---==================================================
--- ICON TAP
---==================================================
+icon.Activated:Connect(open)
+close.Activated:Connect(hide)
 
-icon.Activated:Connect(function()
-
-	if menu.Visible then
-		closeMenu()
-	else
-		openMenu()
-	end
-
-end)
-
---==================================================
--- CLOSE
---==================================================
-
-close.Activated:Connect(function()
-	closeMenu()
-end)
-
---==================================================
--- DRAG ICON
---==================================================
-
-local draggingIcon = false
-local dragStart
-local startPosition
+-- ПЕРЕТАСКИВАНИЕ
+local dragging,start,pos = false,nil,nil
 
 icon.InputBegan:Connect(function(input)
-
 	if input.UserInputType == Enum.UserInputType.Touch
-		or input.UserInputType == Enum.UserInputType.MouseButton1 then
-
-		draggingIcon = true
-		dragStart = input.Position
-		startPosition = icon.Position
-
+	or input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging=true
+		start=input.Position
+		pos=icon.Position
 	end
-
 end)
 
-UserInputService.InputChanged:Connect(function(input)
+UIS.InputChanged:Connect(function(input)
+	if dragging and (
+		input.UserInputType==Enum.UserInputType.Touch
+		or input.UserInputType==Enum.UserInputType.MouseMovement
+	) then
+		local d=input.Position-start
 
-	if not draggingIcon then
-		return
+		icon.Position=UDim2.new(
+			pos.X.Scale,pos.X.Offset+d.X,
+			pos.Y.Scale,pos.Y.Offset+d.Y
+		)
 	end
-
-	if input.UserInputType ~= Enum.UserInputType.Touch
-		and input.UserInputType ~= Enum.UserInputType.MouseMovement then
-		return
-	end
-
-	local delta = input.Position - dragStart
-
-	icon.Position = UDim2.new(
-		startPosition.X.Scale,
-		startPosition.X.Offset + delta.X,
-		startPosition.Y.Scale,
-		startPosition.Y.Offset + delta.Y
-	)
-
 end)
 
-UserInputService.InputEnded:Connect(function(input)
-
-	if input.UserInputType == Enum.UserInputType.Touch
-		or input.UserInputType == Enum.UserInputType.MouseButton1 then
-
-		draggingIcon = false
-
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType==Enum.UserInputType.Touch
+	or input.UserInputType==Enum.UserInputType.MouseButton1 then
+		dragging=false
 	end
-
-end)
-
---==================================================
--- DRAG MENU BY TITLE
---==================================================
-
-local draggingMenu = false
-local menuDragStart
-local menuStartPosition
-
-title.InputBegan:Connect(function(input)
-
-	if input.UserInputType == Enum.UserInputType.Touch
-		or input.UserInputType == Enum.UserInputType.MouseButton1 then
-
-		draggingMenu = true
-		menuDragStart = input.Position
-		menuStartPosition = menu.Position
-
-	end
-
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-
-	if not draggingMenu then
-		return
-	end
-
-	if input.UserInputType ~= Enum.UserInputType.Touch
-		and input.UserInputType ~= Enum.UserInputType.MouseMovement then
-		return
-	end
-
-	local delta = input.Position - menuDragStart
-
-	menu.Position = UDim2.new(
-		menuStartPosition.X.Scale,
-		menuStartPosition.X.Offset + delta.X,
-		menuStartPosition.Y.Scale,
-		menuStartPosition.Y.Offset + delta.Y
-	)
-
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-
-	if input.UserInputType == Enum.UserInputType.Touch
-		or input.UserInputType == Enum.UserInputType.MouseButton1 then
-
-		draggingMenu = false
-
-	end
-
 end)
