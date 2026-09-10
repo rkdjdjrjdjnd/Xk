@@ -42,7 +42,6 @@ local LANG = {
         noclip = "Noclip",
         fullbright = "Fullbright",
         tp_player = "TP to Player",
-        fling = "🌀 Fling Player",
         no_players = "No players",
         ok = "OK",
         enter_value = "Enter value...",
@@ -77,7 +76,6 @@ local LANG = {
         noclip = "Сквозь стены",
         fullbright = "Яркость",
         tp_player = "ТП к игроку",
-        fling = "🌀 Флип игрока",
         no_players = "Нет игроков",
         ok = "ОК",
         enter_value = "Введи число...",
@@ -242,7 +240,7 @@ local function hideMain()
     menu.Visible = false
 end
 
--- ========== ESP (КОМПАКТНО, БЕЗ ⚙) ==========
+-- ========== ESP ==========
 local espMenu, espTitle, espBack = createSubmenu(T("esp").." (OFF)")
 
 local espEnabled = false
@@ -656,28 +654,42 @@ local aimbotRange = 300
 local aimbotTeamCheck = true
 local aimbotPart = "Head"
 
+-- ВНЕШНИЙ КРУГ
 local fovCircle = Instance.new("Frame")
 fovCircle.Size = UDim2.fromOffset(aimbotRadius*2, aimbotRadius*2)
 fovCircle.Position = UDim2.new(0.5, -aimbotRadius, 0.5, -aimbotRadius)
 fovCircle.BackgroundTransparency = 1
-fovCircle.BorderSizePixel = 3
-fovCircle.BorderColor3 = Color3.fromRGB(255,80,80)
+fovCircle.BorderSizePixel = 4
+fovCircle.BorderColor3 = Color3.fromRGB(0,255,100)
 fovCircle.Visible = false
-fovCircle.ZIndex = 5
+fovCircle.ZIndex = 999
 fovCircle.Parent = gui
 Instance.new("UICorner",fovCircle).CornerRadius = UDim.new(1,0)
 
+-- ВНУТРЕННИЙ ТОНКИЙ КРУГ (для красоты)
+local fovCircleInner = Instance.new("Frame")
+fovCircleInner.Size = UDim2.new(0.92,0,0.92,0)
+fovCircleInner.Position = UDim2.new(0.04,0,0.04,0)
+fovCircleInner.BackgroundTransparency = 1
+fovCircleInner.BorderSizePixel = 1
+fovCircleInner.BorderColor3 = Color3.fromRGB(0,255,100)
+fovCircleInner.ZIndex = 999
+fovCircleInner.Parent = fovCircle
+Instance.new("UICorner",fovCircleInner).CornerRadius = UDim.new(1,0)
+
+-- ПОДПИСЬ РАДИУСА
 local fovLabel = Instance.new("TextLabel")
 fovLabel.Size = UDim2.fromOffset(220,22)
 fovLabel.Position = UDim2.new(0.5, -110, 0.5, aimbotRadius + 15)
 fovLabel.BackgroundTransparency = 1
 fovLabel.Text = ""
-fovLabel.TextColor3 = Color3.fromRGB(255,80,80)
+fovLabel.TextColor3 = Color3.fromRGB(0,255,100)
 fovLabel.TextSize = 14
 fovLabel.Font = Enum.Font.GothamBold
-fovLabel.TextStrokeTransparency = 0.4
+fovLabel.TextStrokeTransparency = 0
+fovLabel.TextStrokeColor3 = Color3.new(0,0,0)
 fovLabel.Visible = false
-fovLabel.ZIndex = 6
+fovLabel.ZIndex = 1000
 fovLabel.Parent = gui
 
 local function pixelsToStuds(px)
@@ -699,6 +711,17 @@ local function updateFovCircle()
     fovLabel.Text = aimbotRadius.."px (~"..pixelsToStuds(aimbotRadius).." studs)"
     fovLabel.Visible = aimbotEnabled
 end
+
+-- ОБНОВЛЕНИЕ КРУГА КАЖДЫЙ КАДР (чтобы не пропадал)
+RunService.RenderStepped:Connect(function()
+    if fovCircle and aimbotEnabled then
+        fovCircle.Visible = true
+        fovLabel.Visible = true
+    elseif fovCircle then
+        fovCircle.Visible = false
+        fovLabel.Visible = false
+    end
+end)
 
 local aimbotToggle = Instance.new("TextButton")
 aimbotToggle.Size = UDim2.new(1,-30,0,50)
@@ -783,6 +806,7 @@ aimbotTeamBtn.MouseButton1Click:Connect(function()
     aimbotTeamBtn.BackgroundColor3 = aimbotTeamCheck and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
 end)
 
+-- ЛОГИКА AIMBOT — только внутри FOV-круга
 RunService.RenderStepped:Connect(function()
     if not aimbotEnabled then return end
     local myChar = player.Character
@@ -857,7 +881,7 @@ local function makeDraggable(frame, dragArea)
     end)
 end
 
--- ========== MISC ==========
+-- ========== MISC (3 КНОПКИ) ==========
 local miscMenu, miscTitle, miscBack = createSubmenu(T("misc"))
 
 local noclipEnabled = false
@@ -930,22 +954,10 @@ fullbrightBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Fling Player
-local flingBtn = Instance.new("TextButton")
-flingBtn.Size = UDim2.new(1,-30,0,55)
-flingBtn.Position = UDim2.fromOffset(15,195)
-flingBtn.BackgroundColor3 = Color3.fromRGB(120,40,180)
-flingBtn.Text = T("fling")
-flingBtn.TextColor3 = Color3.new(1,1,1)
-flingBtn.TextSize = 17
-flingBtn.Font = Enum.Font.GothamBold
-flingBtn.Parent = miscMenu
-Instance.new("UICorner",flingBtn).CornerRadius = UDim.new(0,11)
-
 -- TP to Player
 local tpPlayerBtn = Instance.new("TextButton")
 tpPlayerBtn.Size = UDim2.new(1,-30,0,55)
-tpPlayerBtn.Position = UDim2.fromOffset(15,260)
+tpPlayerBtn.Position = UDim2.fromOffset(15,195)
 tpPlayerBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
 tpPlayerBtn.Text = T("tp_player")
 tpPlayerBtn.TextColor3 = Color3.new(1,1,1)
@@ -1010,154 +1022,6 @@ local function refreshTPList()
         y = 40
     end
     tpScroll.CanvasSize = UDim2.new(0,0,0,y)
-end
-
--- ========== FLING MENU (ЖОСКИЙ) ==========
-local flingMenu, flingTitle, flingBack = createSubmenu(T("fling"))
-
-local flingScroll = Instance.new("ScrollingFrame")
-flingScroll.Size = UDim2.new(1,-20,1,-70)
-flingScroll.Position = UDim2.fromOffset(10,60)
-flingScroll.BackgroundTransparency = 1
-flingScroll.BorderSizePixel = 0
-flingScroll.ScrollBarThickness = 5
-flingScroll.ScrollBarImageColor3 = Color3.fromRGB(120,80,180)
-flingScroll.CanvasSize = UDim2.new(0,0,0,0)
-flingScroll.Parent = flingMenu
-
-local flingActive = false
-
-local function flingTarget(targetPlayer)
-    if flingActive then return end
-    local myChar = player.Character
-    if not myChar or not myChar.PrimaryPart then return end
-    local targetChar = targetPlayer.Character
-    if not targetChar or not targetChar.PrimaryPart then return end
-
-    flingActive = true
-    local myOriginalCFrame = myChar.PrimaryPart.CFrame
-    local hum = myChar:FindFirstChildOfClass("Humanoid")
-    local root = myChar.PrimaryPart
-
-    local savedCollide = {}
-    local savedMassless = {}
-    for _, p in ipairs(myChar:GetDescendants()) do
-        if p:IsA("BasePart") then
-            savedCollide[p] = p.CanCollide
-            savedMassless[p] = p.Massless
-        end
-    end
-
-    for _, p in ipairs(myChar:GetDescendants()) do
-        if p:IsA("BasePart") then
-            p.CanCollide = true
-            p.Massless = true
-            p.CustomPhysicalProperties = PhysicalProperties.new(0.01, 0.3, 0.5, 1, 1)
-        end
-    end
-
-    if hum then
-        hum.PlatformStand = true
-        hum.AutoRotate = false
-    end
-
-    local spin = Instance.new("BodyAngularVelocity")
-    spin.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-    spin.AngularVelocity = Vector3.new(0, 100000, 0)
-    spin.P = 100000
-    spin.Parent = root
-
-    local push = Instance.new("BodyVelocity")
-    push.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    push.Velocity = Vector3.new(0,0,0)
-    push.P = 100000
-    push.Parent = root
-
-    local function oneHit()
-        local tChar = targetPlayer.Character
-        if not tChar or not tChar.PrimaryPart then return end
-        local tRoot = tChar.PrimaryPart
-        root.CFrame = tRoot.CFrame * CFrame.new(0, 0, 0)
-        push.Velocity = (tRoot.Position - root.Position).Unit * 5000
-        if push.Velocity.Magnitude < 100 then
-            push.Velocity = Vector3.new(math.random(-5000,5000), 5000, math.random(-5000,5000))
-        end
-        spin.AngularVelocity = Vector3.new(
-            math.random(-100000, 100000),
-            math.random(-100000, 100000),
-            math.random(-100000, 100000)
-        )
-    end
-
-    for i = 1, 5 do
-        oneHit()
-        task.wait(0.1)
-    end
-
-    local tChar = targetPlayer.Character
-    if tChar and tChar.PrimaryPart then
-        local tRoot = tChar.PrimaryPart
-        root.CFrame = tRoot.CFrame
-        push.Velocity = Vector3.new(math.random(-5000,5000), 8000, math.random(-5000,5000))
-        spin.AngularVelocity = Vector3.new(100000, 100000, 100000)
-    end
-
-    task.wait(0.4)
-    spin:Destroy()
-    push:Destroy()
-    root.CFrame = myOriginalCFrame
-
-    for part, val in pairs(savedCollide) do
-        if part and part.Parent then part.CanCollide = val end
-    end
-    for part, val in pairs(savedMassless) do
-        if part and part.Parent then part.Massless = val end
-    end
-
-    if hum then
-        hum.PlatformStand = false
-        hum.AutoRotate = true
-    end
-
-    task.wait(0.3)
-    flingActive = false
-end
-
-local function refreshFlingList()
-    for _, c in ipairs(flingScroll:GetChildren()) do
-        if c:IsA("TextButton") or c:IsA("TextLabel") then c:Destroy() end
-    end
-    local y = 0
-    local count = 0
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= player then
-            count = count + 1
-            local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(1,-10,0,50)
-            btn.Position = UDim2.fromOffset(0,y)
-            btn.BackgroundColor3 = Color3.fromRGB(40,20,60)
-            btn.Text = "🌀 "..p.Name
-            btn.TextColor3 = Color3.new(1,1,1)
-            btn.TextSize = 15
-            btn.Font = Enum.Font.GothamSemibold
-            btn.Parent = flingScroll
-            Instance.new("UICorner",btn).CornerRadius = UDim.new(0,10)
-            btn.MouseButton1Click:Connect(function() flingTarget(p) end)
-            y = y + 55
-        end
-    end
-    if count == 0 then
-        local none = Instance.new("TextLabel")
-        none.Size = UDim2.new(1,-10,0,40)
-        none.BackgroundTransparency = 1
-        none.Text = T("no_players")
-        none.TextColor3 = Color3.fromRGB(150,150,150)
-        none.TextSize = 15
-        none.Font = Enum.Font.Gotham
-        none.Parent = flingScroll
-        y = 40
-    end
-    flingScroll.CanvasSize = UDim2.new(0,0,0,y)
 end
 
 -- ========== SETTINGS (ВЫБОР ЯЗЫКА) ==========
@@ -1228,7 +1092,6 @@ local function applyLanguage()
     noclipBtn.Text = T("noclip")..": "..(noclipEnabled and T("on") or T("off"))
     fullbrightBtn.Text = T("fullbright")..": "..(fullbrightEnabled and T("on") or T("off"))
     tpPlayerBtn.Text = T("tp_player")
-    flingBtn.Text = T("fling")
     popupOk.Text = T("ok")
     popupBox.PlaceholderText = T("enter_value")
     title.Text = T("title")
@@ -1237,7 +1100,6 @@ local function applyLanguage()
     miscTitle.Text = T("misc")
     settingsTitle.Text = T("settings")
     tpTitle.Text = T("tp_player")
-    flingTitle.Text = T("fling")
     if currentLangLabel then
         currentLangLabel.Text = (currentLang == "EN") and "Current language: EN" or "Текущий язык: RU"
     end
@@ -1288,13 +1150,12 @@ flyBack.Activated:Connect(function() setFly(false); backToMain(flyMenu) end)
 aimbotBack.Activated:Connect(function() backToMain(aimbotMenu) end)
 miscBack.Activated:Connect(function() backToMain(miscMenu) end)
 tpBack.Activated:Connect(function() backToMain(tpMenu) end)
-flingBack.Activated:Connect(function() backToMain(flingMenu) end)
 settingsBack.Activated:Connect(function() backToMain(settingsMenu) end)
 
 mainButtons[1].Activated:Connect(function() openSub(espMenu, 340, 260) end)
 mainButtons[2].Activated:Connect(function() openSub(playerMenu, 340, 280) end)
 mainButtons[3].Activated:Connect(function() openSub(aimbotMenu, 340, 350) end)
-mainButtons[4].Activated:Connect(function() openSub(miscMenu, 340, 340) end)
+mainButtons[4].Activated:Connect(function() openSub(miscMenu, 340, 260) end)
 mainButtons[5].Activated:Connect(function() openSub(settingsMenu, 340, 340) end)
 
 flyBtn.Activated:Connect(function()
@@ -1310,13 +1171,6 @@ tpPlayerBtn.Activated:Connect(function()
     openFrame(tpMenu, 260, 340)
 end)
 
-flingBtn.Activated:Connect(function()
-    refreshFlingList()
-    closeFrame(miscMenu)
-    task.wait(.05)
-    openFrame(flingMenu, 260, 340)
-end)
-
 -- ========== DRAGGABLE ==========
 makeDraggable(menu, title)
 makeDraggable(espMenu, espTitle)
@@ -1325,7 +1179,6 @@ makeDraggable(flyMenu, flyTitle)
 makeDraggable(aimbotMenu, aimbotTitle)
 makeDraggable(miscMenu, miscTitle)
 makeDraggable(tpMenu, tpTitle)
-makeDraggable(flingMenu, flingTitle)
 makeDraggable(settingsMenu, settingsTitle)
 makeDraggable(inputPopup, popupTitle)
 
@@ -1353,7 +1206,7 @@ end)
 -- ========== РЕСПАВН ==========
 player.CharacterAdded:Connect(function(char)
     task.wait(.5)
-    local hum = char:FindFirstChildOfClass("Humanoid")
+    local hum = char:FindFirstChild("Humanoid")
     if hum then hum.WalkSpeed = currentSpeed end
 end)
 
