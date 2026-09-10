@@ -101,9 +101,9 @@ local function closeFrame(f)
     f.Visible = false
 end
 
--- ========== ГЛАВНОЕ МЕНЮ ==========
+-- ========== ГЛАВНОЕ МЕНЮ (4 кнопки) ==========
 local menu = Instance.new("Frame")
-menu.Size = UDim2.fromOffset(300,320)
+menu.Size = UDim2.fromOffset(300,390)
 menu.Position = UDim2.fromScale(.5,.5)
 menu.AnchorPoint = Vector2.new(.5,.5)
 menu.BackgroundColor3 = Color3.fromRGB(12,12,16)
@@ -134,7 +134,7 @@ close.Parent = menu
 Instance.new("UICorner",close).CornerRadius = UDim.new(0,10)
 
 local mainButtons = {}
-for i,text in ipairs({"ESP","PLAYER","MISC"}) do
+for i,text in ipairs({"ESP","PLAYER","AIMBOT","MISC"}) do
     local b = Instance.new("TextButton")
     b.Size = UDim2.new(1,-30,0,65)
     b.Position = UDim2.fromOffset(15,65+(i-1)*75)
@@ -151,7 +151,7 @@ end
 local function openMain()
     menu.Visible = true
     menu.Size = UDim2.fromOffset(0,0)
-    Tween:Create(menu, TweenInfo.new(.28, Enum.EasingStyle.Back), {Size = UDim2.fromOffset(300,320)}):Play()
+    Tween:Create(menu, TweenInfo.new(.28, Enum.EasingStyle.Back), {Size = UDim2.fromOffset(300,390)}):Play()
 end
 local function hideMain()
     Tween:Create(menu, TweenInfo.new(.18), {Size = UDim2.fromOffset(0,0)}):Play()
@@ -200,7 +200,6 @@ local function createSwitch(parent, y, labelText, getter, setter, onChange)
     end)
 end
 
--- ВАЖНО: clearESP объявляем заранее как forward declaration
 local clearESP
 
 createSwitch(espMenu, 60, "Enable ESP", function() return espEnabled end, function(v) espEnabled = v end, function(v) espTitle.Text = "ESP ("..(v and "ON" or "OFF")..")"; if not v and clearESP then clearESP() end end)
@@ -209,7 +208,6 @@ createSwitch(espMenu, 150, "Names", function() return espSettings.names end, fun
 createSwitch(espMenu, 195, "Health", function() return espSettings.health end, function(v) espSettings.health = v end)
 createSwitch(espMenu, 240, "Distance", function() return espSettings.distance end, function(v) espSettings.distance = v end)
 
--- ESP логика
 local espObjects = {}
 clearESP = function()
     for _, d in pairs(espObjects) do
@@ -325,7 +323,7 @@ end)
 print("PART 1/2 LOADED")
 
 -- ===================================================================
--- ROBLOX MASTER v7.0 — ЧАСТЬ 2/2 (FLY ПО КАМЕРЕ + DRAG)
+-- ROBLOX MASTER v7.0 — ЧАСТЬ 2/2-A
 -- ===================================================================
 
 local Lighting = game:GetService("Lighting")
@@ -355,96 +353,95 @@ local function makeDraggable(frame, dragArea)
     end)
 end
 
--- ========== УНИВЕРСАЛЬНЫЙ СЛАЙДЕР ==========
-local function createSlider(parent, yPos, minV, maxV, startV, labelText, onChange)
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(1,-30,0,65)
-    container.Position = UDim2.fromOffset(15, yPos)
-    container.BackgroundTransparency = 1
-    container.Parent = parent
+-- ========== ОКНО ВВОДА ==========
+local inputPopup = Instance.new("Frame")
+inputPopup.Size = UDim2.fromOffset(0,0)
+inputPopup.Position = UDim2.fromScale(.5,.5)
+inputPopup.AnchorPoint = Vector2.new(.5,.5)
+inputPopup.BackgroundColor3 = Color3.fromRGB(20,20,28)
+inputPopup.Visible = false
+inputPopup.Parent = gui
+Instance.new("UICorner",inputPopup).CornerRadius = UDim.new(0,16)
 
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1,0,0,25)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = labelText..": "..math.floor(startV)
-    lbl.TextColor3 = Color3.new(1,1,1)
-    lbl.TextSize = 16
-    lbl.Font = Enum.Font.GothamSemibold
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.Parent = container
+local popupTitle = Instance.new("TextLabel")
+popupTitle.Size = UDim2.new(1,-60,0,50)
+popupTitle.Position = UDim2.fromOffset(15,5)
+popupTitle.BackgroundTransparency = 1
+popupTitle.Text = "Value"
+popupTitle.TextColor3 = Color3.new(1,1,1)
+popupTitle.TextSize = 18
+popupTitle.Font = Enum.Font.GothamBold
+popupTitle.TextXAlignment = Enum.TextXAlignment.Left
+popupTitle.Parent = inputPopup
 
-    local track = Instance.new("Frame")
-    track.Size = UDim2.new(1,-20,0,12)
-    track.Position = UDim2.fromOffset(10,40)
-    track.BackgroundColor3 = Color3.fromRGB(40,40,50)
-    track.BorderSizePixel = 0
-    track.Parent = container
-    Instance.new("UICorner",track).CornerRadius = UDim.new(1,0)
+local popupClose = Instance.new("TextButton")
+popupClose.Size = UDim2.fromOffset(40,40)
+popupClose.Position = UDim2.new(1,-48,0,10)
+popupClose.BackgroundColor3 = Color3.fromRGB(35,35,40)
+popupClose.Text = "X"
+popupClose.TextColor3 = Color3.new(1,1,1)
+popupClose.TextSize = 18
+popupClose.Font = Enum.Font.GothamBold
+popupClose.Parent = inputPopup
+Instance.new("UICorner",popupClose).CornerRadius = UDim.new(0,10)
 
-    local fill = Instance.new("Frame")
-    fill.Size = UDim2.new(0,0,1,0)
-    fill.BackgroundColor3 = Color3.fromRGB(0,180,255)
-    fill.BorderSizePixel = 0
-    fill.Parent = track
-    Instance.new("UICorner",fill).CornerRadius = UDim.new(1,0)
+local popupBox = Instance.new("TextBox")
+popupBox.Size = UDim2.new(1,-60,0,55)
+popupBox.Position = UDim2.fromOffset(30,80)
+popupBox.BackgroundColor3 = Color3.fromRGB(40,40,50)
+popupBox.Text = ""
+popupBox.TextColor3 = Color3.new(1,1,1)
+popupBox.TextSize = 20
+popupBox.Font = Enum.Font.Gotham
+popupBox.ClearTextOnFocus = false
+popupBox.PlaceholderText = "Введи число..."
+popupBox.Parent = inputPopup
+Instance.new("UICorner",popupBox).CornerRadius = UDim.new(0,8)
 
-    local knob = Instance.new("Frame")
-    knob.Size = UDim2.fromOffset(30,30)
-    knob.AnchorPoint = Vector2.new(.5,.5)
-    knob.Position = UDim2.new(0,0,.5,0)
-    knob.BackgroundColor3 = Color3.new(1,1,1)
-    knob.ZIndex = 2
-    knob.Parent = track
-    Instance.new("UICorner",knob).CornerRadius = UDim.new(1,0)
+local popupOk = Instance.new("TextButton")
+popupOk.Size = UDim2.new(1,-60,0,55)
+popupOk.Position = UDim2.fromOffset(30,150)
+popupOk.BackgroundColor3 = Color3.fromRGB(0,150,80)
+popupOk.Text = "OK"
+popupOk.TextColor3 = Color3.new(1,1,1)
+popupOk.TextSize = 20
+popupOk.Font = Enum.Font.GothamBold
+popupOk.Parent = inputPopup
+Instance.new("UICorner",popupOk).CornerRadius = UDim.new(0,8)
 
-    local currentVal = startV
-    local dragging = false
-
-    local function setVal(v, fire)
-        v = math.clamp(v, minV, maxV)
-        currentVal = v
-        local alpha = (maxV == minV) and 0 or (v - minV)/(maxV - minV)
-        fill.Size = UDim2.new(alpha,0,1,0)
-        knob.Position = UDim2.new(alpha,0,.5,0)
-        lbl.Text = labelText..": "..math.floor(v)
-        if fire and onChange then onChange(v) end
-    end
-    setVal(startV, false)
-
-    local function updateFromX(x)
-        local tPos = track.AbsolutePosition.X
-        local tW = track.AbsoluteSize.X
-        if tW <= 0 then return end
-        local alpha = math.clamp((x - tPos)/tW, 0, 1)
-        setVal(minV + alpha * (maxV - minV), true)
-    end
-
-    track.InputBegan:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.Touch or inp.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            updateFromX(inp.Position.X)
-        end
-    end)
-    UIS.InputChanged:Connect(function(inp)
-        if not dragging then return end
-        if inp.UserInputType == Enum.UserInputType.Touch or inp.UserInputType == Enum.UserInputType.MouseMovement then
-            updateFromX(inp.Position.X)
-        end
-    end)
-    UIS.InputEnded:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.Touch or inp.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-
-    return container
+local popupCallback = nil
+local function hidePopup()
+    Tween:Create(inputPopup, TweenInfo.new(.18), {Size = UDim2.fromOffset(0,0)}):Play()
+    task.wait(.18)
+    inputPopup.Visible = false
+    popupCallback = nil
 end
+local function showPopup(titleTxt, placeholder, callback)
+    popupTitle.Text = titleTxt
+    popupBox.PlaceholderText = placeholder
+    popupBox.Text = ""
+    popupCallback = function(input)
+        local num = tonumber(input)
+        if num then callback(num); hidePopup()
+        else
+            popupBox.Text = ""
+            popupBox.PlaceholderText = "Не число! Попробуй ещё"
+        end
+    end
+    inputPopup.Visible = true
+    inputPopup.Size = UDim2.fromOffset(0,0)
+    Tween:Create(inputPopup, TweenInfo.new(.22, Enum.EasingStyle.Back), {Size = UDim2.fromOffset(300,225)}):Play()
+    task.wait(.05)
+    popupBox:CaptureFocus()
+end
+popupClose.MouseButton1Click:Connect(hidePopup)
+popupOk.MouseButton1Click:Connect(function() if popupCallback then popupCallback(popupBox.Text) end end)
+popupBox.FocusLost:Connect(function(enter) if enter and popupCallback then popupCallback(popupBox.Text) end end)
 
 -- ========== ПОДМЕНЮ PLAYER ==========
 local playerMenu, playerTitle, playerBack = createSubmenu("PLAYER")
 
 local currentSpeed = 16
-local currentJump = 5
 local infiniteJump = false
 
 local speedBtn = Instance.new("TextButton")
@@ -457,21 +454,16 @@ speedBtn.TextSize = 18
 speedBtn.Font = Enum.Font.GothamBold
 speedBtn.Parent = playerMenu
 Instance.new("UICorner",speedBtn).CornerRadius = UDim.new(0,11)
-
-local jumpBtn = Instance.new("TextButton")
-jumpBtn.Size = UDim2.new(1,-30,0,55)
-jumpBtn.Position = UDim2.fromOffset(15,130)
-jumpBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
-jumpBtn.Text = "Jump: 5"
-jumpBtn.TextColor3 = Color3.new(1,1,1)
-jumpBtn.TextSize = 18
-jumpBtn.Font = Enum.Font.GothamBold
-jumpBtn.Parent = playerMenu
-Instance.new("UICorner",jumpBtn).CornerRadius = UDim.new(0,11)
+speedBtn.MouseButton1Click:Connect(function()
+    showPopup("Speed (1-500)", "1-500", function(v)
+        currentSpeed = v
+        speedBtn.Text = "Speed: "..math.floor(v)
+    end)
+end)
 
 local infJumpBtn = Instance.new("TextButton")
 infJumpBtn.Size = UDim2.new(1,-30,0,55)
-infJumpBtn.Position = UDim2.fromOffset(15,195)
+infJumpBtn.Position = UDim2.fromOffset(15,130)
 infJumpBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 infJumpBtn.Text = "Infinite Jump: OFF"
 infJumpBtn.TextColor3 = Color3.new(1,1,1)
@@ -493,7 +485,7 @@ end)
 
 local flyBtn = Instance.new("TextButton")
 flyBtn.Size = UDim2.new(1,-30,0,60)
-flyBtn.Position = UDim2.fromOffset(15,260)
+flyBtn.Position = UDim2.fromOffset(15,195)
 flyBtn.BackgroundColor3 = Color3.fromRGB(40,80,200)
 flyBtn.Text = "Открыть Fly →"
 flyBtn.TextColor3 = Color3.new(1,1,1)
@@ -502,7 +494,7 @@ flyBtn.Font = Enum.Font.GothamBold
 flyBtn.Parent = playerMenu
 Instance.new("UICorner",flyBtn).CornerRadius = UDim.new(0,11)
 
--- ========== ПОДМЕНЮ FLY (летишь куда смотрит камера) ==========
+-- ========== ПОДМЕНЮ FLY ==========
 local flyMenu, flyTitle, flyBack = createSubmenu("FLY")
 
 local flyEnabled = false
@@ -544,11 +536,16 @@ local function startFly()
     hum.PlatformStand = true
     flyConnection = RunService.Heartbeat:Connect(function()
         if not flyEnabled or not flyBodyVelocity then return end
-        local cam = workspace.CurrentCamera
-        if not cam then return end
-        -- ✅ ЛЕТИМ КУДА СМОТРИТ КАМЕРА
-        local dir = cam.CFrame.LookVector
-        flyBodyVelocity.Velocity = dir * flySpeed
+        local c = player.Character
+        if not c then return end
+        local h = c:FindFirstChildOfClass("Humanoid")
+        if not h then return end
+        if h.MoveDirection.Magnitude > 0.1 then
+            local cam = workspace.CurrentCamera
+            flyBodyVelocity.Velocity = cam.CFrame.LookVector * flySpeed
+        else
+            flyBodyVelocity.Velocity = Vector3.new(0,0,0)
+        end
     end)
 end
 
@@ -557,17 +554,16 @@ local function setFly(on)
     if on then startFly() else stopFly() end
     flyToggle.Text = on and "ON" or "OFF"
     flyToggle.BackgroundColor3 = on and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
-    flyBtn.Text = on and "Fly: ON (смотри камерой)" or "Открыть Fly →"
+    flyBtn.Text = on and "Fly: ON (тяни стик)" or "Открыть Fly →"
     flyBtn.BackgroundColor3 = on and Color3.fromRGB(0,200,80) or Color3.fromRGB(40,80,200)
 end
 flyToggle.MouseButton1Click:Connect(function() setFly(not flyEnabled) end)
 
--- Подсказка
 local flyHint = Instance.new("TextLabel")
 flyHint.Size = UDim2.new(1,-30,0,80)
 flyHint.Position = UDim2.fromOffset(15,70)
 flyHint.BackgroundColor3 = Color3.fromRGB(30,30,40)
-flyHint.Text = "✈ Включи ON и просто смотри камерой.\nКуда смотришь — туда летишь.\nВверх — поднимаешься, вниз — спускаешься."
+flyHint.Text = "✈ Включи ON.\nТяни родной джойстик Roblox — летишь.\nКуда смотрит камера — туда и полёт.\nОтпустил стик — остановился."
 flyHint.TextColor3 = Color3.fromRGB(180,200,255)
 flyHint.TextSize = 14
 flyHint.Font = Enum.Font.GothamMedium
@@ -575,8 +571,158 @@ flyHint.TextWrapped = true
 flyHint.Parent = flyMenu
 Instance.new("UICorner",flyHint).CornerRadius = UDim.new(0,10)
 
--- Слайдер Fly Speed (1–500)
-createSlider(flyMenu, 165, 1, 500, flySpeed, "Fly Speed", function(v) flySpeed = v end)
+local flySpeedBtn = Instance.new("TextButton")
+flySpeedBtn.Size = UDim2.new(1,-30,0,55)
+flySpeedBtn.Position = UDim2.fromOffset(15,165)
+flySpeedBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
+flySpeedBtn.Text = "Fly Speed: 60"
+flySpeedBtn.TextColor3 = Color3.new(1,1,1)
+flySpeedBtn.TextSize = 17
+flySpeedBtn.Font = Enum.Font.GothamBold
+flySpeedBtn.Parent = flyMenu
+Instance.new("UICorner",flySpeedBtn).CornerRadius = UDim.new(0,11)
+flySpeedBtn.MouseButton1Click:Connect(function()
+    showPopup("Fly Speed (1-1000)", "1-1000", function(v)
+        flySpeed = v
+        flySpeedBtn.Text = "Fly Speed: "..math.floor(v)
+    end)
+end)
+
+-- ========== ПОДМЕНЮ AIMBOT ==========
+local aimbotMenu, aimbotTitle, aimbotBack = createSubmenu("AIMBOT")
+
+local aimbotEnabled = false
+local aimbotRadius = 120
+local aimbotSmoothness = 0.25
+local aimbotTeamCheck = true
+local aimbotPart = "Head"
+
+local fovCircle = Instance.new("Frame")
+fovCircle.Size = UDim2.fromOffset(aimbotRadius*2, aimbotRadius*2)
+fovCircle.Position = UDim2.new(0.5, -aimbotRadius, 0.5, -aimbotRadius)
+fovCircle.BackgroundTransparency = 1
+fovCircle.BorderSizePixel = 2
+fovCircle.BorderColor3 = Color3.fromRGB(255,255,255)
+fovCircle.Visible = false
+fovCircle.ZIndex = 5
+fovCircle.Parent = gui
+Instance.new("UICorner",fovCircle).CornerRadius = UDim.new(1,0)
+
+local function updateFovCircle()
+    fovCircle.Size = UDim2.fromOffset(aimbotRadius*2, aimbotRadius*2)
+    fovCircle.Position = UDim2.new(0.5, -aimbotRadius, 0.5, -aimbotRadius)
+    fovCircle.Visible = aimbotEnabled
+end
+
+local aimbotToggle = Instance.new("TextButton")
+aimbotToggle.Size = UDim2.new(1,-30,0,50)
+aimbotToggle.Position = UDim2.fromOffset(15,60)
+aimbotToggle.BackgroundColor3 = Color3.fromRGB(80,80,80)
+aimbotToggle.Text = "Aimbot: OFF"
+aimbotToggle.TextColor3 = Color3.new(1,1,1)
+aimbotToggle.TextSize = 17
+aimbotToggle.Font = Enum.Font.GothamBold
+aimbotToggle.Parent = aimbotMenu
+Instance.new("UICorner",aimbotToggle).CornerRadius = UDim.new(0,11)
+aimbotToggle.MouseButton1Click:Connect(function()
+    aimbotEnabled = not aimbotEnabled
+    aimbotToggle.Text = "Aimbot: "..(aimbotEnabled and "ON" or "OFF")
+    aimbotToggle.BackgroundColor3 = aimbotEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
+    updateFovCircle()
+end)
+
+local aimbotRadiusBtn = Instance.new("TextButton")
+aimbotRadiusBtn.Size = UDim2.new(1,-30,0,50)
+aimbotRadiusBtn.Position = UDim2.fromOffset(15,118)
+aimbotRadiusBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
+aimbotRadiusBtn.Text = "Радиус: 120"
+aimbotRadiusBtn.TextColor3 = Color3.new(1,1,1)
+aimbotRadiusBtn.TextSize = 17
+aimbotRadiusBtn.Font = Enum.Font.GothamBold
+aimbotRadiusBtn.Parent = aimbotMenu
+Instance.new("UICorner",aimbotRadiusBtn).CornerRadius = UDim.new(0,11)
+aimbotRadiusBtn.MouseButton1Click:Connect(function()
+    showPopup("Aimbot Радиус", "20-500", function(v)
+        aimbotRadius = v
+        aimbotRadiusBtn.Text = "Радиус: "..math.floor(v)
+        updateFovCircle()
+    end)
+end)
+
+local aimbotPartBtn = Instance.new("TextButton")
+aimbotPartBtn.Size = UDim2.new(1,-30,0,50)
+aimbotPartBtn.Position = UDim2.fromOffset(15,176)
+aimbotPartBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
+aimbotPartBtn.Text = "Часть: Head"
+aimbotPartBtn.TextColor3 = Color3.new(1,1,1)
+aimbotPartBtn.TextSize = 17
+aimbotPartBtn.Font = Enum.Font.GothamBold
+aimbotPartBtn.Parent = aimbotMenu
+Instance.new("UICorner",aimbotPartBtn).CornerRadius = UDim.new(0,11)
+aimbotPartBtn.MouseButton1Click:Connect(function()
+    aimbotPart = (aimbotPart == "Head") and "Torso" or "Head"
+    aimbotPartBtn.Text = "Часть: "..aimbotPart
+end)
+
+local aimbotTeamBtn = Instance.new("TextButton")
+aimbotTeamBtn.Size = UDim2.new(1,-30,0,50)
+aimbotTeamBtn.Position = UDim2.fromOffset(15,234)
+aimbotTeamBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
+aimbotTeamBtn.Text = "Team Check: ON"
+aimbotTeamBtn.TextColor3 = Color3.new(1,1,1)
+aimbotTeamBtn.TextSize = 17
+aimbotTeamBtn.Font = Enum.Font.GothamBold
+aimbotTeamBtn.Parent = aimbotMenu
+Instance.new("UICorner",aimbotTeamBtn).CornerRadius = UDim.new(0,11)
+aimbotTeamBtn.MouseButton1Click:Connect(function()
+    aimbotTeamCheck = not aimbotTeamCheck
+    aimbotTeamBtn.Text = "Team Check: "..(aimbotTeamCheck and "ON" or "OFF")
+    aimbotTeamBtn.BackgroundColor3 = aimbotTeamCheck and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
+end)
+
+RunService.RenderStepped:Connect(function()
+    if not aimbotEnabled then return end
+    local myChar = player.Character
+    if not myChar or not myChar:FindFirstChild("Head") then return end
+
+    local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+    local closestPart = nil
+    local closestDist = aimbotRadius
+
+    for _, target in ipairs(Players:GetPlayers()) do
+        if target ~= player then
+            if not (aimbotTeamCheck and target.Team and player.Team and target.Team == player.Team) then
+                local char = target.Character
+                if char and char.PrimaryPart then
+                    local part = char:FindFirstChild(aimbotPart) or char:FindFirstChild("Head")
+                    if part then
+                        local sp, onScreen = Camera:WorldToViewportPoint(part.Position)
+                        if onScreen then
+                            local d = (Vector2.new(sp.X, sp.Y) - center).Magnitude
+                            if d < closestDist then
+                                closestDist = d
+                                closestPart = part
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if closestPart then
+        local targetPos = closestPart.Position
+        local currentCF = Camera.CFrame
+        local lookAt = CFrame.lookAt(currentCF.Position, targetPos)
+        Camera.CFrame = currentCF:Lerp(lookAt, aimbotSmoothness)
+    end
+end)
+
+print("PART 2/2-A LOADED")
+
+-- ===================================================================
+-- ROBLOX MASTER v7.0 — ЧАСТЬ 2/2-B
+-- ===================================================================
 
 -- ========== ПОДМЕНЮ MISC ==========
 local miscMenu, miscTitle, miscBack = createSubmenu("MISC")
@@ -587,9 +733,11 @@ local antiAfkEnabled = false
 local antiAfkConn = nil
 local fullbrightEnabled = false
 local origLighting = {Ambient = Lighting.Ambient, Outdoor = Lighting.OutdoorAmbient, Brightness = Lighting.Brightness}
+local hitboxEnabled = false
+local hitboxConn = nil
 
 local noclipBtn = Instance.new("TextButton")
-noclipBtn.Size = UDim2.new(1,-30,0,50)
+noclipBtn.Size = UDim2.new(1,-30,0,48)
 noclipBtn.Position = UDim2.fromOffset(15,60)
 noclipBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 noclipBtn.Text = "Noclip: OFF"
@@ -625,8 +773,8 @@ noclipBtn.MouseButton1Click:Connect(function()
 end)
 
 local antiAfkBtn = Instance.new("TextButton")
-antiAfkBtn.Size = UDim2.new(1,-30,0,50)
-antiAfkBtn.Position = UDim2.fromOffset(15,118)
+antiAfkBtn.Size = UDim2.new(1,-30,0,48)
+antiAfkBtn.Position = UDim2.fromOffset(15,114)
 antiAfkBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 antiAfkBtn.Text = "Anti-AFK: OFF"
 antiAfkBtn.TextColor3 = Color3.new(1,1,1)
@@ -652,8 +800,8 @@ antiAfkBtn.MouseButton1Click:Connect(function()
 end)
 
 local fullbrightBtn = Instance.new("TextButton")
-fullbrightBtn.Size = UDim2.new(1,-30,0,50)
-fullbrightBtn.Position = UDim2.fromOffset(15,176)
+fullbrightBtn.Size = UDim2.new(1,-30,0,48)
+fullbrightBtn.Position = UDim2.fromOffset(15,168)
 fullbrightBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 fullbrightBtn.Text = "Fullbright: OFF"
 fullbrightBtn.TextColor3 = Color3.new(1,1,1)
@@ -678,29 +826,62 @@ fullbrightBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- ✅ ОТ МЕНЯ: Reset Character
-local resetBtn = Instance.new("TextButton")
-resetBtn.Size = UDim2.new(1,-30,0,50)
-resetBtn.Position = UDim2.fromOffset(15,234)
-resetBtn.BackgroundColor3 = Color3.fromRGB(180,50,50)
-resetBtn.Text = "⚠ Reset Character"
-resetBtn.TextColor3 = Color3.new(1,1,1)
-resetBtn.TextSize = 16
-resetBtn.Font = Enum.Font.GothamBold
-resetBtn.Parent = miscMenu
-Instance.new("UICorner",resetBtn).CornerRadius = UDim.new(0,11)
-resetBtn.MouseButton1Click:Connect(function()
-    local char = player.Character
-    if char then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then hum.Health = 0 end
+local hitboxBtn = Instance.new("TextButton")
+hitboxBtn.Size = UDim2.new(1,-30,0,48)
+hitboxBtn.Position = UDim2.fromOffset(15,222)
+hitboxBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+hitboxBtn.Text = "Hitbox Expand: OFF"
+hitboxBtn.TextColor3 = Color3.new(1,1,1)
+hitboxBtn.TextSize = 16
+hitboxBtn.Font = Enum.Font.GothamBold
+hitboxBtn.Parent = miscMenu
+Instance.new("UICorner",hitboxBtn).CornerRadius = UDim.new(0,11)
+hitboxBtn.MouseButton1Click:Connect(function()
+    hitboxEnabled = not hitboxEnabled
+    if hitboxEnabled then
+        hitboxConn = RunService.Heartbeat:Connect(function()
+            for _, p in ipairs(Players:GetPlayers()) do
+                if p ~= player and p.Character then
+                    for _, part in ipairs(p.Character:GetDescendants()) do
+                        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                            part.Size = Vector3.new(10,10,10)
+                            part.Transparency = 0.7
+                            part.CanCollide = false
+                            part.Massless = true
+                        end
+                    end
+                end
+            end
+        end)
+        hitboxBtn.Text = "Hitbox Expand: ON"
+        hitboxBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
+    else
+        if hitboxConn then hitboxConn:Disconnect(); hitboxConn = nil end
+        hitboxBtn.Text = "Hitbox Expand: OFF"
+        hitboxBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
     end
 end)
 
--- ✅ ОТ МЕНЯ: TP to Mouse
+local resetCamBtn = Instance.new("TextButton")
+resetCamBtn.Size = UDim2.new(1,-30,0,48)
+resetCamBtn.Position = UDim2.fromOffset(15,276)
+resetCamBtn.BackgroundColor3 = Color3.fromRGB(60,60,120)
+resetCamBtn.Text = "🔄 Reset Camera"
+resetCamBtn.TextColor3 = Color3.new(1,1,1)
+resetCamBtn.TextSize = 16
+resetCamBtn.Font = Enum.Font.GothamBold
+resetCamBtn.Parent = miscMenu
+Instance.new("UICorner",resetCamBtn).CornerRadius = UDim.new(0,11)
+resetCamBtn.MouseButton1Click:Connect(function()
+    local char = player.Character
+    if char and char:FindFirstChild("Head") then
+        Camera.CameraSubject = char.Head
+    end
+end)
+
 local tpMouseBtn = Instance.new("TextButton")
-tpMouseBtn.Size = UDim2.new(1,-30,0,50)
-tpMouseBtn.Position = UDim2.fromOffset(15,292)
+tpMouseBtn.Size = UDim2.new(1,-30,0,48)
+tpMouseBtn.Position = UDim2.fromOffset(15,330)
 tpMouseBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
 tpMouseBtn.Text = "TP to Mouse"
 tpMouseBtn.TextColor3 = Color3.new(1,1,1)
@@ -719,8 +900,8 @@ tpMouseBtn.MouseButton1Click:Connect(function()
 end)
 
 local tpPlayerBtn = Instance.new("TextButton")
-tpPlayerBtn.Size = UDim2.new(1,-30,0,50)
-tpPlayerBtn.Position = UDim2.fromOffset(15,350)
+tpPlayerBtn.Size = UDim2.new(1,-30,0,48)
+tpPlayerBtn.Position = UDim2.fromOffset(15,384)
 tpPlayerBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
 tpPlayerBtn.Text = "TP to Player"
 tpPlayerBtn.TextColor3 = Color3.new(1,1,1)
@@ -729,7 +910,7 @@ tpPlayerBtn.Font = Enum.Font.GothamBold
 tpPlayerBtn.Parent = miscMenu
 Instance.new("UICorner",tpPlayerBtn).CornerRadius = UDim.new(0,11)
 
--- ========== ПОДМЕНЮ TP TO PLAYER (маленькое + перетаскиваемое) ==========
+-- ========== ПОДМЕНЮ TP TO PLAYER ==========
 local tpMenu, tpTitle, tpBack = createSubmenu("TP TO PLAYER")
 
 local tpScroll = Instance.new("ScrollingFrame")
@@ -787,83 +968,13 @@ local function refreshTPList()
     tpScroll.CanvasSize = UDim2.new(0,0,0,y)
 end
 
--- ========== ОКНО СЛАЙДЕРА ==========
-local sliderPopup = Instance.new("Frame")
-sliderPopup.Size = UDim2.fromOffset(0,0)
-sliderPopup.Position = UDim2.fromScale(.5,.5)
-sliderPopup.AnchorPoint = Vector2.new(.5,.5)
-sliderPopup.BackgroundColor3 = Color3.fromRGB(20,20,28)
-sliderPopup.Visible = false
-sliderPopup.Parent = gui
-Instance.new("UICorner",sliderPopup).CornerRadius = UDim.new(0,16)
-
-local sliderTitle = Instance.new("TextLabel")
-sliderTitle.Size = UDim2.new(1,-60,0,50)
-sliderTitle.Position = UDim2.fromOffset(15,5)
-sliderTitle.BackgroundTransparency = 1
-sliderTitle.Text = "Slider"
-sliderTitle.TextColor3 = Color3.new(1,1,1)
-sliderTitle.TextSize = 18
-sliderTitle.Font = Enum.Font.GothamBold
-sliderTitle.TextXAlignment = Enum.TextXAlignment.Left
-sliderTitle.Parent = sliderPopup
-
-local sliderClose = Instance.new("TextButton")
-sliderClose.Size = UDim2.fromOffset(40,40)
-sliderClose.Position = UDim2.new(1,-48,0,10)
-sliderClose.BackgroundColor3 = Color3.fromRGB(35,35,40)
-sliderClose.Text = "X"
-sliderClose.TextColor3 = Color3.new(1,1,1)
-sliderClose.TextSize = 18
-sliderClose.Font = Enum.Font.GothamBold
-sliderClose.Parent = sliderPopup
-Instance.new("UICorner",sliderClose).CornerRadius = UDim.new(0,10)
-
-local sliderHolder = Instance.new("Frame")
-sliderHolder.Size = UDim2.new(1,-30,0,80)
-sliderHolder.Position = UDim2.fromOffset(15,70)
-sliderHolder.BackgroundTransparency = 1
-sliderHolder.Parent = sliderPopup
-
-local sliderInstance = nil
-local function hideSliderPopup()
-    Tween:Create(sliderPopup, TweenInfo.new(.18), {Size = UDim2.fromOffset(0,0)}):Play()
-    task.wait(.18)
-    sliderPopup.Visible = false
-    if sliderInstance then sliderInstance:Destroy(); sliderInstance = nil end
-end
-local function showSliderPopup(title, minV, maxV, startV, callback)
-    sliderTitle.Text = title
-    if sliderInstance then sliderInstance:Destroy(); sliderInstance = nil end
-    sliderInstance = createSlider(sliderHolder, 0, minV, maxV, startV, title, callback)
-    sliderPopup.Visible = true
-    sliderPopup.Size = UDim2.fromOffset(0,0)
-    Tween:Create(sliderPopup, TweenInfo.new(.22, Enum.EasingStyle.Back), {Size = UDim2.fromOffset(300,180)}):Play()
-end
-sliderClose.MouseButton1Click:Connect(hideSliderPopup)
-
-speedBtn.MouseButton1Click:Connect(function()
-    showSliderPopup("Speed", 1, 500, currentSpeed, function(v)
-        currentSpeed = v
-        speedBtn.Text = "Speed: "..math.floor(v)
-    end)
-end)
-jumpBtn.MouseButton1Click:Connect(function()
-    showSliderPopup("Jump", 5, 30, currentJump, function(v)
-        currentJump = v
-        jumpBtn.Text = "Jump: "..math.floor(v)
-    end)
-end)
-
--- ========== ФИКС SPEED + JUMP ==========
+-- ========== ФИКС SPEED ==========
 RunService.Heartbeat:Connect(function()
     local char = player.Character
     if not char then return end
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
-    if hum.UseJumpPower ~= true then hum.UseJumpPower = true end
     if hum.WalkSpeed ~= currentSpeed then hum.WalkSpeed = currentSpeed end
-    if hum.JumpPower ~= currentJump then hum.JumpPower = currentJump end
 end)
 
 -- ========== НАВИГАЦИЯ ==========
@@ -885,37 +996,38 @@ close.Activated:Connect(hideMain)
 espBack.Activated:Connect(function() backToMain(espMenu) end)
 playerBack.Activated:Connect(function() backToMain(playerMenu) end)
 flyBack.Activated:Connect(function() setFly(false); backToMain(flyMenu) end)
+aimbotBack.Activated:Connect(function() backToMain(aimbotMenu) end)
 miscBack.Activated:Connect(function() backToMain(miscMenu) end)
 tpBack.Activated:Connect(function() backToMain(tpMenu) end)
 
 mainButtons[1].Activated:Connect(function() openSub(espMenu, 340, 400) end)
-mainButtons[2].Activated:Connect(function() openSub(playerMenu, 340, 350) end)
-mainButtons[3].Activated:Connect(function() openSub(miscMenu, 340, 430) end)
+mainButtons[2].Activated:Connect(function() openSub(playerMenu, 340, 280) end)
+mainButtons[3].Activated:Connect(function() openSub(aimbotMenu, 340, 300) end)
+mainButtons[4].Activated:Connect(function() openSub(miscMenu, 340, 450) end)
 
 flyBtn.Activated:Connect(function()
     closeFrame(playerMenu)
     task.wait(.05)
-    openFrame(flyMenu, 340, 270)
+    openFrame(flyMenu, 340, 245)
 end)
 
 tpPlayerBtn.Activated:Connect(function()
     refreshTPList()
     closeFrame(miscMenu)
     task.wait(.05)
-    -- ✅ МАЛЕНЬКОЕ ОКНО TP (260x340)
     openFrame(tpMenu, 260, 340)
 end)
 
--- ========== ПЕРЕТАСКИВАНИЕ ВСЕХ ОКОН ==========
+-- ========== ПЕРЕТАСКИВАНИЕ ==========
 makeDraggable(menu, title)
 makeDraggable(espMenu, espTitle)
 makeDraggable(playerMenu, playerTitle)
 makeDraggable(flyMenu, flyTitle)
+makeDraggable(aimbotMenu, aimbotTitle)
 makeDraggable(miscMenu, miscTitle)
 makeDraggable(tpMenu, tpTitle)
-makeDraggable(sliderPopup, sliderTitle)
+makeDraggable(inputPopup, popupTitle)
 
--- ========== ПЕРЕТАСКИВАНИЕ ИКОНКИ ==========
 local dragging, startPos, iconStart = false, nil, nil
 icon.InputBegan:Connect(function(inp)
     if inp.UserInputType == Enum.UserInputType.Touch or inp.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -940,10 +1052,10 @@ player.CharacterAdded:Connect(function(char)
     task.wait(.5)
     local hum = char:FindFirstChildOfClass("Humanoid")
     if hum then
-        hum.UseJumpPower = true
         hum.WalkSpeed = currentSpeed
-        hum.JumpPower = currentJump
     end
 end)
 
-print("PART 2/2 LOADED — FLY ПО КАМЕРЕ, DRAG ВКЛЮЧЕН")
+updateFovCircle()
+
+print("PART 2/2-B LOADED — ALL SYSTEMS GO")
