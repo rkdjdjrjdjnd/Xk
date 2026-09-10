@@ -19,12 +19,12 @@ local LANG = {
         player = "PLAYER",
         aimbot = "AIMBOT",
         misc = "MISC",
+        settings = "SETTINGS",
         enable_esp = "Enable ESP",
         boxes = "Boxes",
         names = "Names",
         health = "Health",
         distance = "Distance",
-        settings = "SETTINGS",
         language = "Language",
         speed = "Speed",
         infinite_jump = "Infinite Jump",
@@ -40,20 +40,13 @@ local LANG = {
         part = "Part",
         team_check = "Team Check",
         noclip = "Noclip",
-        anti_afk = "Anti-AFK",
         fullbright = "Fullbright",
-        hitbox = "Hitbox Expand",
-        tp_mouse = "TP to Mouse",
         tp_player = "TP to Player",
         fling = "🌀 Fling Player",
         no_players = "No players",
         ok = "OK",
         enter_value = "Enter value...",
         not_number = "Not a number!",
-        esp_settings_text = "ESP settings will be here:\ncolor, thickness, font, distance...",
-        fly_settings_text = "Fly settings will be here:\nsmoothness, fly type, keys...",
-        aimbot_settings_text = "Aimbot settings will be here:\naim speed, priority, auto-shoot...",
-        misc_settings_text = "MISC settings will be here:\nradii, speeds, hotkeys...",
     },
     RU = {
         title = "AD МЕНЮ",
@@ -61,12 +54,12 @@ local LANG = {
         player = "ИГРОК",
         aimbot = "АИМБОТ",
         misc = "РАЗНОЕ",
+        settings = "НАСТРОЙКИ",
         enable_esp = "Включить ESP",
         boxes = "Рамки",
         names = "Имена",
         health = "Здоровье",
         distance = "Дистанция",
-        settings = "НАСТРОЙКИ",
         language = "Язык",
         speed = "Скорость",
         infinite_jump = "Беск. прыжок",
@@ -82,20 +75,13 @@ local LANG = {
         part = "Часть",
         team_check = "Проверка команды",
         noclip = "Сквозь стены",
-        anti_afk = "Анти-АФК",
         fullbright = "Яркость",
-        hitbox = "Увеличение хитбокса",
-        tp_mouse = "ТП к курсору",
         tp_player = "ТП к игроку",
         fling = "🌀 Флип игрока",
         no_players = "Нет игроков",
         ok = "ОК",
         enter_value = "Введи число...",
         not_number = "Не число!",
-        esp_settings_text = "Тут будут настройки ESP:\nцвет, толщина, шрифт, дистанция...",
-        fly_settings_text = "Тут будут настройки Fly:\nплавность, тип полёта, клавиши...",
-        aimbot_settings_text = "Тут будут настройки Aimbot:\nскорость наведения, приоритет...",
-        misc_settings_text = "Тут будут настройки MISC:\nрадиусы, скорости, горячие клавиши...",
     }
 }
 
@@ -152,7 +138,7 @@ dot.Parent = icon
 Instance.new("UICorner",dot).CornerRadius = UDim.new(1,0)
 
 -- ========== ХЕЛПЕРЫ ==========
-local function createSubmenu(titleKey)
+local function createSubmenu(titleText)
     local f = Instance.new("Frame")
     f.Size = UDim2.fromOffset(0,0)
     f.Position = UDim2.fromScale(.5,.5)
@@ -162,16 +148,15 @@ local function createSubmenu(titleKey)
     f.Parent = gui
     Instance.new("UICorner",f).CornerRadius = UDim.new(0,16)
     local t = Instance.new("TextLabel")
-    t.Size = UDim2.new(1,-100,0,50)
+    t.Size = UDim2.new(1,-60,0,50)
     t.Position = UDim2.fromOffset(15,5)
     t.BackgroundTransparency = 1
-    t.Text = titleKey
+    t.Text = titleText
     t.TextColor3 = Color3.new(1,1,1)
     t.TextSize = 20
     t.Font = Enum.Font.GothamBold
     t.TextXAlignment = Enum.TextXAlignment.Left
     t.Parent = f
-    t:SetAttribute("titleKey", titleKey)
     local back = Instance.new("TextButton")
     back.Size = UDim2.fromOffset(40,40)
     back.Position = UDim2.new(1,-48,0,10)
@@ -196,9 +181,9 @@ local function closeFrame(f)
     f.Visible = false
 end
 
--- ========== ГЛАВНОЕ МЕНЮ ==========
+-- ========== ГЛАВНОЕ МЕНЮ (5 кнопок) ==========
 local menu = Instance.new("Frame")
-menu.Size = UDim2.fromOffset(300,390)
+menu.Size = UDim2.fromOffset(300,395)
 menu.Position = UDim2.fromScale(.5,.5)
 menu.AnchorPoint = Vector2.new(.5,.5)
 menu.BackgroundColor3 = Color3.fromRGB(12,12,16)
@@ -230,15 +215,15 @@ close.Parent = menu
 Instance.new("UICorner",close).CornerRadius = UDim.new(0,10)
 
 local mainButtons = {}
-local mainKeys = {"esp","player","aimbot","misc"}
+local mainKeys = {"esp","player","aimbot","misc","settings"}
 for i,key in ipairs(mainKeys) do
     local b = Instance.new("TextButton")
-    b.Size = UDim2.new(1,-30,0,65)
-    b.Position = UDim2.fromOffset(15,65+(i-1)*75)
-    b.BackgroundColor3 = Color3.fromRGB(28,28,35)
+    b.Size = UDim2.new(1,-30,0,55)
+    b.Position = UDim2.fromOffset(15,60+(i-1)*62)
+    b.BackgroundColor3 = (key == "settings") and Color3.fromRGB(40,50,90) or Color3.fromRGB(28,28,35)
     b.Text = T(key)
     b.TextColor3 = Color3.new(1,1,1)
-    b.TextSize = 18
+    b.TextSize = 17
     b.Font = Enum.Font.GothamBold
     b.Parent = menu
     Instance.new("UICorner",b).CornerRadius = UDim.new(0,11)
@@ -249,7 +234,7 @@ end
 local function openMain()
     menu.Visible = true
     menu.Size = UDim2.fromOffset(0,0)
-    Tween:Create(menu, TweenInfo.new(.28, Enum.EasingStyle.Back), {Size = UDim2.fromOffset(300,390)}):Play()
+    Tween:Create(menu, TweenInfo.new(.28, Enum.EasingStyle.Back), {Size = UDim2.fromOffset(300,395)}):Play()
 end
 local function hideMain()
     Tween:Create(menu, TweenInfo.new(.18), {Size = UDim2.fromOffset(0,0)}):Play()
@@ -257,19 +242,8 @@ local function hideMain()
     menu.Visible = false
 end
 
--- ========== ESP (КОМПАКТНО + ⚙) ==========
+-- ========== ESP (КОМПАКТНО, БЕЗ ⚙) ==========
 local espMenu, espTitle, espBack = createSubmenu(T("esp").." (OFF)")
-
-local espSettingsBtn = Instance.new("TextButton")
-espSettingsBtn.Size = UDim2.fromOffset(40,40)
-espSettingsBtn.Position = UDim2.new(1,-92,0,10)
-espSettingsBtn.BackgroundColor3 = Color3.fromRGB(50,50,60)
-espSettingsBtn.Text = "⚙"
-espSettingsBtn.TextColor3 = Color3.new(1,1,1)
-espSettingsBtn.TextSize = 22
-espSettingsBtn.Font = Enum.Font.GothamBold
-espSettingsBtn.Parent = espMenu
-Instance.new("UICorner",espSettingsBtn).CornerRadius = UDim.new(0,10)
 
 local espEnabled = false
 local espSettings = {boxes=false, names=false, health=false, distance=false}
@@ -317,32 +291,6 @@ createSwitch(espMenu, 92, "boxes", function() return espSettings.boxes end, func
 createSwitch(espMenu, 129, "names", function() return espSettings.names end, function(v) espSettings.names = v end)
 createSwitch(espMenu, 166, "health", function() return espSettings.health end, function(v) espSettings.health = v end)
 createSwitch(espMenu, 203, "distance", function() return espSettings.distance end, function(v) espSettings.distance = v end)
-
--- ESP SETTINGS (шестерёнка)
-local espSettingsMenu, espSettingsTitle, espSettingsBack = createSubmenu(T("settings"))
-local espSetText = Instance.new("TextLabel")
-espSetText.Size = UDim2.new(1,-30,0,80)
-espSetText.Position = UDim2.fromOffset(15,70)
-espSetText.BackgroundTransparency = 1
-espSetText.Text = T("esp_settings_text")
-espSetText.TextColor3 = Color3.fromRGB(150,150,150)
-espSetText.TextSize = 14
-espSetText.Font = Enum.Font.Gotham
-espSetText.TextWrapped = true
-espSetText.TextYAlignment = Enum.TextYAlignment.Top
-espSetText.Parent = espSettingsMenu
-espSetText:SetAttribute("langKey", "esp_settings_text")
-
-espSettingsBtn.Activated:Connect(function()
-    closeFrame(espMenu)
-    task.wait(.05)
-    openFrame(espSettingsMenu, 340, 200)
-end)
-espSettingsBack.Activated:Connect(function()
-    closeFrame(espSettingsMenu)
-    task.wait(.05)
-    openFrame(espMenu, 340, 260)
-end)
 
 local espObjects = {}
 clearESP = function()
@@ -603,19 +551,8 @@ flyBtn.Font = Enum.Font.GothamBold
 flyBtn.Parent = playerMenu
 Instance.new("UICorner",flyBtn).CornerRadius = UDim.new(0,11)
 
--- ========== FLY (СТОИТ РОВНО + ⚙) ==========
+-- ========== FLY ==========
 local flyMenu, flyTitle, flyBack = createSubmenu(T("fly"))
-
-local flySettingsBtn = Instance.new("TextButton")
-flySettingsBtn.Size = UDim2.fromOffset(40,40)
-flySettingsBtn.Position = UDim2.new(1,-92,0,10)
-flySettingsBtn.BackgroundColor3 = Color3.fromRGB(50,50,60)
-flySettingsBtn.Text = "⚙"
-flySettingsBtn.TextColor3 = Color3.new(1,1,1)
-flySettingsBtn.TextSize = 22
-flySettingsBtn.Font = Enum.Font.GothamBold
-flySettingsBtn.Parent = flyMenu
-Instance.new("UICorner",flySettingsBtn).CornerRadius = UDim.new(0,10)
 
 local flyEnabled = false
 local flySpeed = 60
@@ -693,32 +630,6 @@ local function setFly(on)
 end
 flyToggle.MouseButton1Click:Connect(function() setFly(not flyEnabled) end)
 
--- FLY SETTINGS
-local flySettingsMenu, flySettingsTitle, flySettingsBack = createSubmenu(T("settings"))
-local flySetText = Instance.new("TextLabel")
-flySetText.Size = UDim2.new(1,-30,0,80)
-flySetText.Position = UDim2.fromOffset(15,70)
-flySetText.BackgroundTransparency = 1
-flySetText.Text = T("fly_settings_text")
-flySetText.TextColor3 = Color3.fromRGB(150,150,150)
-flySetText.TextSize = 14
-flySetText.Font = Enum.Font.Gotham
-flySetText.TextWrapped = true
-flySetText.TextYAlignment = Enum.TextYAlignment.Top
-flySetText.Parent = flySettingsMenu
-flySetText:SetAttribute("langKey", "fly_settings_text")
-
-flySettingsBtn.Activated:Connect(function()
-    closeFrame(flyMenu)
-    task.wait(.05)
-    openFrame(flySettingsMenu, 340, 200)
-end)
-flySettingsBack.Activated:Connect(function()
-    closeFrame(flySettingsMenu)
-    task.wait(.05)
-    openFrame(flyMenu, 340, 200)
-end)
-
 local flySpeedBtn = Instance.new("TextButton")
 flySpeedBtn.Size = UDim2.new(1,-30,0,55)
 flySpeedBtn.Position = UDim2.fromOffset(15,130)
@@ -736,22 +647,12 @@ flySpeedBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- ========== AIMBOT (РЕЗКИЙ + КРУГ + МЕТРЫ + ⚙) ==========
+-- ========== AIMBOT (FOV КРУГ + МЕТРЫ) ==========
 local aimbotMenu, aimbotTitle, aimbotBack = createSubmenu(T("aimbot"))
 
-local aimbotSettingsBtn = Instance.new("TextButton")
-aimbotSettingsBtn.Size = UDim2.fromOffset(40,40)
-aimbotSettingsBtn.Position = UDim2.new(1,-92,0,10)
-aimbotSettingsBtn.BackgroundColor3 = Color3.fromRGB(50,50,60)
-aimbotSettingsBtn.Text = "⚙"
-aimbotSettingsBtn.TextColor3 = Color3.new(1,1,1)
-aimbotSettingsBtn.TextSize = 22
-aimbotSettingsBtn.Font = Enum.Font.GothamBold
-aimbotSettingsBtn.Parent = aimbotMenu
-Instance.new("UICorner",aimbotSettingsBtn).CornerRadius = UDim.new(0,10)
-
 local aimbotEnabled = false
-local aimbotRadius = 120
+local aimbotRadius = 200
+local aimbotRange = 300
 local aimbotTeamCheck = true
 local aimbotPart = "Head"
 
@@ -759,7 +660,7 @@ local fovCircle = Instance.new("Frame")
 fovCircle.Size = UDim2.fromOffset(aimbotRadius*2, aimbotRadius*2)
 fovCircle.Position = UDim2.new(0.5, -aimbotRadius, 0.5, -aimbotRadius)
 fovCircle.BackgroundTransparency = 1
-fovCircle.BorderSizePixel = 2
+fovCircle.BorderSizePixel = 3
 fovCircle.BorderColor3 = Color3.fromRGB(255,80,80)
 fovCircle.Visible = false
 fovCircle.ZIndex = 5
@@ -767,28 +668,35 @@ fovCircle.Parent = gui
 Instance.new("UICorner",fovCircle).CornerRadius = UDim.new(1,0)
 
 local fovLabel = Instance.new("TextLabel")
-fovLabel.Size = UDim2.fromOffset(200,20)
-fovLabel.Position = UDim2.new(0.5, -100, 0.5, aimbotRadius + 10)
+fovLabel.Size = UDim2.fromOffset(220,22)
+fovLabel.Position = UDim2.new(0.5, -110, 0.5, aimbotRadius + 15)
 fovLabel.BackgroundTransparency = 1
-fovLabel.Text = "120px (~0m)"
+fovLabel.Text = ""
 fovLabel.TextColor3 = Color3.fromRGB(255,80,80)
-fovLabel.TextSize = 13
+fovLabel.TextSize = 14
 fovLabel.Font = Enum.Font.GothamBold
-fovLabel.TextStrokeTransparency = 0.5
+fovLabel.TextStrokeTransparency = 0.4
 fovLabel.Visible = false
 fovLabel.ZIndex = 6
 fovLabel.Parent = gui
 
-local function pxToMeters(px)
-    return math.floor(px / 3.5)
+local function pixelsToStuds(px)
+    local cam = workspace.CurrentCamera
+    if not cam then return 0 end
+    local viewportY = cam.ViewportSize.Y
+    local fovRad = math.rad(cam.FieldOfView)
+    local refDist = 50
+    local pxPerStud = viewportY / (2 * math.tan(fovRad/2) * refDist)
+    if pxPerStud <= 0 then return 0 end
+    return math.floor(px / pxPerStud)
 end
 
 local function updateFovCircle()
     fovCircle.Size = UDim2.fromOffset(aimbotRadius*2, aimbotRadius*2)
     fovCircle.Position = UDim2.new(0.5, -aimbotRadius, 0.5, -aimbotRadius)
     fovCircle.Visible = aimbotEnabled
-    fovLabel.Position = UDim2.new(0.5, -100, 0.5, aimbotRadius + 10)
-    fovLabel.Text = aimbotRadius.."px (~"..pxToMeters(aimbotRadius).."m)"
+    fovLabel.Position = UDim2.new(0.5, -110, 0.5, aimbotRadius + 15)
+    fovLabel.Text = aimbotRadius.."px (~"..pixelsToStuds(aimbotRadius).." studs)"
     fovLabel.Visible = aimbotEnabled
 end
 
@@ -810,30 +718,47 @@ aimbotToggle.MouseButton1Click:Connect(function()
 end)
 
 local aimbotRadiusBtn = Instance.new("TextButton")
-aimbotRadiusBtn.Size = UDim2.new(1,-30,0,50)
+aimbotRadiusBtn.Size = UDim2.new(1,-30,0,48)
 aimbotRadiusBtn.Position = UDim2.fromOffset(15,118)
 aimbotRadiusBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
-aimbotRadiusBtn.Text = T("radius")..": 120px (~34m)"
+aimbotRadiusBtn.Text = "FOV: "..aimbotRadius.."px"
 aimbotRadiusBtn.TextColor3 = Color3.new(1,1,1)
 aimbotRadiusBtn.TextSize = 16
 aimbotRadiusBtn.Font = Enum.Font.GothamBold
 aimbotRadiusBtn.Parent = aimbotMenu
 Instance.new("UICorner",aimbotRadiusBtn).CornerRadius = UDim.new(0,11)
 aimbotRadiusBtn.MouseButton1Click:Connect(function()
-    showPopup(T("radius").." (20-500)", "20-500", function(v)
+    showPopup("FOV Radius (50-500px)", "50-500", function(v)
         aimbotRadius = v
-        aimbotRadiusBtn.Text = T("radius")..": "..math.floor(v).."px (~"..pxToMeters(v).."m)"
+        aimbotRadiusBtn.Text = "FOV: "..math.floor(v).."px"
         updateFovCircle()
     end)
 end)
 
+local aimbotRangeBtn = Instance.new("TextButton")
+aimbotRangeBtn.Size = UDim2.new(1,-30,0,48)
+aimbotRangeBtn.Position = UDim2.fromOffset(15,172)
+aimbotRangeBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
+aimbotRangeBtn.Text = "Range: "..aimbotRange.." studs"
+aimbotRangeBtn.TextColor3 = Color3.new(1,1,1)
+aimbotRangeBtn.TextSize = 16
+aimbotRangeBtn.Font = Enum.Font.GothamBold
+aimbotRangeBtn.Parent = aimbotMenu
+Instance.new("UICorner",aimbotRangeBtn).CornerRadius = UDim.new(0,11)
+aimbotRangeBtn.MouseButton1Click:Connect(function()
+    showPopup("Range (10-2000 studs)", "10-2000", function(v)
+        aimbotRange = v
+        aimbotRangeBtn.Text = "Range: "..math.floor(v).." studs"
+    end)
+end)
+
 local aimbotPartBtn = Instance.new("TextButton")
-aimbotPartBtn.Size = UDim2.new(1,-30,0,50)
-aimbotPartBtn.Position = UDim2.fromOffset(15,176)
+aimbotPartBtn.Size = UDim2.new(1,-30,0,48)
+aimbotPartBtn.Position = UDim2.fromOffset(15,226)
 aimbotPartBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
 aimbotPartBtn.Text = T("part")..": Head"
 aimbotPartBtn.TextColor3 = Color3.new(1,1,1)
-aimbotPartBtn.TextSize = 17
+aimbotPartBtn.TextSize = 16
 aimbotPartBtn.Font = Enum.Font.GothamBold
 aimbotPartBtn.Parent = aimbotMenu
 Instance.new("UICorner",aimbotPartBtn).CornerRadius = UDim.new(0,11)
@@ -843,8 +768,8 @@ aimbotPartBtn.MouseButton1Click:Connect(function()
 end)
 
 local aimbotTeamBtn = Instance.new("TextButton")
-aimbotTeamBtn.Size = UDim2.new(1,-30,0,50)
-aimbotTeamBtn.Position = UDim2.fromOffset(15,234)
+aimbotTeamBtn.Size = UDim2.new(1,-30,0,48)
+aimbotTeamBtn.Position = UDim2.fromOffset(15,280)
 aimbotTeamBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
 aimbotTeamBtn.Text = T("team_check")..": "..T("on")
 aimbotTeamBtn.TextColor3 = Color3.new(1,1,1)
@@ -858,33 +783,6 @@ aimbotTeamBtn.MouseButton1Click:Connect(function()
     aimbotTeamBtn.BackgroundColor3 = aimbotTeamCheck and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
 end)
 
--- AIMBOT SETTINGS
-local aimbotSettingsMenu, aimbotSettingsTitle, aimbotSettingsBack = createSubmenu(T("settings"))
-local aimbotSetText = Instance.new("TextLabel")
-aimbotSetText.Size = UDim2.new(1,-30,0,80)
-aimbotSetText.Position = UDim2.fromOffset(15,70)
-aimbotSetText.BackgroundTransparency = 1
-aimbotSetText.Text = T("aimbot_settings_text")
-aimbotSetText.TextColor3 = Color3.fromRGB(150,150,150)
-aimbotSetText.TextSize = 14
-aimbotSetText.Font = Enum.Font.Gotham
-aimbotSetText.TextWrapped = true
-aimbotSetText.TextYAlignment = Enum.TextYAlignment.Top
-aimbotSetText.Parent = aimbotSettingsMenu
-aimbotSetText:SetAttribute("langKey", "aimbot_settings_text")
-
-aimbotSettingsBtn.Activated:Connect(function()
-    closeFrame(aimbotMenu)
-    task.wait(.05)
-    openFrame(aimbotSettingsMenu, 340, 200)
-end)
-aimbotSettingsBack.Activated:Connect(function()
-    closeFrame(aimbotSettingsMenu)
-    task.wait(.05)
-    openFrame(aimbotMenu, 340, 300)
-end)
-
--- ЛОГИКА AIMBOT — МГНОВЕННО
 RunService.RenderStepped:Connect(function()
     if not aimbotEnabled then return end
     local myChar = player.Character
@@ -893,20 +791,26 @@ RunService.RenderStepped:Connect(function()
     local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
     local closestPart = nil
     local closestDist = aimbotRadius
+    local myPos = myChar.Head.Position
 
     for _, target in ipairs(Players:GetPlayers()) do
         if target ~= player then
             if not (aimbotTeamCheck and target.Team and player.Team and target.Team == player.Team) then
                 local char = target.Character
-                if char and char.PrimaryPart then
-                    local part = char:FindFirstChild(aimbotPart) or char:FindFirstChild("Head")
-                    if part then
-                        local sp, onScreen = Camera:WorldToViewportPoint(part.Position)
-                        if onScreen then
-                            local d = (Vector2.new(sp.X, sp.Y) - center).Magnitude
-                            if d < closestDist then
-                                closestDist = d
-                                closestPart = part
+                if char and char.PrimaryPart and char:FindFirstChild("Head") then
+                    local distInStuds = (char.Head.Position - myPos).Magnitude
+                    if distInStuds <= aimbotRange then
+                        local part = char:FindFirstChild(aimbotPart) or char:FindFirstChild("Head")
+                        if part then
+                            local sp, onScreen = Camera:WorldToViewportPoint(part.Position)
+                            if onScreen then
+                                local screenDist = (Vector2.new(sp.X, sp.Y) - center).Magnitude
+                                if screenDist <= aimbotRadius then
+                                    if screenDist < closestDist then
+                                        closestDist = screenDist
+                                        closestPart = part
+                                    end
+                                end
                             end
                         end
                     end
@@ -956,33 +860,19 @@ end
 -- ========== MISC ==========
 local miscMenu, miscTitle, miscBack = createSubmenu(T("misc"))
 
-local miscSettingsBtn = Instance.new("TextButton")
-miscSettingsBtn.Size = UDim2.fromOffset(40,40)
-miscSettingsBtn.Position = UDim2.new(1,-92,0,10)
-miscSettingsBtn.BackgroundColor3 = Color3.fromRGB(50,50,60)
-miscSettingsBtn.Text = "⚙"
-miscSettingsBtn.TextColor3 = Color3.new(1,1,1)
-miscSettingsBtn.TextSize = 22
-miscSettingsBtn.Font = Enum.Font.GothamBold
-miscSettingsBtn.Parent = miscMenu
-Instance.new("UICorner",miscSettingsBtn).CornerRadius = UDim.new(0,10)
-
 local noclipEnabled = false
 local noclipConn = nil
-local antiAfkEnabled = false
-local antiAfkConn = nil
 local fullbrightEnabled = false
 local origLighting = {Ambient = Lighting.Ambient, Outdoor = Lighting.OutdoorAmbient, Brightness = Lighting.Brightness}
-local hitboxEnabled = false
-local hitboxConn = nil
 
+-- Noclip
 local noclipBtn = Instance.new("TextButton")
-noclipBtn.Size = UDim2.new(1,-30,0,48)
-noclipBtn.Position = UDim2.fromOffset(15,60)
+noclipBtn.Size = UDim2.new(1,-30,0,55)
+noclipBtn.Position = UDim2.fromOffset(15,65)
 noclipBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 noclipBtn.Text = T("noclip")..": "..T("off")
 noclipBtn.TextColor3 = Color3.new(1,1,1)
-noclipBtn.TextSize = 16
+noclipBtn.TextSize = 17
 noclipBtn.Font = Enum.Font.GothamBold
 noclipBtn.Parent = miscMenu
 Instance.new("UICorner",noclipBtn).CornerRadius = UDim.new(0,11)
@@ -1012,40 +902,14 @@ noclipBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-local antiAfkBtn = Instance.new("TextButton")
-antiAfkBtn.Size = UDim2.new(1,-30,0,48)
-antiAfkBtn.Position = UDim2.fromOffset(15,114)
-antiAfkBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-antiAfkBtn.Text = T("anti_afk")..": "..T("off")
-antiAfkBtn.TextColor3 = Color3.new(1,1,1)
-antiAfkBtn.TextSize = 16
-antiAfkBtn.Font = Enum.Font.GothamBold
-antiAfkBtn.Parent = miscMenu
-Instance.new("UICorner",antiAfkBtn).CornerRadius = UDim.new(0,11)
-antiAfkBtn.MouseButton1Click:Connect(function()
-    antiAfkEnabled = not antiAfkEnabled
-    if antiAfkEnabled then
-        antiAfkConn = RunService.Heartbeat:Connect(function()
-            local vim = game:GetService("VirtualUser")
-            vim:CaptureController()
-            vim:ClickButton2(Vector2.new())
-        end)
-        antiAfkBtn.Text = T("anti_afk")..": "..T("on")
-        antiAfkBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
-    else
-        if antiAfkConn then antiAfkConn:Disconnect(); antiAfkConn = nil end
-        antiAfkBtn.Text = T("anti_afk")..": "..T("off")
-        antiAfkBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-    end
-end)
-
+-- Fullbright
 local fullbrightBtn = Instance.new("TextButton")
-fullbrightBtn.Size = UDim2.new(1,-30,0,48)
-fullbrightBtn.Position = UDim2.fromOffset(15,168)
+fullbrightBtn.Size = UDim2.new(1,-30,0,55)
+fullbrightBtn.Position = UDim2.fromOffset(15,130)
 fullbrightBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 fullbrightBtn.Text = T("fullbright")..": "..T("off")
 fullbrightBtn.TextColor3 = Color3.new(1,1,1)
-fullbrightBtn.TextSize = 16
+fullbrightBtn.TextSize = 17
 fullbrightBtn.Font = Enum.Font.GothamBold
 fullbrightBtn.Parent = miscMenu
 Instance.new("UICorner",fullbrightBtn).CornerRadius = UDim.new(0,11)
@@ -1066,181 +930,29 @@ fullbrightBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-local hitboxBtn = Instance.new("TextButton")
-hitboxBtn.Size = UDim2.new(1,-30,0,48)
-hitboxBtn.Position = UDim2.fromOffset(15,222)
-hitboxBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-hitboxBtn.Text = T("hitbox")..": "..T("off")
-hitboxBtn.TextColor3 = Color3.new(1,1,1)
-hitboxBtn.TextSize = 16
-hitboxBtn.Font = Enum.Font.GothamBold
-hitboxBtn.Parent = miscMenu
-Instance.new("UICorner",hitboxBtn).CornerRadius = UDim.new(0,11)
-hitboxBtn.MouseButton1Click:Connect(function()
-    hitboxEnabled = not hitboxEnabled
-    if hitboxEnabled then
-        hitboxConn = RunService.Heartbeat:Connect(function()
-            for _, p in ipairs(Players:GetPlayers()) do
-                if p ~= player and p.Character then
-                    for _, part in ipairs(p.Character:GetDescendants()) do
-                        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                            part.Size = Vector3.new(10,10,10)
-                            part.Transparency = 0.7
-                            part.CanCollide = false
-                            part.Massless = true
-                        end
-                    end
-                end
-            end
-        end)
-        hitboxBtn.Text = T("hitbox")..": "..T("on")
-        hitboxBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
-    else
-        if hitboxConn then hitboxConn:Disconnect(); hitboxConn = nil end
-        hitboxBtn.Text = T("hitbox")..": "..T("off")
-        hitboxBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-    end
-end)
-
-local tpMouseBtn = Instance.new("TextButton")
-tpMouseBtn.Size = UDim2.new(1,-30,0,48)
-tpMouseBtn.Position = UDim2.fromOffset(15,276)
-tpMouseBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
-tpMouseBtn.Text = T("tp_mouse")
-tpMouseBtn.TextColor3 = Color3.new(1,1,1)
-tpMouseBtn.TextSize = 16
-tpMouseBtn.Font = Enum.Font.GothamBold
-tpMouseBtn.Parent = miscMenu
-Instance.new("UICorner",tpMouseBtn).CornerRadius = UDim.new(0,11)
-tpMouseBtn.MouseButton1Click:Connect(function()
-    local mouse = player:GetMouse()
-    if mouse and mouse.Hit then
-        local char = player.Character
-        if char and char.PrimaryPart then
-            char.PrimaryPart.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0,3,0))
-        end
-    end
-end)
-
--- FLING PLAYER
+-- Fling Player
 local flingBtn = Instance.new("TextButton")
-flingBtn.Size = UDim2.new(1,-30,0,48)
-flingBtn.Position = UDim2.fromOffset(15,330)
+flingBtn.Size = UDim2.new(1,-30,0,55)
+flingBtn.Position = UDim2.fromOffset(15,195)
 flingBtn.BackgroundColor3 = Color3.fromRGB(120,40,180)
 flingBtn.Text = T("fling")
 flingBtn.TextColor3 = Color3.new(1,1,1)
-flingBtn.TextSize = 16
+flingBtn.TextSize = 17
 flingBtn.Font = Enum.Font.GothamBold
 flingBtn.Parent = miscMenu
 Instance.new("UICorner",flingBtn).CornerRadius = UDim.new(0,11)
 
--- TP TO PLAYER
+-- TP to Player
 local tpPlayerBtn = Instance.new("TextButton")
-tpPlayerBtn.Size = UDim2.new(1,-30,0,48)
-tpPlayerBtn.Position = UDim2.fromOffset(15,384)
+tpPlayerBtn.Size = UDim2.new(1,-30,0,55)
+tpPlayerBtn.Position = UDim2.fromOffset(15,260)
 tpPlayerBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
 tpPlayerBtn.Text = T("tp_player")
 tpPlayerBtn.TextColor3 = Color3.new(1,1,1)
-tpPlayerBtn.TextSize = 16
+tpPlayerBtn.TextSize = 17
 tpPlayerBtn.Font = Enum.Font.GothamBold
 tpPlayerBtn.Parent = miscMenu
 Instance.new("UICorner",tpPlayerBtn).CornerRadius = UDim.new(0,11)
-
--- MISC SETTINGS (⚙ с языком)
-local miscSettingsMenu, miscSettingsTitle, miscSettingsBack = createSubmenu(T("settings"))
-
-local miscSetText = Instance.new("TextLabel")
-miscSetText.Size = UDim2.new(1,-30,0,30)
-miscSetText.Position = UDim2.fromOffset(15,60)
-miscSetText.BackgroundTransparency = 1
-miscSetText.Text = T("settings")
-miscSetText.TextColor3 = Color3.new(1,1,1)
-miscSetText.TextSize = 16
-miscSetText.Font = Enum.Font.GothamBold
-miscSetText.TextXAlignment = Enum.TextXAlignment.Left
-miscSetText.Parent = miscSettingsMenu
-miscSetText:SetAttribute("langKey", "settings")
-
-local langBtn = Instance.new("TextButton")
-langBtn.Size = UDim2.new(1,-30,0,55)
-langBtn.Position = UDim2.fromOffset(15,100)
-langBtn.BackgroundColor3 = Color3.fromRGB(40,80,180)
-langBtn.Text = T("language")..": "..currentLang
-langBtn.TextColor3 = Color3.new(1,1,1)
-langBtn.TextSize = 17
-langBtn.Font = Enum.Font.GothamBold
-langBtn.Parent = miscSettingsMenu
-Instance.new("UICorner",langBtn).CornerRadius = UDim.new(0,11)
-
-local miscSettingsHint = Instance.new("TextLabel")
-miscSettingsHint.Size = UDim2.new(1,-30,0,80)
-miscSettingsHint.Position = UDim2.fromOffset(15,170)
-miscSettingsHint.BackgroundTransparency = 1
-miscSettingsHint.Text = T("misc_settings_text")
-miscSettingsHint.TextColor3 = Color3.fromRGB(150,150,150)
-miscSettingsHint.TextSize = 14
-miscSettingsHint.Font = Enum.Font.Gotham
-miscSettingsHint.TextWrapped = true
-miscSettingsHint.TextYAlignment = Enum.TextYAlignment.Top
-miscSettingsHint.Parent = miscSettingsMenu
-miscSettingsHint:SetAttribute("langKey", "misc_settings_text")
-
-miscSettingsBtn.Activated:Connect(function()
-    closeFrame(miscMenu)
-    task.wait(.05)
-    openFrame(miscSettingsMenu, 340, 280)
-end)
-miscSettingsBack.Activated:Connect(function()
-    closeFrame(miscSettingsMenu)
-    task.wait(.05)
-    openFrame(miscMenu, 340, 450)
-end)
-
--- ========== ПРИМЕНЕНИЕ ЯЗЫКА ==========
-local function applyLanguage()
-    -- Статические (через langKey)
-    for _, obj in ipairs(gui:GetDescendants()) do
-        local key = obj:GetAttribute("langKey")
-        if key and (obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox")) then
-            obj.Text = T(key)
-        end
-    end
-    -- Динамические (с состояниями)
-    espTitle.Text = T("esp").." ("..(espEnabled and T("on") or T("off"))..")"
-    flyToggle.Text = flyEnabled and T("fly_on") or T("fly_off")
-    flyBtn.Text = flyEnabled and T("fly_on") or T("fly")
-    speedBtn.Text = T("speed")..": "..math.floor(currentSpeed)
-    infJumpBtn.Text = T("infinite_jump")..": "..(infiniteJump and T("on") or T("off"))
-    flySpeedBtn.Text = T("fly_speed")..": "..math.floor(flySpeed)
-    aimbotToggle.Text = aimbotEnabled and T("aimbot_on") or T("aimbot_off")
-    aimbotRadiusBtn.Text = T("radius")..": "..aimbotRadius.."px (~"..math.floor(aimbotRadius/3.5).."m)"
-    aimbotPartBtn.Text = T("part")..": "..aimbotPart
-    aimbotTeamBtn.Text = T("team_check")..": "..(aimbotTeamCheck and T("on") or T("off"))
-    noclipBtn.Text = T("noclip")..": "..(noclipEnabled and T("on") or T("off"))
-    antiAfkBtn.Text = T("anti_afk")..": "..(antiAfkEnabled and T("on") or T("off"))
-    fullbrightBtn.Text = T("fullbright")..": "..(fullbrightEnabled and T("on") or T("off"))
-    hitboxBtn.Text = T("hitbox")..": "..(hitboxEnabled and T("on") or T("off"))
-    tpMouseBtn.Text = T("tp_mouse")
-    tpPlayerBtn.Text = T("tp_player")
-    flingBtn.Text = T("fling")
-    popupOk.Text = T("ok")
-    popupBox.PlaceholderText = T("enter_value")
-    langBtn.Text = T("language")..": "..currentLang
-    espSettingsTitle.Text = T("settings")
-    flySettingsTitle.Text = T("settings")
-    aimbotSettingsTitle.Text = T("settings")
-    miscSettingsTitle.Text = T("settings")
-    -- Заголовки меню
-    title.Text = T("title")
-    playerTitle.Text = T("player")
-    aimbotTitle.Text = T("aimbot")
-    miscTitle.Text = T("misc")
-end
-
-langBtn.MouseButton1Click:Connect(function()
-    currentLang = (currentLang == "EN") and "RU" or "EN"
-    applyLanguage()
-end)
 
 -- ========== TP TO PLAYER ==========
 local tpMenu, tpTitle, tpBack = createSubmenu(T("tp_player"))
@@ -1300,7 +1012,7 @@ local function refreshTPList()
     tpScroll.CanvasSize = UDim2.new(0,0,0,y)
 end
 
--- ========== FLING MENU ==========
+-- ========== FLING MENU (ЖОСКИЙ) ==========
 local flingMenu, flingTitle, flingBack = createSubmenu(T("fling"))
 
 local flingScroll = Instance.new("ScrollingFrame")
@@ -1328,42 +1040,85 @@ local function flingTarget(targetPlayer)
     local root = myChar.PrimaryPart
 
     local savedCollide = {}
+    local savedMassless = {}
     for _, p in ipairs(myChar:GetDescendants()) do
         if p:IsA("BasePart") then
             savedCollide[p] = p.CanCollide
-            p.CanCollide = false
+            savedMassless[p] = p.Massless
         end
     end
+
     for _, p in ipairs(myChar:GetDescendants()) do
-        if p:IsA("BasePart") then p.Massless = false end
+        if p:IsA("BasePart") then
+            p.CanCollide = true
+            p.Massless = true
+            p.CustomPhysicalProperties = PhysicalProperties.new(0.01, 0.3, 0.5, 1, 1)
+        end
     end
 
-    root.CFrame = targetChar.PrimaryPart.CFrame * CFrame.new(1.5, 0, 1.5)
-    if hum then hum.PlatformStand = true end
+    if hum then
+        hum.PlatformStand = true
+        hum.AutoRotate = false
+    end
 
     local spin = Instance.new("BodyAngularVelocity")
     spin.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-    spin.AngularVelocity = Vector3.new(0, 500, 0)
-    spin.P = 10000
+    spin.AngularVelocity = Vector3.new(0, 100000, 0)
+    spin.P = 100000
     spin.Parent = root
 
-    local move = Instance.new("BodyVelocity")
-    move.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-    move.Velocity = (targetChar.PrimaryPart.Position - root.Position).Unit * 100
-    move.Parent = root
+    local push = Instance.new("BodyVelocity")
+    push.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    push.Velocity = Vector3.new(0,0,0)
+    push.P = 100000
+    push.Parent = root
+
+    local function oneHit()
+        local tChar = targetPlayer.Character
+        if not tChar or not tChar.PrimaryPart then return end
+        local tRoot = tChar.PrimaryPart
+        root.CFrame = tRoot.CFrame * CFrame.new(0, 0, 0)
+        push.Velocity = (tRoot.Position - root.Position).Unit * 5000
+        if push.Velocity.Magnitude < 100 then
+            push.Velocity = Vector3.new(math.random(-5000,5000), 5000, math.random(-5000,5000))
+        end
+        spin.AngularVelocity = Vector3.new(
+            math.random(-100000, 100000),
+            math.random(-100000, 100000),
+            math.random(-100000, 100000)
+        )
+    end
+
+    for i = 1, 5 do
+        oneHit()
+        task.wait(0.1)
+    end
+
+    local tChar = targetPlayer.Character
+    if tChar and tChar.PrimaryPart then
+        local tRoot = tChar.PrimaryPart
+        root.CFrame = tRoot.CFrame
+        push.Velocity = Vector3.new(math.random(-5000,5000), 8000, math.random(-5000,5000))
+        spin.AngularVelocity = Vector3.new(100000, 100000, 100000)
+    end
 
     task.wait(0.4)
-    root.CFrame = targetChar.PrimaryPart.CFrame * CFrame.new(0, 0, 0.5)
-    task.wait(0.3)
-
     spin:Destroy()
-    move:Destroy()
+    push:Destroy()
     root.CFrame = myOriginalCFrame
 
     for part, val in pairs(savedCollide) do
         if part and part.Parent then part.CanCollide = val end
     end
-    if hum then hum.PlatformStand = false end
+    for part, val in pairs(savedMassless) do
+        if part and part.Parent then part.Massless = val end
+    end
+
+    if hum then
+        hum.PlatformStand = false
+        hum.AutoRotate = true
+    end
+
     task.wait(0.3)
     flingActive = false
 end
@@ -1405,6 +1160,103 @@ local function refreshFlingList()
     flingScroll.CanvasSize = UDim2.new(0,0,0,y)
 end
 
+-- ========== SETTINGS (ВЫБОР ЯЗЫКА) ==========
+local settingsMenu, settingsTitle, settingsBack = createSubmenu(T("settings"))
+
+local currentLangLabel = Instance.new("TextLabel")
+currentLangLabel.Size = UDim2.new(1,-30,0,40)
+currentLangLabel.Position = UDim2.fromOffset(15,65)
+currentLangLabel.BackgroundTransparency = 1
+currentLangLabel.Text = (currentLang == "EN") and "Current language: EN" or "Текущий язык: RU"
+currentLangLabel.TextColor3 = Color3.new(1,1,1)
+currentLangLabel.TextSize = 16
+currentLangLabel.Font = Enum.Font.GothamBold
+currentLangLabel.TextXAlignment = Enum.TextXAlignment.Left
+currentLangLabel.Parent = settingsMenu
+
+local langENBtn = Instance.new("TextButton")
+langENBtn.Size = UDim2.new(1,-30,0,55)
+langENBtn.Position = UDim2.fromOffset(15,115)
+langENBtn.BackgroundColor3 = (currentLang == "EN") and Color3.fromRGB(0,150,80) or Color3.fromRGB(35,35,45)
+langENBtn.Text = "English"
+langENBtn.TextColor3 = Color3.new(1,1,1)
+langENBtn.TextSize = 18
+langENBtn.Font = Enum.Font.GothamBold
+langENBtn.Parent = settingsMenu
+Instance.new("UICorner",langENBtn).CornerRadius = UDim.new(0,11)
+
+local langRUBtn = Instance.new("TextButton")
+langRUBtn.Size = UDim2.new(1,-30,0,55)
+langRUBtn.Position = UDim2.fromOffset(15,180)
+langRUBtn.BackgroundColor3 = (currentLang == "RU") and Color3.fromRGB(0,150,80) or Color3.fromRGB(35,35,45)
+langRUBtn.Text = "Русский"
+langRUBtn.TextColor3 = Color3.new(1,1,1)
+langRUBtn.TextSize = 18
+langRUBtn.Font = Enum.Font.GothamBold
+langRUBtn.Parent = settingsMenu
+Instance.new("UICorner",langRUBtn).CornerRadius = UDim.new(0,11)
+
+local settingsInfo = Instance.new("TextLabel")
+settingsInfo.Size = UDim2.new(1,-30,0,60)
+settingsInfo.Position = UDim2.fromOffset(15,245)
+settingsInfo.BackgroundTransparency = 1
+settingsInfo.Text = "Choose your language below\nВыбери язык ниже"
+settingsInfo.TextColor3 = Color3.fromRGB(150,150,150)
+settingsInfo.TextSize = 13
+settingsInfo.Font = Enum.Font.Gotham
+settingsInfo.TextWrapped = true
+settingsInfo.TextYAlignment = Enum.TextYAlignment.Top
+settingsInfo.Parent = settingsMenu
+
+-- ========== APPLY LANGUAGE ==========
+local function applyLanguage()
+    for _, obj in ipairs(gui:GetDescendants()) do
+        local key = obj:GetAttribute("langKey")
+        if key and (obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox")) then
+            obj.Text = T(key)
+        end
+    end
+    espTitle.Text = T("esp").." ("..(espEnabled and T("on") or T("off"))..")"
+    flyToggle.Text = flyEnabled and T("fly_on") or T("fly_off")
+    flyBtn.Text = flyEnabled and T("fly_on") or T("fly")
+    speedBtn.Text = T("speed")..": "..math.floor(currentSpeed)
+    infJumpBtn.Text = T("infinite_jump")..": "..(infiniteJump and T("on") or T("off"))
+    flySpeedBtn.Text = T("fly_speed")..": "..math.floor(flySpeed)
+    aimbotToggle.Text = aimbotEnabled and T("aimbot_on") or T("aimbot_off")
+    aimbotPartBtn.Text = T("part")..": "..aimbotPart
+    aimbotTeamBtn.Text = T("team_check")..": "..(aimbotTeamCheck and T("on") or T("off"))
+    noclipBtn.Text = T("noclip")..": "..(noclipEnabled and T("on") or T("off"))
+    fullbrightBtn.Text = T("fullbright")..": "..(fullbrightEnabled and T("on") or T("off"))
+    tpPlayerBtn.Text = T("tp_player")
+    flingBtn.Text = T("fling")
+    popupOk.Text = T("ok")
+    popupBox.PlaceholderText = T("enter_value")
+    title.Text = T("title")
+    playerTitle.Text = T("player")
+    aimbotTitle.Text = T("aimbot")
+    miscTitle.Text = T("misc")
+    settingsTitle.Text = T("settings")
+    tpTitle.Text = T("tp_player")
+    flingTitle.Text = T("fling")
+    if currentLangLabel then
+        currentLangLabel.Text = (currentLang == "EN") and "Current language: EN" or "Текущий язык: RU"
+    end
+    if langENBtn then
+        langENBtn.BackgroundColor3 = (currentLang == "EN") and Color3.fromRGB(0,150,80) or Color3.fromRGB(35,35,45)
+    end
+    if langRUBtn then
+        langRUBtn.BackgroundColor3 = (currentLang == "RU") and Color3.fromRGB(0,150,80) or Color3.fromRGB(35,35,45)
+    end
+end
+
+local function setLanguage(lang)
+    currentLang = lang
+    applyLanguage()
+end
+
+langENBtn.MouseButton1Click:Connect(function() setLanguage("EN") end)
+langRUBtn.MouseButton1Click:Connect(function() setLanguage("RU") end)
+
 -- ========== ФИКС SPEED ==========
 RunService.Heartbeat:Connect(function()
     local char = player.Character
@@ -1437,11 +1289,13 @@ aimbotBack.Activated:Connect(function() backToMain(aimbotMenu) end)
 miscBack.Activated:Connect(function() backToMain(miscMenu) end)
 tpBack.Activated:Connect(function() backToMain(tpMenu) end)
 flingBack.Activated:Connect(function() backToMain(flingMenu) end)
+settingsBack.Activated:Connect(function() backToMain(settingsMenu) end)
 
 mainButtons[1].Activated:Connect(function() openSub(espMenu, 340, 260) end)
 mainButtons[2].Activated:Connect(function() openSub(playerMenu, 340, 280) end)
-mainButtons[3].Activated:Connect(function() openSub(aimbotMenu, 340, 300) end)
-mainButtons[4].Activated:Connect(function() openSub(miscMenu, 340, 450) end)
+mainButtons[3].Activated:Connect(function() openSub(aimbotMenu, 340, 350) end)
+mainButtons[4].Activated:Connect(function() openSub(miscMenu, 340, 340) end)
+mainButtons[5].Activated:Connect(function() openSub(settingsMenu, 340, 340) end)
 
 flyBtn.Activated:Connect(function()
     closeFrame(playerMenu)
@@ -1472,11 +1326,8 @@ makeDraggable(aimbotMenu, aimbotTitle)
 makeDraggable(miscMenu, miscTitle)
 makeDraggable(tpMenu, tpTitle)
 makeDraggable(flingMenu, flingTitle)
+makeDraggable(settingsMenu, settingsTitle)
 makeDraggable(inputPopup, popupTitle)
-makeDraggable(espSettingsMenu, espSettingsTitle)
-makeDraggable(flySettingsMenu, flySettingsTitle)
-makeDraggable(aimbotSettingsMenu, aimbotSettingsTitle)
-makeDraggable(miscSettingsMenu, miscSettingsTitle)
 
 -- ========== DRAG ИКОНКИ ==========
 local dragging, startPos, iconStart = false, nil, nil
@@ -1499,13 +1350,15 @@ UIS.InputEnded:Connect(function(inp)
     end
 end)
 
--- ========== ПРИМЕНЕНИЕ ПРИ РЕСПАВНЕ ==========
+-- ========== РЕСПАВН ==========
 player.CharacterAdded:Connect(function(char)
     task.wait(.5)
     local hum = char:FindFirstChildOfClass("Humanoid")
     if hum then hum.WalkSpeed = currentSpeed end
 end)
 
+-- ========== СТАРТ ==========
 updateFovCircle()
+applyLanguage()
 
 print("PART 3/3 LOADED — ALL SYSTEMS GO")
