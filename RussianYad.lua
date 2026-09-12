@@ -21,8 +21,8 @@ local LANG = {
         aimbot_on = "Aimbot: ON", aimbot_off = "Aimbot: OFF", radius = "Radius", part = "Part", team_check = "Team Check",
         fov = "FOV", range = "Range", fov_circle = "FOV Circle",
         noclip = "Noclip", fullbright = "Fullbright", tp_player = "TP to Player",
-        auto_parry = "Auto Parry", parry_on = "Auto Parry: ON", parry_off = "Auto Parry: OFF",
-        parry_delay = "Parry Delay", parry_range = "Parry Range",
+        fast_click = "Fast Click", fast_click_on = "Fast Click: ON", fast_click_off = "Fast Click: OFF",
+        click_delay = "Click Delay",
         no_players = "No players", ok = "OK", enter_value = "Enter value...", not_number = "Not a number!",
     },
     RU = {
@@ -33,8 +33,8 @@ local LANG = {
         aimbot_on = "Аимбот: ВКЛ", aimbot_off = "Аимбот: ВЫКЛ", radius = "Радиус", part = "Часть", team_check = "Проверка команды",
         fov = "ФОВ", range = "Дальность", fov_circle = "Круг ФОВ",
         noclip = "Сквозь стены", fullbright = "Яркость", tp_player = "ТП к игроку",
-        auto_parry = "Авто-парирование", parry_on = "Авто-парирование: ВКЛ", parry_off = "Авто-парирование: ВЫКЛ",
-        parry_delay = "Задержка парирования", parry_range = "Дальность парирования",
+        fast_click = "Фаст клик", fast_click_on = "Фаст клик: ВКЛ", fast_click_off = "Фаст клик: ВЫКЛ",
+        click_delay = "Задержка клика",
         no_players = "Нет игроков", ok = "ОК", enter_value = "Введи число...", not_number = "Не число!",
     }
 }
@@ -281,7 +281,6 @@ local function createESP(target)
     name.TextStrokeTransparency = 0.5
     name.Parent = gui
 
-    -- ЗДОРОВЬЕ — ТЕКСТОМ ❤️
     local health = Instance.new("TextLabel")
     health.Size = UDim2.fromOffset(100,18)
     health.BackgroundTransparency = 1
@@ -615,46 +614,44 @@ flySpeedBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- ========== AIMBOT (С FOV КРУГОМ И ТУМБЛЕРОМ) ==========
+-- ========== AIMBOT (БЕЛЫЙ КРУГ + ВСЕГДА В ГОЛОВУ + ПОВОРОТ) ==========
 local aimbotMenu, aimbotTitle, aimbotBack = createSubmenu(T("aimbot"))
 
 local aimbotEnabled = false
 local aimbotRadius = 200
 local aimbotRange = 300
 local aimbotTeamCheck = true
-local aimbotPart = "Head"
 local fovCircleEnabled = true
 
--- FOV КРУГ
+-- БЕЛЫЙ FOV КРУГ
 local fovCircle = Instance.new("Frame")
 fovCircle.Size = UDim2.fromOffset(aimbotRadius*2, aimbotRadius*2)
 fovCircle.Position = UDim2.new(0.5, -aimbotRadius, 0.5, -aimbotRadius)
 fovCircle.BackgroundTransparency = 1
 fovCircle.BorderSizePixel = 4
-fovCircle.BorderColor3 = Color3.fromRGB(0,255,100)
+fovCircle.BorderColor3 = Color3.new(1,1,1)
 fovCircle.Visible = false
 fovCircle.ZIndex = 999
 fovCircle.Parent = gui
 Instance.new("UICorner",fovCircle).CornerRadius = UDim.new(1,0)
 
--- Внутренний круг
 local fovCircleInner = Instance.new("Frame")
 fovCircleInner.Size = UDim2.new(0.92,0,0.92,0)
 fovCircleInner.Position = UDim2.new(0.04,0,0.04,0)
 fovCircleInner.BackgroundTransparency = 1
 fovCircleInner.BorderSizePixel = 1
-fovCircleInner.BorderColor3 = Color3.fromRGB(0,255,100)
+fovCircleInner.BorderColor3 = Color3.new(1,1,1)
 fovCircleInner.ZIndex = 999
 fovCircleInner.Parent = fovCircle
 Instance.new("UICorner",fovCircleInner).CornerRadius = UDim.new(1,0)
 
--- Подпись радиуса
+-- БЕЛАЯ ПОДПИСЬ
 local fovLabel = Instance.new("TextLabel")
 fovLabel.Size = UDim2.fromOffset(220,22)
 fovLabel.Position = UDim2.new(0.5, -110, 0.5, aimbotRadius + 15)
 fovLabel.BackgroundTransparency = 1
 fovLabel.Text = ""
-fovLabel.TextColor3 = Color3.fromRGB(0,255,100)
+fovLabel.TextColor3 = Color3.new(1,1,1)
 fovLabel.TextSize = 14
 fovLabel.Font = Enum.Font.GothamBold
 fovLabel.TextStrokeTransparency = 0
@@ -683,7 +680,6 @@ local function updateFovCircle()
     fovLabel.Visible = aimbotEnabled and fovCircleEnabled
 end
 
--- Обновление круга каждый кадр
 RunService.RenderStepped:Connect(function()
     if fovCircle and aimbotEnabled and fovCircleEnabled then
         fovCircle.Visible = true
@@ -694,7 +690,6 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Кнопка ON/OFF
 local aimbotToggle = Instance.new("TextButton")
 aimbotToggle.Size = UDim2.new(1,-30,0,48)
 aimbotToggle.Position = UDim2.fromOffset(15,58)
@@ -712,7 +707,6 @@ aimbotToggle.MouseButton1Click:Connect(function()
     updateFovCircle()
 end)
 
--- FOV радиус
 local aimbotRadiusBtn = Instance.new("TextButton")
 aimbotRadiusBtn.Size = UDim2.new(1,-30,0,48)
 aimbotRadiusBtn.Position = UDim2.fromOffset(15,112)
@@ -731,7 +725,6 @@ aimbotRadiusBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- Тумблер FOV круга
 local fovCircleBtn = Instance.new("TextButton")
 fovCircleBtn.Size = UDim2.new(1,-30,0,48)
 fovCircleBtn.Position = UDim2.fromOffset(15,166)
@@ -749,7 +742,6 @@ fovCircleBtn.MouseButton1Click:Connect(function()
     updateFovCircle()
 end)
 
--- Range
 local aimbotRangeBtn = Instance.new("TextButton")
 aimbotRangeBtn.Size = UDim2.new(1,-30,0,48)
 aimbotRangeBtn.Position = UDim2.fromOffset(15,220)
@@ -767,26 +759,9 @@ aimbotRangeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- Часть тела
-local aimbotPartBtn = Instance.new("TextButton")
-aimbotPartBtn.Size = UDim2.new(1,-30,0,48)
-aimbotPartBtn.Position = UDim2.fromOffset(15,274)
-aimbotPartBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
-aimbotPartBtn.Text = T("part")..": Head"
-aimbotPartBtn.TextColor3 = Color3.new(1,1,1)
-aimbotPartBtn.TextSize = 16
-aimbotPartBtn.Font = Enum.Font.GothamBold
-aimbotPartBtn.Parent = aimbotMenu
-Instance.new("UICorner",aimbotPartBtn).CornerRadius = UDim.new(0,11)
-aimbotPartBtn.MouseButton1Click:Connect(function()
-    aimbotPart = (aimbotPart == "Head") and "Torso" or "Head"
-    aimbotPartBtn.Text = T("part")..": "..aimbotPart
-end)
-
--- Team Check
 local aimbotTeamBtn = Instance.new("TextButton")
 aimbotTeamBtn.Size = UDim2.new(1,-30,0,48)
-aimbotTeamBtn.Position = UDim2.fromOffset(15,328)
+aimbotTeamBtn.Position = UDim2.fromOffset(15,274)
 aimbotTeamBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
 aimbotTeamBtn.Text = T("team_check")..": "..T("on")
 aimbotTeamBtn.TextColor3 = Color3.new(1,1,1)
@@ -800,7 +775,7 @@ aimbotTeamBtn.MouseButton1Click:Connect(function()
     aimbotTeamBtn.BackgroundColor3 = aimbotTeamCheck and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
 end)
 
--- ЛОГИКА AIMBOT
+-- ===== ЛОГИКА AIMBOT — ВСЕГДА В ГОЛОВУ + ПОВОРОТ ПЕРСОНАЖА =====
 RunService.RenderStepped:Connect(function()
     if not aimbotEnabled then return end
     local myChar = player.Character
@@ -818,7 +793,7 @@ RunService.RenderStepped:Connect(function()
                 if char and char.PrimaryPart and char:FindFirstChild("Head") then
                     local distInStuds = (char.Head.Position - myPos).Magnitude
                     if distInStuds <= aimbotRange then
-                        local part = char:FindFirstChild(aimbotPart) or char:FindFirstChild("Head")
+                        local part = char:FindFirstChild("Head")
                         if part then
                             local sp, onScreen = Camera:WorldToViewportPoint(part.Position)
                             if onScreen then
@@ -838,7 +813,17 @@ RunService.RenderStepped:Connect(function()
     end
 
     if closestPart then
+        -- Мгновенный снап камеры в голову
         Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, closestPart.Position)
+        
+        -- ПОВОРОТ ПЕРСОНАЖА в сторону цели
+        local hrp = myChar:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            local headPos = closestPart.Position
+            local myPos2 = hrp.Position
+            local lookAt = CFrame.lookAt(myPos2, Vector3.new(headPos.X, myPos2.Y, headPos.Z))
+            hrp.CFrame = lookAt
+        end
     end
 end)
 
@@ -961,116 +946,57 @@ tpPlayerBtn.Font = Enum.Font.GothamBold
 tpPlayerBtn.Parent = miscMenu
 Instance.new("UICorner",tpPlayerBtn).CornerRadius = UDim.new(0,11)
 
--- ========== AUTO PARRY ==========
-local parryEnabled = false
-local parryDelay = 0.02
-local parryRange = 100
+-- ========== FAST CLICK ==========
+local fastClickEnabled = false
+local clickDelay = 0.001
 
-local parryBtn = Instance.new("TextButton")
-parryBtn.Size = UDim2.new(1,-30,0,52)
-parryBtn.Position = UDim2.fromOffset(15,234)
-parryBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-parryBtn.Text = T("parry_off")
-parryBtn.TextColor3 = Color3.new(1,1,1)
-parryBtn.TextSize = 15
-parryBtn.Font = Enum.Font.GothamBold
-parryBtn.Parent = miscMenu
-Instance.new("UICorner",parryBtn).CornerRadius = UDim.new(0,11)
-parryBtn.MouseButton1Click:Connect(function()
-    parryEnabled = not parryEnabled
-    parryBtn.Text = parryEnabled and T("parry_on") or T("parry_off")
-    parryBtn.BackgroundColor3 = parryEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
+local fastClickBtn = Instance.new("TextButton")
+fastClickBtn.Size = UDim2.new(1,-30,0,52)
+fastClickBtn.Position = UDim2.fromOffset(15,234)
+fastClickBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+fastClickBtn.Text = T("fast_click_off")
+fastClickBtn.TextColor3 = Color3.new(1,1,1)
+fastClickBtn.TextSize = 16
+fastClickBtn.Font = Enum.Font.GothamBold
+fastClickBtn.Parent = miscMenu
+Instance.new("UICorner",fastClickBtn).CornerRadius = UDim.new(0,11)
+fastClickBtn.MouseButton1Click:Connect(function()
+    fastClickEnabled = not fastClickEnabled
+    fastClickBtn.Text = fastClickEnabled and T("fast_click_on") or T("fast_click_off")
+    fastClickBtn.BackgroundColor3 = fastClickEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
 end)
 
--- Задержка парирования
-local parryDelayBtn = Instance.new("TextButton")
-parryDelayBtn.Size = UDim2.new(1,-30,0,44)
-parryDelayBtn.Position = UDim2.fromOffset(15,292)
-parryDelayBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
-parryDelayBtn.Text = T("parry_delay")..": 0.02"
-parryDelayBtn.TextColor3 = Color3.new(1,1,1)
-parryDelayBtn.TextSize = 15
-parryDelayBtn.Font = Enum.Font.GothamBold
-parryDelayBtn.Parent = miscMenu
-Instance.new("UICorner",parryDelayBtn).CornerRadius = UDim.new(0,11)
-
--- Дальность парирования
-local parryRangeBtn = Instance.new("TextButton")
-parryRangeBtn.Size = UDim2.new(1,-30,0,44)
-parryRangeBtn.Position = UDim2.fromOffset(15,342)
-parryRangeBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
-parryRangeBtn.Text = T("parry_range")..": 100"
-parryRangeBtn.TextColor3 = Color3.new(1,1,1)
-parryRangeBtn.TextSize = 15
-parryRangeBtn.Font = Enum.Font.GothamBold
-parryRangeBtn.Parent = miscMenu
-Instance.new("UICorner",parryRangeBtn).CornerRadius = UDim.new(0,11)
-
-parryDelayBtn.MouseButton1Click:Connect(function()
-    showPopup(T("parry_delay").." (1-50)", "2", function(v)
-        parryDelay = math.clamp(v/100, 0.01, 0.5)
-        parryDelayBtn.Text = T("parry_delay")..": "..string.format("%.2f", parryDelay)
-    end)
-end)
-parryRangeBtn.MouseButton1Click:Connect(function()
-    showPopup(T("parry_range").." (10-500)", "100", function(v)
-        parryRange = v
-        parryRangeBtn.Text = T("parry_range")..": "..math.floor(v)
+-- Задержка кликов
+local clickDelayBtn = Instance.new("TextButton")
+clickDelayBtn.Size = UDim2.new(1,-30,0,44)
+clickDelayBtn.Position = UDim2.fromOffset(15,292)
+clickDelayBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
+clickDelayBtn.Text = T("click_delay")..": 0.001"
+clickDelayBtn.TextColor3 = Color3.new(1,1,1)
+clickDelayBtn.TextSize = 15
+clickDelayBtn.Font = Enum.Font.GothamBold
+clickDelayBtn.Parent = miscMenu
+Instance.new("UICorner",clickDelayBtn).CornerRadius = UDim.new(0,11)
+clickDelayBtn.MouseButton1Click:Connect(function()
+    showPopup(T("click_delay").." (1-100)", "1", function(v)
+        clickDelay = math.clamp(v/1000, 0.001, 0.1)
+        clickDelayBtn.Text = T("click_delay")..": "..string.format("%.3f", clickDelay)
     end)
 end)
 
--- ===== ЛОГИКА AUTO PARRY =====
-local nextParryTime = 0
-local lastParryBall = nil
-
-local function findClosestBall(myPos)
-    local closestBall, closestDist = nil, math.huge
-    local folders = {workspace}
-    local bf = workspace:FindFirstChild("Balls")
-    if bf then table.insert(folders, bf) end
-    local ef = workspace:FindFirstChild("Effects")
-    if ef then table.insert(folders, ef) end
-    for _, folder in ipairs(folders) do
-        for _, obj in ipairs(folder:GetChildren()) do
-            if obj:IsA("BasePart") then
-                local isBall = obj.Name:lower():find("ball") or (obj:GetAttribute("realBall") == true)
-                if isBall then
-                    local d = (obj.Position - myPos).Magnitude
-                    if d < closestDist then
-                        closestDist = d
-                        closestBall = obj
-                    end
-                end
-            end
+-- ЛОГИКА FAST CLICK — жмёт без остановки
+task.spawn(function()
+    while true do
+        if fastClickEnabled then
+            pcall(function()
+                VIM:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+                task.wait(0.0001)
+                VIM:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+            end)
+            task.wait(clickDelay)
+        else
+            task.wait(0.1)
         end
-    end
-    return closestBall, closestDist
-end
-
-RunService.Heartbeat:Connect(function()
-    if not parryEnabled then return end
-    local char = player.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local myPos = char.HumanoidRootPart.Position
-    local ball, dist = findClosestBall(myPos)
-    if not ball then lastParryBall = nil; return end
-    if dist > parryRange then return end
-    local vel = ball.AssemblyLinearVelocity or ball.Velocity
-    if not vel or vel.Magnitude < 5 then return end
-    local toMe = (myPos - ball.Position).Unit
-    if toMe:Dot(vel.Unit) < 0.5 then return end
-    if lastParryBall == ball then return end
-    local now = tick()
-    if now < nextParryTime then return end
-    local timeToImpact = dist / vel.Magnitude
-    if timeToImpact <= (parryDelay + 0.15) then
-        pcall(function()
-            VIM:SendMouseButtonEvent(0,0,0,true,game,0)
-            task.wait(0.01)
-            VIM:SendMouseButtonEvent(0,0,0,false,game,0)
-        end)
-        lastParryBall = ball
-        nextParryTime = now + 0.1
     end
 end)
 
@@ -1132,7 +1058,7 @@ local function refreshTPList()
     tpScroll.CanvasSize = UDim2.new(0,0,0,y)
 end
 
--- ========== SETTINGS (ВЫБОР ЯЗЫКА) ==========
+-- ========== SETTINGS ==========
 local settingsMenu, settingsTitle, settingsBack = createSubmenu(T("settings"))
 
 local currentLangLabel = Instance.new("TextLabel")
@@ -1198,14 +1124,12 @@ local function applyLanguage()
     aimbotRadiusBtn.Text = T("fov")..": "..aimbotRadius.."px"
     fovCircleBtn.Text = T("fov_circle")..": "..(fovCircleEnabled and T("on") or T("off"))
     aimbotRangeBtn.Text = T("range")..": "..aimbotRange.." studs"
-    aimbotPartBtn.Text = T("part")..": "..aimbotPart
     aimbotTeamBtn.Text = T("team_check")..": "..(aimbotTeamCheck and T("on") or T("off"))
     noclipBtn.Text = T("noclip")..": "..(noclipEnabled and T("on") or T("off"))
     fullbrightBtn.Text = T("fullbright")..": "..(fullbrightEnabled and T("on") or T("off"))
     tpPlayerBtn.Text = T("tp_player")
-    parryBtn.Text = parryEnabled and T("parry_on") or T("parry_off")
-    parryDelayBtn.Text = T("parry_delay")..": "..string.format("%.2f", parryDelay)
-    parryRangeBtn.Text = T("parry_range")..": "..parryRange
+    fastClickBtn.Text = fastClickEnabled and T("fast_click_on") or T("fast_click_off")
+    clickDelayBtn.Text = T("click_delay")..": "..string.format("%.3f", clickDelay)
     popupOk.Text = T("ok")
     popupBox.PlaceholderText = T("enter_value")
     title.Text = T("title")
@@ -1268,8 +1192,8 @@ settingsBack.Activated:Connect(function() backToMain(settingsMenu) end)
 
 mainButtons[1].Activated:Connect(function() openSub(espMenu, 340, 260) end)
 mainButtons[2].Activated:Connect(function() openSub(playerMenu, 340, 280) end)
-mainButtons[3].Activated:Connect(function() openSub(aimbotMenu, 340, 400) end)
-mainButtons[4].Activated:Connect(function() openSub(miscMenu, 340, 410) end)
+mainButtons[3].Activated:Connect(function() openSub(aimbotMenu, 340, 340) end)
+mainButtons[4].Activated:Connect(function() openSub(miscMenu, 340, 350) end)
 mainButtons[5].Activated:Connect(function() openSub(settingsMenu, 340, 340) end)
 
 flyBtn.Activated:Connect(function()
