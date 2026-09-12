@@ -625,27 +625,28 @@ local fovCircleEnabled = true
 
 -- БЕЛЫЙ FOV КРУГ
 local fovCircle = Instance.new("Frame")
+fovCircle.Name = "FOV"
 fovCircle.Size = UDim2.fromOffset(aimbotRadius*2, aimbotRadius*2)
-fovCircle.Position = UDim2.new(0.5, -aimbotRadius, 0.5, -aimbotRadius)
+fovCircle.Position = UDim2.fromScale(0.5, 0.5)
+fovCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+fovCircle.BackgroundColor3 = Color3.new(1,1,1)
 fovCircle.BackgroundTransparency = 1
-fovCircle.BorderSizePixel = 4
-fovCircle.BorderColor3 = Color3.new(1,1,1)
+fovCircle.BorderSizePixel = 0
 fovCircle.Visible = false
 fovCircle.ZIndex = 999
 fovCircle.Parent = gui
-Instance.new("UICorner",fovCircle).CornerRadius = UDim.new(1,0)
 
-local fovCircleInner = Instance.new("Frame")
-fovCircleInner.Size = UDim2.new(0.92,0,0.92,0)
-fovCircleInner.Position = UDim2.new(0.04,0,0.04,0)
-fovCircleInner.BackgroundTransparency = 1
-fovCircleInner.BorderSizePixel = 1
-fovCircleInner.BorderColor3 = Color3.new(1,1,1)
-fovCircleInner.ZIndex = 999
-fovCircleInner.Parent = fovCircle
-Instance.new("UICorner",fovCircleInner).CornerRadius = UDim.new(1,0)
+local fovCorner = Instance.new("UICorner")
+fovCorner.CornerRadius = UDim.new(1, 0)
+fovCorner.Parent = fovCircle
 
--- БЕЛАЯ ПОДПИСЬ
+local fovStroke = Instance.new("UIStroke")
+fovStroke.Thickness = 4
+fovStroke.Color = Color3.new(1,1,1)
+fovStroke.Transparency = 0
+fovStroke.Parent = fovCircle
+
+-- Подпись радиуса (пиксели + studs)
 local fovLabel = Instance.new("TextLabel")
 fovLabel.Size = UDim2.fromOffset(220,22)
 fovLabel.Position = UDim2.new(0.5, -110, 0.5, aimbotRadius + 15)
@@ -671,9 +672,9 @@ local function pixelsToStuds(px)
     return math.floor(px / pxPerStud)
 end
 
+-- ФУНКЦИЯ: обновляет круг И подпись при смене радиуса
 local function updateFovCircle()
     fovCircle.Size = UDim2.fromOffset(aimbotRadius*2, aimbotRadius*2)
-    fovCircle.Position = UDim2.new(0.5, -aimbotRadius, 0.5, -aimbotRadius)
     fovCircle.Visible = aimbotEnabled and fovCircleEnabled
     fovLabel.Position = UDim2.new(0.5, -110, 0.5, aimbotRadius + 15)
     fovLabel.Text = aimbotRadius.."px (~"..pixelsToStuds(aimbotRadius).." studs)"
@@ -681,10 +682,10 @@ local function updateFovCircle()
 end
 
 RunService.RenderStepped:Connect(function()
-    if fovCircle and aimbotEnabled and fovCircleEnabled then
+    if aimbotEnabled and fovCircleEnabled then
         fovCircle.Visible = true
         fovLabel.Visible = true
-    elseif fovCircle then
+    else
         fovCircle.Visible = false
         fovLabel.Visible = false
     end
@@ -775,7 +776,7 @@ aimbotTeamBtn.MouseButton1Click:Connect(function()
     aimbotTeamBtn.BackgroundColor3 = aimbotTeamCheck and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
 end)
 
--- ===== ЛОГИКА AIMBOT — ВСЕГДА В ГОЛОВУ + ПОВОРОТ ПЕРСОНАЖА =====
+-- ===== ЛОГИКА AIMBOT — ВСЕГДА В ГОЛОВУ + ПОВОРОТ =====
 RunService.RenderStepped:Connect(function()
     if not aimbotEnabled then return end
     local myChar = player.Character
@@ -813,10 +814,7 @@ RunService.RenderStepped:Connect(function()
     end
 
     if closestPart then
-        -- Мгновенный снап камеры в голову
         Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, closestPart.Position)
-        
-        -- ПОВОРОТ ПЕРСОНАЖА в сторону цели
         local hrp = myChar:FindFirstChild("HumanoidRootPart")
         if hrp then
             local headPos = closestPart.Position
@@ -966,7 +964,6 @@ fastClickBtn.MouseButton1Click:Connect(function()
     fastClickBtn.BackgroundColor3 = fastClickEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
 end)
 
--- Задержка кликов
 local clickDelayBtn = Instance.new("TextButton")
 clickDelayBtn.Size = UDim2.new(1,-30,0,44)
 clickDelayBtn.Position = UDim2.fromOffset(15,292)
@@ -984,7 +981,7 @@ clickDelayBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- ЛОГИКА FAST CLICK — жмёт без остановки
+-- ЛОГИКА FAST CLICK
 task.spawn(function()
     while true do
         if fastClickEnabled then
