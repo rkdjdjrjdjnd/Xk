@@ -335,10 +335,10 @@ popupClose.MouseButton1Click:Connect(hidePopup)
 popupOk.MouseButton1Click:Connect(function() if popupCallback then popupCallback(popupBox.Text) end end)
 popupBox.FocusLost:Connect(function(enter) if enter and popupCallback then popupCallback(popupBox.Text) end end)
 
--- ========== ESP ==========
+-- ========== ESP (3D BOX + HIGHLIGHT) ==========
 local espMenu, espTitle, espBack = createSubmenu(T("esp").." (OFF)")
 local espEnabled = false
-local espSettings = {boxes=false, names=false, health=false, distance=false}
+local espSettings = {boxes=false, names=false, health=false, distance=false, highlight=false}
 
 local function createSwitch(parent, y, labelKey, getter, setter, onChange)
     local frame = Instance.new("Frame")
@@ -377,34 +377,96 @@ local function createSwitch(parent, y, labelKey, getter, setter, onChange)
 end
 
 local clearESP
-createSwitch(espMenu,55,"enable_esp",function() return espEnabled end,function(v) espEnabled=v end,function(v) espTitle.Text=T("esp").." ("..(v and T("on") or T("off"))..")"; if not v and clearESP then clearESP() end end)
-createSwitch(espMenu,92,"boxes",function() return espSettings.boxes end,function(v) espSettings.boxes=v end)
-createSwitch(espMenu,129,"names",function() return espSettings.names end,function(v) espSettings.names=v end)
-createSwitch(espMenu,166,"health",function() return espSettings.health end,function(v) espSettings.health=v end)
-createSwitch(espMenu,203,"distance",function() return espSettings.distance end,function(v) espSettings.distance=v end)
+createSwitch(espMenu,52,"enable_esp",function() return espEnabled end,function(v) espEnabled=v end,function(v) espTitle.Text=T("esp").." ("..(v and T("on") or T("off"))..")"; if not v and clearESP then clearESP() end end)
+createSwitch(espMenu,88,"boxes",function() return espSettings.boxes end,function(v) espSettings.boxes=v end)
+createSwitch(espMenu,124,"names",function() return espSettings.names end,function(v) espSettings.names=v end)
+createSwitch(espMenu,160,"health",function() return espSettings.health end,function(v) espSettings.health=v end)
+createSwitch(espMenu,196,"distance",function() return espSettings.distance end,function(v) espSettings.distance=v end)
+
+-- 6-я кнопка Highlight
+LANG.EN.highlight = "Highlight"
+LANG.RU.highlight = "Обводка"
+createSwitch(espMenu,232,"highlight",function() return espSettings.highlight end,function(v) espSettings.highlight=v end)
 
 local espObjects = {}
+local espHighlights = {}
+
 clearESP = function()
     for _,d in pairs(espObjects) do
         if d.box then d.box:Destroy() end
         if d.name then d.name:Destroy() end
         if d.health then d.health:Destroy() end
         if d.dist then d.dist:Destroy() end
+        if d.topLeft then d.topLeft:Destroy() end
+        if d.topRight then d.topRight:Destroy() end
+        if d.botLeft then d.botLeft:Destroy() end
+        if d.botRight then d.botRight:Destroy() end
+        if d.topLine then d.topLine:Destroy() end
+        if d.botLine then d.botLine:Destroy() end
+        if d.leftLine then d.leftLine:Destroy() end
+        if d.rightLine then d.rightLine:Destroy() end
+    end
+    for _,h in pairs(espHighlights) do
+        if h then h:Destroy() end
     end
     espObjects = {}
+    espHighlights = {}
 end
 
 local function createESP(target)
     if espObjects[target] then return end
     local data = {}
-    local box = Instance.new("Frame")
-    box.BackgroundTransparency = 1
-    box.BorderSizePixel = 0
-    box.ZIndex = 3
-    box.Parent = gui
-    local stroke = Instance.new("UIStroke",box)
-    stroke.Thickness = 2
-    stroke.Color = Color3.new(1,1,1)
+    
+    -- 4 УГЛА (как в CS)
+    local topLeft = Instance.new("Frame")
+    topLeft.BackgroundColor3 = Color3.new(1,1,1)
+    topLeft.BorderSizePixel = 0
+    topLeft.ZIndex = 3
+    topLeft.Parent = gui
+    
+    local topRight = Instance.new("Frame")
+    topRight.BackgroundColor3 = Color3.new(1,1,1)
+    topRight.BorderSizePixel = 0
+    topRight.ZIndex = 3
+    topRight.Parent = gui
+    
+    local botLeft = Instance.new("Frame")
+    botLeft.BackgroundColor3 = Color3.new(1,1,1)
+    botLeft.BorderSizePixel = 0
+    botLeft.ZIndex = 3
+    botLeft.Parent = gui
+    
+    local botRight = Instance.new("Frame")
+    botRight.BackgroundColor3 = Color3.new(1,1,1)
+    botRight.BorderSizePixel = 0
+    botRight.ZIndex = 3
+    botRight.Parent = gui
+    
+    -- Тонкие линии между углами
+    local topLine = Instance.new("Frame")
+    topLine.BackgroundColor3 = Color3.new(1,1,1)
+    topLine.BorderSizePixel = 0
+    topLine.ZIndex = 3
+    topLine.Parent = gui
+    
+    local botLine = Instance.new("Frame")
+    botLine.BackgroundColor3 = Color3.new(1,1,1)
+    botLine.BorderSizePixel = 0
+    botLine.ZIndex = 3
+    botLine.Parent = gui
+    
+    local leftLine = Instance.new("Frame")
+    leftLine.BackgroundColor3 = Color3.new(1,1,1)
+    leftLine.BorderSizePixel = 0
+    leftLine.ZIndex = 3
+    leftLine.Parent = gui
+    
+    local rightLine = Instance.new("Frame")
+    rightLine.BackgroundColor3 = Color3.new(1,1,1)
+    rightLine.BorderSizePixel = 0
+    rightLine.ZIndex = 3
+    rightLine.Parent = gui
+    
     local name = Instance.new("TextLabel")
     name.BackgroundTransparency = 1
     name.TextColor3 = Color3.new(1,1,1)
@@ -414,6 +476,7 @@ local function createESP(target)
     name.TextStrokeColor3 = Color3.new(0,0,0)
     name.ZIndex = 4
     name.Parent = gui
+    
     local health = Instance.new("TextLabel")
     health.BackgroundTransparency = 1
     health.TextColor3 = Color3.new(1,1,1)
@@ -423,6 +486,7 @@ local function createESP(target)
     health.TextStrokeColor3 = Color3.new(0,0,0)
     health.ZIndex = 4
     health.Parent = gui
+    
     local dist = Instance.new("TextLabel")
     dist.BackgroundTransparency = 1
     dist.TextColor3 = Color3.fromRGB(200,200,200)
@@ -432,13 +496,59 @@ local function createESP(target)
     dist.TextStrokeColor3 = Color3.new(0,0,0)
     dist.ZIndex = 4
     dist.Parent = gui
-    data.box=box; data.stroke=stroke; data.name=name; data.health=health; data.dist=dist
+    
+    data.box = topLeft  -- для совместимости с clearESP
+    data.topLeft = topLeft
+    data.topRight = topRight
+    data.botLeft = botLeft
+    data.botRight = botRight
+    data.topLine = topLine
+    data.botLine = botLine
+    data.leftLine = leftLine
+    data.rightLine = rightLine
+    data.name = name
+    data.health = health
+    data.dist = dist
     espObjects[target] = data
+end
+
+-- Функция обновления Highlight
+local function updateHighlight(target)
+    local char = target.Character
+    if not char then
+        if espHighlights[target] then
+            espHighlights[target]:Destroy()
+            espHighlights[target] = nil
+        end
+        return
+    end
+    
+    if espSettings.highlight then
+        if not espHighlights[target] or not espHighlights[target].Parent then
+            local h = Instance.new("Highlight")
+            h.FillColor = Color3.fromRGB(255,50,50)
+            h.FillTransparency = 0.5
+            h.OutlineColor = Color3.fromRGB(255,50,50)
+            h.OutlineTransparency = 0
+            h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            h.Adornee = char
+            h.Parent = gui
+            espHighlights[target] = h
+        else
+            -- Обновляем Adornee если персонаж изменился
+            espHighlights[target].Adornee = char
+        end
+    else
+        if espHighlights[target] then
+            espHighlights[target]:Destroy()
+            espHighlights[target] = nil
+        end
+    end
 end
 
 RunService.RenderStepped:Connect(function()
     if not espEnabled then
-        if next(espObjects) then clearESP() end
+        if next(espObjects) or next(espHighlights) then clearESP() end
         return
     end
     local myChar = player.Character
@@ -446,61 +556,132 @@ RunService.RenderStepped:Connect(function()
     local myPos = myChar.PrimaryPart.Position
     local camPos = Camera.CFrame.Position
     local vx, vy = Camera.ViewportSize.X, Camera.ViewportSize.Y
+    
     for _,target in ipairs(Players:GetPlayers()) do
         if target ~= player then
             local char = target.Character
             local head = char and char:FindFirstChild("Head")
-            if head then
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            if head and hrp then
                 local pos = head.Position
                 local sp, onScreen = Camera:WorldToViewportPoint(pos)
-                if onScreen and sp.X>-100 and sp.X<vx+100 and sp.Y>-100 and sp.Y<vy+100 then
+                local footPos = hrp.Position - Vector3.new(0, hrp.Size.Y/2 + 2.5, 0)
+                local spFoot, onFoot = Camera:WorldToViewportPoint(footPos)
+                
+                if onScreen and sp.X>-200 and sp.X<vx+200 and sp.Y>-200 and sp.Y<vy+200 then
                     if not espObjects[target] then createESP(target) end
                     local d = espObjects[target]
                     if d then
-                        local dist3D = (pos-camPos).Magnitude
-                        local bh = math.clamp(2500/dist3D, 30, 250)
-                        local bw = bh*0.6
-                        local top = sp.Y - bh
+                        -- РАЗМЕР бокса (от головы до ног)
+                        local boxTop = sp.Y
+                        local boxBot = spFoot.Y
+                        local boxHeight = math.abs(boxBot - boxTop)
+                        local boxWidth = boxHeight * 0.55
+                        local boxLeft = sp.X - boxWidth/2
+                        local boxRight = sp.X + boxWidth/2
+                        
                         local isEnemy = target.Team and player.Team and target.Team ~= player.Team
                         local col = isEnemy and Color3.fromRGB(255,80,80) or Color3.fromRGB(80,255,80)
-                        d.box.Size = UDim2.fromOffset(bw,bh)
-                        d.box.Position = UDim2.new(0, math.floor(sp.X-bw/2), 0, math.floor(top))
-                        d.box.Visible = espSettings.boxes
-                        d.stroke.Color = col
-                        d.name.Size = UDim2.fromOffset(math.max(bw+40,150),16)
-                        d.name.Position = UDim2.new(0, sp.X-d.name.Size.X.Offset/2, 0, top-18)
+                        
+                        -- Длина углов (25% от ширины)
+                        local cornerLen = math.max(boxWidth * 0.25, 8)
+                        local thick = 2
+                        
+                        -- TOP LEFT (горизонт + вертикаль)
+                        d.topLeft.Visible = espSettings.boxes
+                        d.topLeft.BackgroundColor3 = col
+                        d.topLeft.Size = UDim2.fromOffset(cornerLen, thick)
+                        d.topLeft.Position = UDim2.fromOffset(boxLeft, boxTop)
+                        
+                        d.leftLine.Visible = espSettings.boxes
+                        d.leftLine.BackgroundColor3 = col
+                        d.leftLine.Size = UDim2.fromOffset(thick, cornerLen)
+                        d.leftLine.Position = UDim2.fromOffset(boxLeft, boxTop)
+                        
+                        -- TOP RIGHT
+                        d.topRight.Visible = espSettings.boxes
+                        d.topRight.BackgroundColor3 = col
+                        d.topRight.Size = UDim2.fromOffset(cornerLen, thick)
+                        d.topRight.Position = UDim2.fromOffset(boxRight - cornerLen, boxTop)
+                        
+                        d.rightLine.Visible = espSettings.boxes
+                        d.rightLine.BackgroundColor3 = col
+                        d.rightLine.Size = UDim2.fromOffset(thick, cornerLen)
+                        d.rightLine.Position = UDim2.fromOffset(boxRight - thick, boxTop)
+                        
+                        -- BOTTOM LEFT
+                        d.botLeft.Visible = espSettings.boxes
+                        d.botLeft.BackgroundColor3 = col
+                        d.botLeft.Size = UDim2.fromOffset(cornerLen, thick)
+                        d.botLeft.Position = UDim2.fromOffset(boxLeft, boxBot - thick)
+                        
+                        d.topLine.Visible = espSettings.boxes
+                        d.topLine.BackgroundColor3 = col
+                        d.topLine.Size = UDim2.fromOffset(thick, cornerLen)
+                        d.topLine.Position = UDim2.fromOffset(boxLeft, boxBot - cornerLen)
+                        
+                        -- BOTTOM RIGHT
+                        d.botRight.Visible = espSettings.boxes
+                        d.botRight.BackgroundColor3 = col
+                        d.botRight.Size = UDim2.fromOffset(cornerLen, thick)
+                        d.botRight.Position = UDim2.fromOffset(boxRight - cornerLen, boxBot - thick)
+                        
+                        d.botLine.Visible = espSettings.boxes
+                        d.botLine.BackgroundColor3 = col
+                        d.botLine.Size = UDim2.fromOffset(thick, cornerLen)
+                        d.botLine.Position = UDim2.fromOffset(boxRight - thick, boxBot - cornerLen)
+                        
+                        -- NAME
+                        d.name.Size = UDim2.fromOffset(math.max(boxWidth+40,150),16)
+                        d.name.Position = UDim2.new(0, sp.X - d.name.Size.X.Offset/2, 0, boxTop - 18)
                         d.name.Text = target.Name
                         d.name.Visible = espSettings.names
                         d.name.TextColor3 = col
+                        
+                        -- HEALTH
                         local hum = char:FindFirstChildOfClass("Humanoid")
                         if hum and hum.Health>0 then
-                            d.health.Position = UDim2.new(0, sp.X-40, 0, top-34)
+                            d.health.Position = UDim2.new(0, sp.X-40, 0, boxTop-34)
                             d.health.Text = "❤️ "..math.floor(hum.Health)
                             d.health.Visible = espSettings.health
                         else
                             d.health.Visible = false
                         end
+                        
+                        -- DIST
                         local dv = math.floor((pos-myPos).Magnitude)
-                        d.dist.Position = UDim2.new(0, sp.X-40, 0, sp.Y+8)
+                        d.dist.Position = UDim2.new(0, sp.X-40, 0, boxBot+4)
                         d.dist.Text = dv.."m"
                         d.dist.Visible = espSettings.distance
                     end
                 else
                     if espObjects[target] then
                         local d = espObjects[target]
-                        d.box:Destroy(); d.name:Destroy(); d.health:Destroy(); d.dist:Destroy()
+                        d.topLeft:Destroy(); d.topRight:Destroy(); d.botLeft:Destroy(); d.botRight:Destroy()
+                        d.topLine:Destroy(); d.botLine:Destroy(); d.leftLine:Destroy(); d.rightLine:Destroy()
+                        d.name:Destroy(); d.health:Destroy(); d.dist:Destroy()
                         espObjects[target] = nil
                     end
                 end
+                
+                -- Обновляем Highlight
+                updateHighlight(target)
             end
         end
     end
 end)
+
 Players.PlayerRemoving:Connect(function(p)
     if espObjects[p] then
         local d = espObjects[p]
-        d.box:Destroy(); d.name:Destroy(); d.health:Destroy(); d.dist:Destroy()
+        d.topLeft:Destroy(); d.topRight:Destroy(); d.botLeft:Destroy(); d.botRight:Destroy()
+        d.topLine:Destroy(); d.botLine:Destroy(); d.leftLine:Destroy(); d.rightLine:Destroy()
+        d.name:Destroy(); d.health:Destroy(); d.dist:Destroy()
         espObjects[p] = nil
+    end
+    if espHighlights[p] then
+        espHighlights[p]:Destroy()
+        espHighlights[p] = nil
     end
 end)
 
