@@ -1,5 +1,5 @@
 -- ===================================================================
--- ROBLOX MASTER v7.0 — ЧАСТЬ 1/3
+-- ROBLOX MASTER v7.0 — ЧАСТЬ 1/4
 -- ===================================================================
 
 local Players = game:GetService("Players")
@@ -23,6 +23,7 @@ local LANG = {
         noclip = "Noclip", fullbright = "Fullbright", tp_player = "TP to Player",
         fast_click = "Fast Click", fast_click_on = "Fast Click: ON", fast_click_off = "Fast Click: OFF",
         click_delay = "Click Delay",
+        anti_afk = "Anti-AFK", fps_boost = "FPS Boost",
         no_players = "No players", ok = "OK", enter_value = "Enter value...", not_number = "Not a number!",
     },
     RU = {
@@ -35,6 +36,7 @@ local LANG = {
         noclip = "Сквозь стены", fullbright = "Яркость", tp_player = "ТП к игроку",
         fast_click = "Фаст клик", fast_click_on = "Фаст клик: ВКЛ", fast_click_off = "Фаст клик: ВЫКЛ",
         click_delay = "Задержка клика",
+        anti_afk = "Анти-АФК", fps_boost = "Буст ФПС",
         no_players = "Нет игроков", ok = "ОК", enter_value = "Введи число...", not_number = "Не число!",
     }
 }
@@ -53,21 +55,102 @@ gui.Parent = player:WaitForChild("PlayerGui")
 local loading = Instance.new("TextLabel")
 loading.Size = UDim2.new(1,0,1,0)
 loading.BackgroundColor3 = Color3.fromRGB(8,8,10)
+loading.BackgroundTransparency = 0
 loading.TextColor3 = Color3.new(1,1,1)
-loading.TextSize = 26
+loading.TextSize = 0
 loading.Font = Enum.Font.GothamBold
 loading.Text = "LOADING 0%"
 loading.ZIndex = 10
 loading.Parent = gui
+
+Tween:Create(loading, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {TextSize = 28}):Play()
+
 task.spawn(function()
     for i=0,100,5 do
         loading.Text = "LOADING "..i.."%"
         task.wait(0.04)
     end
-    Tween:Create(loading,TweenInfo.new(.4),{TextTransparency=1,BackgroundTransparency=1}):Play()
-    task.wait(.4)
+    task.wait(0.3)
+    Tween:Create(loading,TweenInfo.new(.5, Enum.EasingStyle.Quad),{TextTransparency=1,BackgroundTransparency=1,TextSize = 40}):Play()
+    task.wait(.5)
     loading:Destroy()
 end)
+
+-- ========== УВЕДОМЛЕНИЯ ==========
+local notifyGui = Instance.new("Frame")
+notifyGui.Size = UDim2.fromOffset(300,55)
+notifyGui.Position = UDim2.new(1,-320,1,-75)
+notifyGui.BackgroundColor3 = Color3.fromRGB(20,20,28)
+notifyGui.BackgroundTransparency = 1
+notifyGui.BorderSizePixel = 0
+notifyGui.ZIndex = 9999
+notifyGui.Parent = gui
+Instance.new("UICorner",notifyGui).CornerRadius = UDim.new(0,10)
+
+local notifyStroke = Instance.new("UIStroke", notifyGui)
+notifyStroke.Thickness = 2
+notifyStroke.Color = Color3.fromRGB(60,60,80)
+notifyStroke.Transparency = 1
+
+local notifyLine = Instance.new("Frame")
+notifyLine.Size = UDim2.new(0,0,0,3)
+notifyLine.Position = UDim2.new(0,0,0,0)
+notifyLine.BackgroundColor3 = Color3.fromRGB(255,220,0)
+notifyLine.BorderSizePixel = 0
+notifyLine.ZIndex = 10000
+notifyLine.BackgroundTransparency = 0
+notifyLine.Parent = notifyGui
+Instance.new("UICorner",notifyLine).CornerRadius = UDim.new(0,2)
+
+local notifyText = Instance.new("TextLabel")
+notifyText.Size = UDim2.new(1,-20,1,-10)
+notifyText.Position = UDim2.new(0,10,0,5)
+notifyText.BackgroundTransparency = 1
+notifyText.Text = ""
+notifyText.TextColor3 = Color3.new(1,1,1)
+notifyText.TextSize = 15
+notifyText.Font = Enum.Font.GothamBold
+notifyText.TextXAlignment = Enum.TextXAlignment.Left
+notifyText.TextYAlignment = Enum.TextYAlignment.Center
+notifyText.TextTransparency = 1
+notifyText.ZIndex = 10001
+notifyText.Parent = notifyGui
+
+local notifyQueue = {}
+local notifyRunning = false
+
+function showNotify(text, color)
+    table.insert(notifyQueue, {text = text, color = color or Color3.fromRGB(255,220,0)})
+    if notifyRunning then return end
+    notifyRunning = true
+    task.spawn(function()
+        while #notifyQueue > 0 do
+            local data = table.remove(notifyQueue, 1)
+            notifyText.Text = data.text
+            notifyLine.BackgroundColor3 = data.color
+
+            notifyLine.BackgroundTransparency = 0
+            notifyLine.Size = UDim2.new(0,0,0,3)
+
+            Tween:Create(notifyGui, TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0.1}):Play()
+            Tween:Create(notifyStroke, TweenInfo.new(.25), {Transparency = 0}):Play()
+            Tween:Create(notifyText, TweenInfo.new(.25), {TextTransparency = 0}):Play()
+
+            Tween:Create(notifyLine, TweenInfo.new(.6, Enum.EasingStyle.Linear), {Size = UDim2.new(1,0,0,3)}):Play()
+            task.wait(.6)
+            task.wait(0.8)
+
+            Tween:Create(notifyGui, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
+            Tween:Create(notifyStroke, TweenInfo.new(.3), {Transparency = 1}):Play()
+            Tween:Create(notifyText, TweenInfo.new(.3), {TextTransparency = 1}):Play()
+            Tween:Create(notifyLine, TweenInfo.new(.3), {BackgroundTransparency = 1}):Play()
+            task.wait(.35)
+
+            notifyLine.BackgroundTransparency = 0
+        end
+        notifyRunning = false
+    end)
+end
 
 -- ========== ИКОНКА ==========
 local icon = Instance.new("TextButton")
@@ -91,6 +174,15 @@ dot.BackgroundColor3 = Color3.fromRGB(255,40,40)
 dot.Parent = icon
 Instance.new("UICorner",dot).CornerRadius = UDim.new(1,0)
 
+task.spawn(function()
+    while icon.Parent do
+        Tween:Create(dot, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {BackgroundTransparency = 0.5}):Play()
+        task.wait(0.8)
+        Tween:Create(dot, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {BackgroundTransparency = 0}):Play()
+        task.wait(0.8)
+    end
+end)
+
 -- ========== ХЕЛПЕРЫ ==========
 local function createSubmenu(titleText)
     local f = Instance.new("Frame")
@@ -98,9 +190,14 @@ local function createSubmenu(titleText)
     f.Position = UDim2.fromScale(.5,.5)
     f.AnchorPoint = Vector2.new(.5,.5)
     f.BackgroundColor3 = Color3.fromRGB(18,18,24)
+    f.BackgroundTransparency = 0
     f.Visible = false
     f.Parent = gui
     Instance.new("UICorner",f).CornerRadius = UDim.new(0,16)
+    local subStroke = Instance.new("UIStroke", f)
+    subStroke.Thickness = 1
+    subStroke.Color = Color3.fromRGB(50,50,70)
+    subStroke.Transparency = 0.5
     local t = Instance.new("TextLabel")
     t.Size = UDim2.new(1,-60,0,50)
     t.Position = UDim2.fromOffset(15,5)
@@ -119,23 +216,38 @@ local function createSubmenu(titleText)
     back.TextColor3 = Color3.new(1,1,1)
     back.TextSize = 24
     back.Font = Enum.Font.GothamBold
+    back.AutoButtonColor = false
     back.Parent = f
     Instance.new("UICorner",back).CornerRadius = UDim.new(0,10)
+    back.MouseEnter:Connect(function()
+        Tween:Create(back, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(60,60,90)}):Play()
+    end)
+    back.MouseLeave:Connect(function()
+        Tween:Create(back, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(35,35,40)}):Play()
+    end)
     return f, t, back
 end
 
 local function openFrame(f, w, h)
     f.Visible = true
-    f.Size = UDim2.fromOffset(0,0)
-    Tween:Create(f, TweenInfo.new(.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(w,h)}):Play()
+    f.Size = UDim2.fromOffset(w*0.3, h*0.3)
+    f.BackgroundTransparency = 1
+    Tween:Create(f, TweenInfo.new(.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(w,h),
+        BackgroundTransparency = 0
+    }):Play()
 end
+
 local function closeFrame(f)
-    Tween:Create(f, TweenInfo.new(.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.fromOffset(0,0)}):Play()
-    task.wait(.18)
+    Tween:Create(f, TweenInfo.new(.2, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+        Size = UDim2.fromOffset(f.Size.X.Offset * 0.3, f.Size.Y.Offset * 0.3),
+        BackgroundTransparency = 1
+    }):Play()
+    task.wait(.2)
     f.Visible = false
 end
 
--- ========== ГЛАВНОЕ МЕНЮ (5 кнопок) ==========
+-- ========== ГЛАВНОЕ МЕНЮ ==========
 local menu = Instance.new("Frame")
 menu.Size = UDim2.fromOffset(300,395)
 menu.Position = UDim2.fromScale(.5,.5)
@@ -144,6 +256,10 @@ menu.BackgroundColor3 = Color3.fromRGB(12,12,16)
 menu.Visible = false
 menu.Parent = gui
 Instance.new("UICorner",menu).CornerRadius = UDim.new(0,16)
+local menuStroke = Instance.new("UIStroke", menu)
+menuStroke.Thickness = 1
+menuStroke.Color = Color3.fromRGB(50,50,70)
+menuStroke.Transparency = 0.5
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1,-60,0,50)
@@ -165,8 +281,15 @@ close.Text = "X"
 close.TextColor3 = Color3.new(1,1,1)
 close.TextSize = 18
 close.Font = Enum.Font.GothamBold
+close.AutoButtonColor = false
 close.Parent = menu
 Instance.new("UICorner",close).CornerRadius = UDim.new(0,10)
+close.MouseEnter:Connect(function()
+    Tween:Create(close, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(180,50,50)}):Play()
+end)
+close.MouseLeave:Connect(function()
+    Tween:Create(close, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(35,35,40)}):Play()
+end)
 
 local mainButtons = {}
 local mainKeys = {"esp","player","aimbot","misc","settings"}
@@ -179,24 +302,50 @@ for i,key in ipairs(mainKeys) do
     b.TextColor3 = Color3.new(1,1,1)
     b.TextSize = 17
     b.Font = Enum.Font.GothamBold
+    b.AutoButtonColor = false
     b.Parent = menu
     Instance.new("UICorner",b).CornerRadius = UDim.new(0,11)
     b:SetAttribute("langKey", key)
     mainButtons[i] = b
+    b.MouseEnter:Connect(function()
+        Tween:Create(b, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(50,50,70), Size = UDim2.new(1,-26,0,55)}):Play()
+    end)
+    b.MouseLeave:Connect(function()
+        Tween:Create(b, TweenInfo.new(.15), {BackgroundColor3 = (key == "settings") and Color3.fromRGB(40,50,90) or Color3.fromRGB(28,28,35), Size = UDim2.new(1,-30,0,55)}):Play()
+    end)
 end
 
 local function openMain()
     menu.Visible = true
     menu.Size = UDim2.fromOffset(0,0)
-    Tween:Create(menu, TweenInfo.new(.28, Enum.EasingStyle.Back), {Size = UDim2.fromOffset(300,395)}):Play()
+    menu.BackgroundTransparency = 1
+    Tween:Create(menu, TweenInfo.new(.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(300,395),
+        BackgroundTransparency = 0
+    }):Play()
+    for i, b in ipairs(mainButtons) do
+        b.TextTransparency = 1
+        b.BackgroundTransparency = 1
+        task.spawn(function()
+            task.wait(i * 0.03)
+            Tween:Create(b, TweenInfo.new(.25, Enum.EasingStyle.Quad), {TextTransparency = 0, BackgroundTransparency = 0}):Play()
+        end)
+    end
 end
+
 local function hideMain()
-    Tween:Create(menu, TweenInfo.new(.18), {Size = UDim2.fromOffset(0,0)}):Play()
-    task.wait(.18)
+    for _, b in ipairs(mainButtons) do
+        Tween:Create(b, TweenInfo.new(.15), {TextTransparency = 1, BackgroundTransparency = 1}):Play()
+    end
+    Tween:Create(menu, TweenInfo.new(.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+        Size = UDim2.fromOffset(0,0),
+        BackgroundTransparency = 1
+    }):Play()
+    task.wait(.2)
     menu.Visible = false
 end
 
--- ========== ESP (с ❤️ здоровьем) ==========
+-- ========== ESP ==========
 local espMenu, espTitle, espBack = createSubmenu(T("esp").." (OFF)")
 
 local espEnabled = false
@@ -232,8 +381,12 @@ local function createSwitch(parent, y, labelKey, getter, setter, onChange)
     btn.MouseButton1Click:Connect(function()
         local nv = not getter()
         setter(nv)
+        Tween:Create(btn, TweenInfo.new(.15, Enum.EasingStyle.Back), {Size = UDim2.new(0,70,0,30)}):Play()
+        task.wait(.1)
+        Tween:Create(btn, TweenInfo.new(.15, Enum.EasingStyle.Back), {Size = UDim2.new(0,55,0,26)}):Play()
         btn.BackgroundColor3 = nv and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
         btn.Text = nv and T("on") or T("off")
+        showNotify(T(labelKey)..": "..(nv and T("on") or T("off")), nv and Color3.fromRGB(0,255,100) or Color3.fromRGB(255,80,80))
         if onChange then onChange(nv) end
     end)
 end
@@ -246,7 +399,15 @@ createSwitch(espMenu, 129, "names", function() return espSettings.names end, fun
 createSwitch(espMenu, 166, "health", function() return espSettings.health end, function(v) espSettings.health = v end)
 createSwitch(espMenu, 203, "distance", function() return espSettings.distance end, function(v) espSettings.distance = v end)
 
+print("PART 1/4 LOADED")
+
+-- ===================================================================
+-- ROBLOX MASTER v7.0 — ЧАСТЬ 2/4
+-- ===================================================================
+
+-- ========== ESP ЛОГИКА ==========
 local espObjects = {}
+
 clearESP = function()
     for _, d in pairs(espObjects) do
         if d.box then d.box:Destroy() end
@@ -265,41 +426,49 @@ local function createESP(target)
 
     local box = Instance.new("Frame")
     box.Size = UDim2.fromOffset(0,0)
-    box.BackgroundTransparency = 0.6
-    box.BorderSizePixel = 2
-    box.BorderColor3 = Color3.new(1,1,1)
-    box.BackgroundColor3 = Color3.new(0,0,0)
+    box.BackgroundTransparency = 1
+    box.BorderSizePixel = 0
+    box.ZIndex = 3
     box.Parent = gui
+    local boxStroke = Instance.new("UIStroke", box)
+    boxStroke.Thickness = 2
+    boxStroke.Color = Color3.new(1,1,1)
 
     local name = Instance.new("TextLabel")
-    name.Size = UDim2.fromOffset(150,20)
+    name.Size = UDim2.fromOffset(200,16)
     name.BackgroundTransparency = 1
-    name.Text = target.Name
     name.TextColor3 = Color3.new(1,1,1)
-    name.TextSize = 14
+    name.TextSize = 13
     name.Font = Enum.Font.GothamBold
-    name.TextStrokeTransparency = 0.5
+    name.TextStrokeTransparency = 0
+    name.TextStrokeColor3 = Color3.new(0,0,0)
+    name.ZIndex = 4
     name.Parent = gui
 
     local health = Instance.new("TextLabel")
-    health.Size = UDim2.fromOffset(100,18)
+    health.Size = UDim2.fromOffset(80,14)
     health.BackgroundTransparency = 1
-    health.TextColor3 = Color3.fromRGB(255,255,255)
-    health.TextSize = 14
+    health.TextColor3 = Color3.new(1,1,1)
+    health.TextSize = 13
     health.Font = Enum.Font.GothamBold
-    health.TextStrokeTransparency = 0.5
-    health.Text = "❤️ 100"
+    health.TextStrokeTransparency = 0
+    health.TextStrokeColor3 = Color3.new(0,0,0)
+    health.ZIndex = 4
     health.Parent = gui
 
     local dist = Instance.new("TextLabel")
-    dist.Size = UDim2.fromOffset(80,16)
+    dist.Size = UDim2.fromOffset(80,12)
     dist.BackgroundTransparency = 1
-    dist.TextColor3 = Color3.new(1,1,1)
-    dist.TextSize = 12
+    dist.TextColor3 = Color3.fromRGB(200,200,200)
+    dist.TextSize = 11
     dist.Font = Enum.Font.Gotham
+    dist.TextStrokeTransparency = 0
+    dist.TextStrokeColor3 = Color3.new(0,0,0)
+    dist.ZIndex = 4
     dist.Parent = gui
 
     data.box = box
+    data.boxStroke = boxStroke
     data.name = name
     data.health = health
     data.dist = dist
@@ -313,47 +482,69 @@ RunService.RenderStepped:Connect(function()
     end
     local myChar = player.Character
     if not myChar or not myChar.PrimaryPart then return end
+    local myPos = myChar.PrimaryPart.Position
+    local camPos = Camera.CFrame.Position
+    local viewportX = Camera.ViewportSize.X
+    local viewportY = Camera.ViewportSize.Y
+
     for _, target in ipairs(Players:GetPlayers()) do
         if target ~= player then
             local char = target.Character
-            if char and char:FindFirstChild("Head") then
-                local pos = char.Head.Position
+            local head = char and char:FindFirstChild("Head")
+            if head then
+                local pos = head.Position
                 local screenPos, onScreen = Camera:WorldToViewportPoint(pos)
-                if onScreen then
+                if onScreen and screenPos.X > -100 and screenPos.X < viewportX + 100 and screenPos.Y > -100 and screenPos.Y < viewportY + 100 then
                     if not espObjects[target] then createESP(target) end
                     local d = espObjects[target]
                     if d then
-                        local dist3D = (pos - Camera.CFrame.Position).Magnitude
-                        local boxSize = math.clamp(2.5 / dist3D * 500, 20, 150)
-                        d.box.Size = UDim2.fromOffset(boxSize, boxSize*1.5)
-                        d.box.Position = UDim2.new(0, screenPos.X - boxSize/2, 0, screenPos.Y - boxSize*0.75)
-                        d.box.Visible = espSettings.boxes
+                        local dist3D = (pos - camPos).Magnitude
+                        local boxHeight = math.clamp(2500 / dist3D, 30, 250)
+                        local boxWidth = boxHeight * 0.6
+                        local halfW = boxWidth / 2
+                        local boxTop = screenPos.Y - boxHeight
 
-                        d.name.Position = UDim2.new(0, screenPos.X - 75, 0, screenPos.Y - boxSize*0.75 - 40)
+                        local isEnemy = false
+                        if target.Team and player.Team and target.Team ~= player.Team then isEnemy = true end
+                        local col = isEnemy and Color3.fromRGB(255,80,80) or Color3.fromRGB(80,255,80)
+
+                        d.box.Size = UDim2.fromOffset(boxWidth, boxHeight)
+                        d.box.Position = UDim2.new(0, math.floor(screenPos.X - halfW), 0, math.floor(boxTop))
+                        d.box.Visible = espSettings.boxes
+                        d.boxStroke.Color = col
+
+                        d.name.Size = UDim2.fromOffset(math.max(boxWidth + 40, 150), 16)
+                        d.name.Position = UDim2.new(0, screenPos.X - d.name.Size.X.Offset/2, 0, boxTop - 18)
                         d.name.Text = target.Name
                         d.name.Visible = espSettings.names
+                        d.name.TextColor3 = col
 
                         local hum = char:FindFirstChildOfClass("Humanoid")
-                        if hum then
+                        if hum and hum.Health > 0 then
+                            d.health.Position = UDim2.new(0, screenPos.X - 40, 0, boxTop - 34)
                             d.health.Text = "❤️ "..math.floor(hum.Health)
-                            d.health.Position = UDim2.new(0, screenPos.X - 50, 0, screenPos.Y - boxSize*0.75 - 20)
                             d.health.Visible = espSettings.health
+                        else
+                            d.health.Visible = false
                         end
 
-                        local dv = (pos - myChar.PrimaryPart.Position).Magnitude
-                        d.dist.Position = UDim2.new(0, screenPos.X - 40, 0, screenPos.Y + boxSize*0.75 + 6)
-                        d.dist.Text = string.format("%dm", math.floor(dv))
+                        local dv = math.floor((pos - myPos).Magnitude)
+                        d.dist.Position = UDim2.new(0, screenPos.X - 40, 0, screenPos.Y + 8)
+                        d.dist.Text = dv.."m"
                         d.dist.Visible = espSettings.distance
                     end
                 else
                     if espObjects[target] then
                         local d = espObjects[target]
-                        if d.box then d.box:Destroy() end
-                        if d.name then d.name:Destroy() end
-                        if d.health then d.health:Destroy() end
-                        if d.dist then d.dist:Destroy() end
+                        d.box:Destroy(); d.name:Destroy(); d.health:Destroy(); d.dist:Destroy()
                         espObjects[target] = nil
                     end
+                end
+            else
+                if espObjects[target] then
+                    local d = espObjects[target]
+                    d.box:Destroy(); d.name:Destroy(); d.health:Destroy(); d.dist:Destroy()
+                    espObjects[target] = nil
                 end
             end
         end
@@ -363,19 +554,10 @@ end)
 Players.PlayerRemoving:Connect(function(p)
     if espObjects[p] then
         local d = espObjects[p]
-        if d.box then d.box:Destroy() end
-        if d.name then d.name:Destroy() end
-        if d.health then d.health:Destroy() end
-        if d.dist then d.dist:Destroy() end
+        d.box:Destroy(); d.name:Destroy(); d.health:Destroy(); d.dist:Destroy()
         espObjects[p] = nil
     end
 end)
-
-print("PART 1/3 LOADED")
-
--- ===================================================================
--- ROBLOX MASTER v7.0 — ЧАСТЬ 2/3
--- ===================================================================
 
 -- ========== ОКНО ВВОДА ==========
 local inputPopup = Instance.new("Frame")
@@ -383,9 +565,14 @@ inputPopup.Size = UDim2.fromOffset(0,0)
 inputPopup.Position = UDim2.fromScale(.5,.5)
 inputPopup.AnchorPoint = Vector2.new(.5,.5)
 inputPopup.BackgroundColor3 = Color3.fromRGB(20,20,28)
+inputPopup.BackgroundTransparency = 0
 inputPopup.Visible = false
 inputPopup.Parent = gui
 Instance.new("UICorner",inputPopup).CornerRadius = UDim.new(0,16)
+local popupStroke = Instance.new("UIStroke", inputPopup)
+popupStroke.Thickness = 1
+popupStroke.Color = Color3.fromRGB(70,70,100)
+popupStroke.Transparency = 0.3
 
 local popupTitle = Instance.new("TextLabel")
 popupTitle.Size = UDim2.new(1,-60,0,50)
@@ -406,8 +593,15 @@ popupClose.Text = "X"
 popupClose.TextColor3 = Color3.new(1,1,1)
 popupClose.TextSize = 18
 popupClose.Font = Enum.Font.GothamBold
+popupClose.AutoButtonColor = false
 popupClose.Parent = inputPopup
 Instance.new("UICorner",popupClose).CornerRadius = UDim.new(0,10)
+popupClose.MouseEnter:Connect(function()
+    Tween:Create(popupClose, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(180,50,50)}):Play()
+end)
+popupClose.MouseLeave:Connect(function()
+    Tween:Create(popupClose, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(35,35,40)}):Play()
+end)
 
 local popupBox = Instance.new("TextBox")
 popupBox.Size = UDim2.new(1,-60,0,55)
@@ -430,13 +624,23 @@ popupOk.Text = T("ok")
 popupOk.TextColor3 = Color3.new(1,1,1)
 popupOk.TextSize = 20
 popupOk.Font = Enum.Font.GothamBold
+popupOk.AutoButtonColor = false
 popupOk.Parent = inputPopup
 Instance.new("UICorner",popupOk).CornerRadius = UDim.new(0,8)
+popupOk.MouseEnter:Connect(function()
+    Tween:Create(popupOk, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(0,200,100)}):Play()
+end)
+popupOk.MouseLeave:Connect(function()
+    Tween:Create(popupOk, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(0,150,80)}):Play()
+end)
 
 local popupCallback = nil
 local function hidePopup()
-    Tween:Create(inputPopup, TweenInfo.new(.18), {Size = UDim2.fromOffset(0,0)}):Play()
-    task.wait(.18)
+    Tween:Create(inputPopup, TweenInfo.new(.2, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+        Size = UDim2.fromOffset(0,0),
+        BackgroundTransparency = 1
+    }):Play()
+    task.wait(.2)
     inputPopup.Visible = false
     popupCallback = nil
 end
@@ -450,12 +654,24 @@ local function showPopup(titleTxt, placeholder, callback)
         else
             popupBox.Text = ""
             popupBox.PlaceholderText = T("not_number")
+            local origPos = inputPopup.Position
+            for i=1,3 do
+                Tween:Create(inputPopup, TweenInfo.new(.05), {Position = origPos + UDim2.fromOffset(8,0)}):Play()
+                task.wait(.05)
+                Tween:Create(inputPopup, TweenInfo.new(.05), {Position = origPos - UDim2.fromOffset(8,0)}):Play()
+                task.wait(.05)
+            end
+            Tween:Create(inputPopup, TweenInfo.new(.05), {Position = origPos}):Play()
         end
     end
     inputPopup.Visible = true
     inputPopup.Size = UDim2.fromOffset(0,0)
-    Tween:Create(inputPopup, TweenInfo.new(.22, Enum.EasingStyle.Back), {Size = UDim2.fromOffset(300,225)}):Play()
-    task.wait(.05)
+    inputPopup.BackgroundTransparency = 1
+    Tween:Create(inputPopup, TweenInfo.new(.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(300,225),
+        BackgroundTransparency = 0
+    }):Play()
+    task.wait(.1)
     popupBox:CaptureFocus()
 end
 popupClose.MouseButton1Click:Connect(hidePopup)
@@ -476,12 +692,20 @@ speedBtn.Text = T("speed")..": 16"
 speedBtn.TextColor3 = Color3.new(1,1,1)
 speedBtn.TextSize = 18
 speedBtn.Font = Enum.Font.GothamBold
+speedBtn.AutoButtonColor = false
 speedBtn.Parent = playerMenu
 Instance.new("UICorner",speedBtn).CornerRadius = UDim.new(0,11)
+speedBtn.MouseEnter:Connect(function()
+    Tween:Create(speedBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(50,50,70)}):Play()
+end)
+speedBtn.MouseLeave:Connect(function()
+    Tween:Create(speedBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(28,28,35)}):Play()
+end)
 speedBtn.MouseButton1Click:Connect(function()
     showPopup(T("speed").." (1-500)", "1-500", function(v)
         currentSpeed = v
         speedBtn.Text = T("speed")..": "..math.floor(v)
+        showNotify(T("speed")..": "..math.floor(v), Color3.fromRGB(255,220,0))
     end)
 end)
 
@@ -493,12 +717,23 @@ infJumpBtn.Text = T("infinite_jump")..": "..T("off")
 infJumpBtn.TextColor3 = Color3.new(1,1,1)
 infJumpBtn.TextSize = 17
 infJumpBtn.Font = Enum.Font.GothamBold
+infJumpBtn.AutoButtonColor = false
 infJumpBtn.Parent = playerMenu
 Instance.new("UICorner",infJumpBtn).CornerRadius = UDim.new(0,11)
+infJumpBtn.MouseEnter:Connect(function()
+    Tween:Create(infJumpBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(110,110,110)}):Play()
+end)
+infJumpBtn.MouseLeave:Connect(function()
+    Tween:Create(infJumpBtn, TweenInfo.new(.15), {BackgroundColor3 = infiniteJump and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)}):Play()
+end)
 infJumpBtn.MouseButton1Click:Connect(function()
     infiniteJump = not infiniteJump
+    Tween:Create(infJumpBtn, TweenInfo.new(.15, Enum.EasingStyle.Back), {Size = UDim2.new(1,-20,0,60)}):Play()
+    task.wait(.1)
+    Tween:Create(infJumpBtn, TweenInfo.new(.15, Enum.EasingStyle.Back), {Size = UDim2.new(1,-30,0,55)}):Play()
     infJumpBtn.Text = T("infinite_jump")..": "..(infiniteJump and T("on") or T("off"))
     infJumpBtn.BackgroundColor3 = infiniteJump and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
+    showNotify(T("infinite_jump")..": "..(infiniteJump and T("on") or T("off")), infiniteJump and Color3.fromRGB(0,255,100) or Color3.fromRGB(255,80,80))
 end)
 UIS.JumpRequest:Connect(function()
     if infiniteJump then
@@ -515,8 +750,15 @@ flyBtn.Text = T("fly")
 flyBtn.TextColor3 = Color3.new(1,1,1)
 flyBtn.TextSize = 18
 flyBtn.Font = Enum.Font.GothamBold
+flyBtn.AutoButtonColor = false
 flyBtn.Parent = playerMenu
 Instance.new("UICorner",flyBtn).CornerRadius = UDim.new(0,11)
+flyBtn.MouseEnter:Connect(function()
+    Tween:Create(flyBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(60,120,255)}):Play()
+end)
+flyBtn.MouseLeave:Connect(function()
+    Tween:Create(flyBtn, TweenInfo.new(.15), {BackgroundColor3 = flyEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(40,80,200)}):Play()
+end)
 
 -- ========== FLY ==========
 local flyMenu, flyTitle, flyBack = createSubmenu(T("fly"))
@@ -535,8 +777,15 @@ flyToggle.Text = T("fly_off")
 flyToggle.TextColor3 = Color3.new(1,1,1)
 flyToggle.TextSize = 17
 flyToggle.Font = Enum.Font.GothamBold
+flyToggle.AutoButtonColor = false
 flyToggle.Parent = flyMenu
 Instance.new("UICorner",flyToggle).CornerRadius = UDim.new(0,11)
+flyToggle.MouseEnter:Connect(function()
+    Tween:Create(flyToggle, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(110,110,110)}):Play()
+end)
+flyToggle.MouseLeave:Connect(function()
+    Tween:Create(flyToggle, TweenInfo.new(.15), {BackgroundColor3 = flyEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)}):Play()
+end)
 
 local function stopFly()
     if flyBodyVelocity then flyBodyVelocity:Destroy(); flyBodyVelocity = nil end
@@ -594,8 +843,14 @@ local function setFly(on)
     flyToggle.BackgroundColor3 = on and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
     flyBtn.Text = on and T("fly_on") or T("fly")
     flyBtn.BackgroundColor3 = on and Color3.fromRGB(0,200,80) or Color3.fromRGB(40,80,200)
+    showNotify(on and T("fly_on") or T("fly_off"), on and Color3.fromRGB(0,255,100) or Color3.fromRGB(255,80,80))
 end
-flyToggle.MouseButton1Click:Connect(function() setFly(not flyEnabled) end)
+flyToggle.MouseButton1Click:Connect(function()
+    setFly(not flyEnabled)
+    Tween:Create(flyToggle, TweenInfo.new(.15, Enum.EasingStyle.Back), {Size = UDim2.new(1,-20,0,60)}):Play()
+    task.wait(.1)
+    Tween:Create(flyToggle, TweenInfo.new(.15, Enum.EasingStyle.Back), {Size = UDim2.new(1,-30,0,55)}):Play()
+end)
 
 local flySpeedBtn = Instance.new("TextButton")
 flySpeedBtn.Size = UDim2.new(1,-30,0,55)
@@ -605,21 +860,35 @@ flySpeedBtn.Text = T("fly_speed")..": 60"
 flySpeedBtn.TextColor3 = Color3.new(1,1,1)
 flySpeedBtn.TextSize = 17
 flySpeedBtn.Font = Enum.Font.GothamBold
+flySpeedBtn.AutoButtonColor = false
 flySpeedBtn.Parent = flyMenu
 Instance.new("UICorner",flySpeedBtn).CornerRadius = UDim.new(0,11)
+flySpeedBtn.MouseEnter:Connect(function()
+    Tween:Create(flySpeedBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(50,50,70)}):Play()
+end)
+flySpeedBtn.MouseLeave:Connect(function()
+    Tween:Create(flySpeedBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(28,28,35)}):Play()
+end)
 flySpeedBtn.MouseButton1Click:Connect(function()
     showPopup(T("fly_speed").." (1-1000)", "1-1000", function(v)
         flySpeed = v
         flySpeedBtn.Text = T("fly_speed")..": "..math.floor(v)
+        showNotify(T("fly_speed")..": "..math.floor(v), Color3.fromRGB(255,220,0))
     end)
 end)
 
--- ========== AIMBOT (БЕЛЫЙ КРУГ + ВСЕГДА В ГОЛОВУ + ПОВОРОТ) ==========
+print("PART 2/4 LOADED")
+
+-- ===================================================================
+-- ROBLOX MASTER v7.0 — ЧАСТЬ 3/4
+-- ===================================================================
+
+-- ========== AIMBOT (С FOV КРУГОМ) ==========
 local aimbotMenu, aimbotTitle, aimbotBack = createSubmenu(T("aimbot"))
 
 local aimbotEnabled = false
 local aimbotRadius = 200
-local aimbotRange = 300
+local aimbotRange = 500
 local aimbotTeamCheck = true
 local fovCircleEnabled = true
 
@@ -635,18 +904,12 @@ fovCircle.BorderSizePixel = 0
 fovCircle.Visible = false
 fovCircle.ZIndex = 999
 fovCircle.Parent = gui
-
-local fovCorner = Instance.new("UICorner")
-fovCorner.CornerRadius = UDim.new(1, 0)
-fovCorner.Parent = fovCircle
-
-local fovStroke = Instance.new("UIStroke")
-fovStroke.Thickness = 4
+Instance.new("UICorner",fovCircle).CornerRadius = UDim.new(1, 0)
+local fovStroke = Instance.new("UIStroke", fovCircle)
+fovStroke.Thickness = 3
 fovStroke.Color = Color3.new(1,1,1)
-fovStroke.Transparency = 0
 fovStroke.Parent = fovCircle
 
--- Подпись радиуса (пиксели + studs)
 local fovLabel = Instance.new("TextLabel")
 fovLabel.Size = UDim2.fromOffset(220,22)
 fovLabel.Position = UDim2.new(0.5, -110, 0.5, aimbotRadius + 15)
@@ -664,21 +927,38 @@ fovLabel.Parent = gui
 local function pixelsToStuds(px)
     local cam = workspace.CurrentCamera
     if not cam then return 0 end
-    local viewportY = cam.ViewportSize.Y
-    local fovRad = math.rad(cam.FieldOfView)
-    local refDist = 50
-    local pxPerStud = viewportY / (2 * math.tan(fovRad/2) * refDist)
+    local pxPerStud = cam.ViewportSize.Y / (2 * math.tan(math.rad(cam.FieldOfView)/2) * 50)
     if pxPerStud <= 0 then return 0 end
     return math.floor(px / pxPerStud)
 end
 
--- ФУНКЦИЯ: обновляет круг И подпись при смене радиуса
 local function updateFovCircle()
     fovCircle.Size = UDim2.fromOffset(aimbotRadius*2, aimbotRadius*2)
     fovCircle.Visible = aimbotEnabled and fovCircleEnabled
     fovLabel.Position = UDim2.new(0.5, -110, 0.5, aimbotRadius + 15)
     fovLabel.Text = aimbotRadius.."px (~"..pixelsToStuds(aimbotRadius).." studs)"
     fovLabel.Visible = aimbotEnabled and fovCircleEnabled
+end
+
+local function animateFovCircle(show)
+    if show then
+        fovCircle.Visible = true
+        fovLabel.Visible = true
+        fovCircle.Size = UDim2.fromOffset(0,0)
+        fovLabel.TextTransparency = 1
+        Tween:Create(fovCircle, TweenInfo.new(.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.fromOffset(aimbotRadius*2, aimbotRadius*2)
+        }):Play()
+        Tween:Create(fovLabel, TweenInfo.new(.4), {TextTransparency = 0}):Play()
+    else
+        Tween:Create(fovCircle, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            Size = UDim2.fromOffset(0,0)
+        }):Play()
+        Tween:Create(fovLabel, TweenInfo.new(.3), {TextTransparency = 1}):Play()
+        task.wait(.3)
+        fovCircle.Visible = false
+        fovLabel.Visible = false
+    end
 end
 
 RunService.RenderStepped:Connect(function()
@@ -691,6 +971,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+-- Кнопка ON/OFF
 local aimbotToggle = Instance.new("TextButton")
 aimbotToggle.Size = UDim2.new(1,-30,0,48)
 aimbotToggle.Position = UDim2.fromOffset(15,58)
@@ -699,15 +980,29 @@ aimbotToggle.Text = T("aimbot_off")
 aimbotToggle.TextColor3 = Color3.new(1,1,1)
 aimbotToggle.TextSize = 16
 aimbotToggle.Font = Enum.Font.GothamBold
+aimbotToggle.AutoButtonColor = false
 aimbotToggle.Parent = aimbotMenu
 Instance.new("UICorner",aimbotToggle).CornerRadius = UDim.new(0,11)
+aimbotToggle.MouseEnter:Connect(function()
+    Tween:Create(aimbotToggle, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(110,110,110)}):Play()
+end)
+aimbotToggle.MouseLeave:Connect(function()
+    Tween:Create(aimbotToggle, TweenInfo.new(.15), {BackgroundColor3 = aimbotEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)}):Play()
+end)
 aimbotToggle.MouseButton1Click:Connect(function()
     aimbotEnabled = not aimbotEnabled
     aimbotToggle.Text = aimbotEnabled and T("aimbot_on") or T("aimbot_off")
     aimbotToggle.BackgroundColor3 = aimbotEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
-    updateFovCircle()
+    if aimbotEnabled then
+        animateFovCircle(true)
+        showNotify(T("aimbot_on"), Color3.fromRGB(0,255,100))
+    else
+        animateFovCircle(false)
+        showNotify(T("aimbot_off"), Color3.fromRGB(255,80,80))
+    end
 end)
 
+-- FOV радиус
 local aimbotRadiusBtn = Instance.new("TextButton")
 aimbotRadiusBtn.Size = UDim2.new(1,-30,0,48)
 aimbotRadiusBtn.Position = UDim2.fromOffset(15,112)
@@ -716,16 +1011,25 @@ aimbotRadiusBtn.Text = T("fov")..": "..aimbotRadius.."px"
 aimbotRadiusBtn.TextColor3 = Color3.new(1,1,1)
 aimbotRadiusBtn.TextSize = 16
 aimbotRadiusBtn.Font = Enum.Font.GothamBold
+aimbotRadiusBtn.AutoButtonColor = false
 aimbotRadiusBtn.Parent = aimbotMenu
 Instance.new("UICorner",aimbotRadiusBtn).CornerRadius = UDim.new(0,11)
+aimbotRadiusBtn.MouseEnter:Connect(function()
+    Tween:Create(aimbotRadiusBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(50,50,70)}):Play()
+end)
+aimbotRadiusBtn.MouseLeave:Connect(function()
+    Tween:Create(aimbotRadiusBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(28,28,35)}):Play()
+end)
 aimbotRadiusBtn.MouseButton1Click:Connect(function()
     showPopup(T("fov").." (50-500px)", "50-500", function(v)
         aimbotRadius = v
         aimbotRadiusBtn.Text = T("fov")..": "..math.floor(v).."px"
         updateFovCircle()
+        showNotify(T("fov")..": "..math.floor(v).."px", Color3.fromRGB(255,220,0))
     end)
 end)
 
+-- FOV Circle toggle
 local fovCircleBtn = Instance.new("TextButton")
 fovCircleBtn.Size = UDim2.new(1,-30,0,48)
 fovCircleBtn.Position = UDim2.fromOffset(15,166)
@@ -734,15 +1038,29 @@ fovCircleBtn.Text = T("fov_circle")..": "..T("on")
 fovCircleBtn.TextColor3 = Color3.new(1,1,1)
 fovCircleBtn.TextSize = 16
 fovCircleBtn.Font = Enum.Font.GothamBold
+fovCircleBtn.AutoButtonColor = false
 fovCircleBtn.Parent = aimbotMenu
 Instance.new("UICorner",fovCircleBtn).CornerRadius = UDim.new(0,11)
+fovCircleBtn.MouseEnter:Connect(function()
+    Tween:Create(fovCircleBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(50,220,120)}):Play()
+end)
+fovCircleBtn.MouseLeave:Connect(function()
+    Tween:Create(fovCircleBtn, TweenInfo.new(.15), {BackgroundColor3 = fovCircleEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)}):Play()
+end)
 fovCircleBtn.MouseButton1Click:Connect(function()
     fovCircleEnabled = not fovCircleEnabled
     fovCircleBtn.Text = T("fov_circle")..": "..(fovCircleEnabled and T("on") or T("off"))
     fovCircleBtn.BackgroundColor3 = fovCircleEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
-    updateFovCircle()
+    if fovCircleEnabled then
+        animateFovCircle(true)
+        showNotify(T("fov_circle")..": "..T("on"), Color3.fromRGB(0,255,100))
+    else
+        animateFovCircle(false)
+        showNotify(T("fov_circle")..": "..T("off"), Color3.fromRGB(255,80,80))
+    end
 end)
 
+-- Range
 local aimbotRangeBtn = Instance.new("TextButton")
 aimbotRangeBtn.Size = UDim2.new(1,-30,0,48)
 aimbotRangeBtn.Position = UDim2.fromOffset(15,220)
@@ -751,15 +1069,24 @@ aimbotRangeBtn.Text = T("range")..": "..aimbotRange.." studs"
 aimbotRangeBtn.TextColor3 = Color3.new(1,1,1)
 aimbotRangeBtn.TextSize = 16
 aimbotRangeBtn.Font = Enum.Font.GothamBold
+aimbotRangeBtn.AutoButtonColor = false
 aimbotRangeBtn.Parent = aimbotMenu
 Instance.new("UICorner",aimbotRangeBtn).CornerRadius = UDim.new(0,11)
+aimbotRangeBtn.MouseEnter:Connect(function()
+    Tween:Create(aimbotRangeBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(50,50,70)}):Play()
+end)
+aimbotRangeBtn.MouseLeave:Connect(function()
+    Tween:Create(aimbotRangeBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(28,28,35)}):Play()
+end)
 aimbotRangeBtn.MouseButton1Click:Connect(function()
-    showPopup(T("range").." (10-2000 studs)", "10-2000", function(v)
+    showPopup(T("range").." (10-2000)", "10-2000", function(v)
         aimbotRange = v
         aimbotRangeBtn.Text = T("range")..": "..math.floor(v).." studs"
+        showNotify(T("range")..": "..math.floor(v), Color3.fromRGB(255,220,0))
     end)
 end)
 
+-- Team Check
 local aimbotTeamBtn = Instance.new("TextButton")
 aimbotTeamBtn.Size = UDim2.new(1,-30,0,48)
 aimbotTeamBtn.Position = UDim2.fromOffset(15,274)
@@ -768,42 +1095,78 @@ aimbotTeamBtn.Text = T("team_check")..": "..T("on")
 aimbotTeamBtn.TextColor3 = Color3.new(1,1,1)
 aimbotTeamBtn.TextSize = 16
 aimbotTeamBtn.Font = Enum.Font.GothamBold
+aimbotTeamBtn.AutoButtonColor = false
 aimbotTeamBtn.Parent = aimbotMenu
 Instance.new("UICorner",aimbotTeamBtn).CornerRadius = UDim.new(0,11)
+aimbotTeamBtn.MouseEnter:Connect(function()
+    Tween:Create(aimbotTeamBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(50,220,120)}):Play()
+end)
+aimbotTeamBtn.MouseLeave:Connect(function()
+    Tween:Create(aimbotTeamBtn, TweenInfo.new(.15), {BackgroundColor3 = aimbotTeamCheck and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)}):Play()
+end)
 aimbotTeamBtn.MouseButton1Click:Connect(function()
     aimbotTeamCheck = not aimbotTeamCheck
     aimbotTeamBtn.Text = T("team_check")..": "..(aimbotTeamCheck and T("on") or T("off"))
     aimbotTeamBtn.BackgroundColor3 = aimbotTeamCheck and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
+    showNotify(T("team_check")..": "..(aimbotTeamCheck and T("on") or T("off")), aimbotTeamCheck and Color3.fromRGB(0,255,100) or Color3.fromRGB(255,80,80))
 end)
 
 -- ===== ЛОГИКА AIMBOT — ВСЕГДА В ГОЛОВУ + ПОВОРОТ =====
+local currentTarget = nil
+
 RunService.RenderStepped:Connect(function()
     if not aimbotEnabled then return end
     local myChar = player.Character
     if not myChar or not myChar:FindFirstChild("Head") then return end
+    local myHRP = myChar:FindFirstChild("HumanoidRootPart")
+    if not myHRP then return end
 
     local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-    local closestPart = nil
-    local closestDist = aimbotRadius
     local myPos = myChar.Head.Position
 
-    for _, target in ipairs(Players:GetPlayers()) do
-        if target ~= player then
-            if not (aimbotTeamCheck and target.Team and player.Team and target.Team == player.Team) then
-                local char = target.Character
-                if char and char.PrimaryPart and char:FindFirstChild("Head") then
-                    local distInStuds = (char.Head.Position - myPos).Magnitude
-                    if distInStuds <= aimbotRange then
-                        local part = char:FindFirstChild("Head")
-                        if part then
-                            local sp, onScreen = Camera:WorldToViewportPoint(part.Position)
+    -- Проверка текущей цели
+    if currentTarget then
+        local tChar = currentTarget.Character
+        if not tChar or not tChar:FindFirstChild("Head") or not tChar:FindFirstChildOfClass("Humanoid") or tChar.Humanoid.Health <= 0 then
+            currentTarget = nil
+        else
+            local dist = (tChar.Head.Position - myPos).Magnitude
+            if dist > aimbotRange then currentTarget = nil end
+        end
+    end
+
+    local targetPart = nil
+    local targetPlayer = nil
+    local closestDist = aimbotRadius
+
+    -- Если цель захвачена — используем
+    if currentTarget and currentTarget.Character then
+        local head = currentTarget.Character:FindFirstChild("Head")
+        if head then
+            local sp, onScreen = Camera:WorldToViewportPoint(head.Position)
+            if onScreen then
+                targetPart = head
+                targetPlayer = currentTarget
+            end
+        end
+    end
+
+    -- Ищем новую цель
+    if not targetPart then
+        for _, target in ipairs(Players:GetPlayers()) do
+            if target ~= player and target.Character then
+                if not (aimbotTeamCheck and target.Team and player.Team and target.Team == player.Team) then
+                    local head = target.Character:FindFirstChild("Head")
+                    if head then
+                        local distInStuds = (head.Position - myPos).Magnitude
+                        if distInStuds <= aimbotRange then
+                            local sp, onScreen = Camera:WorldToViewportPoint(head.Position)
                             if onScreen then
                                 local screenDist = (Vector2.new(sp.X, sp.Y) - center).Magnitude
-                                if screenDist <= aimbotRadius then
-                                    if screenDist < closestDist then
-                                        closestDist = screenDist
-                                        closestPart = part
-                                    end
+                                if screenDist <= aimbotRadius and screenDist < closestDist then
+                                    closestDist = screenDist
+                                    targetPart = head
+                                    targetPlayer = target
                                 end
                             end
                         end
@@ -811,28 +1174,88 @@ RunService.RenderStepped:Connect(function()
                 end
             end
         end
+        if targetPart then currentTarget = targetPlayer end
     end
 
-    if closestPart then
-        Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, closestPart.Position)
-        local hrp = myChar:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            local headPos = closestPart.Position
-            local myPos2 = hrp.Position
-            local lookAt = CFrame.lookAt(myPos2, Vector3.new(headPos.X, myPos2.Y, headPos.Z))
-            hrp.CFrame = lookAt
-        end
+    if targetPart then
+        -- Круг зелёный (цель в круге)
+        fovStroke.Color = Color3.fromRGB(0,255,100)
+
+        -- МГНОВЕННЫЙ SNAP камеры в голову
+        Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, targetPart.Position)
+
+        -- ПОВОРОТ ПЕРСОНАЖА
+        local myPos2 = myHRP.Position
+        local tPos = targetPart.Position
+        myHRP.CFrame = CFrame.lookAt(myPos2, Vector3.new(tPos.X, myPos2.Y, tPos.Z))
+    else
+        -- Круг белый (нет цели)
+        fovStroke.Color = Color3.new(1,1,1)
     end
 end)
 
-print("PART 2/3 LOADED")
+-- ========== MISC (НАЧАЛО) ==========
+local miscMenu, miscTitle, miscBack = createSubmenu(T("misc"))
+
+local noclipEnabled = false
+local noclipConn = nil
+local fullbrightEnabled = false
+local origLighting = {Ambient = Lighting.Ambient, Outdoor = Lighting.OutdoorAmbient, Brightness = Lighting.Brightness}
+
+local noclipBtn = Instance.new("TextButton")
+noclipBtn.Size = UDim2.new(1,-30,0,52)
+noclipBtn.Position = UDim2.fromOffset(15,60)
+noclipBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+noclipBtn.Text = T("noclip")..": "..T("off")
+noclipBtn.TextColor3 = Color3.new(1,1,1)
+noclipBtn.TextSize = 16
+noclipBtn.Font = Enum.Font.GothamBold
+noclipBtn.AutoButtonColor = false
+noclipBtn.Parent = miscMenu
+Instance.new("UICorner",noclipBtn).CornerRadius = UDim.new(0,11)
+noclipBtn.MouseEnter:Connect(function()
+    Tween:Create(noclipBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(110,110,110)}):Play()
+end)
+noclipBtn.MouseLeave:Connect(function()
+    Tween:Create(noclipBtn, TweenInfo.new(.15), {BackgroundColor3 = noclipEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)}):Play()
+end)
+noclipBtn.MouseButton1Click:Connect(function()
+    noclipEnabled = not noclipEnabled
+    if noclipEnabled then
+        noclipConn = RunService.Heartbeat:Connect(function()
+            local char = player.Character
+            if char then
+                for _, p in ipairs(char:GetDescendants()) do
+                    if p:IsA("BasePart") then p.CanCollide = false end
+                end
+            end
+        end)
+        noclipBtn.Text = T("noclip")..": "..T("on")
+        noclipBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
+        showNotify(T("noclip")..": "..T("on"), Color3.fromRGB(0,255,100))
+    else
+        if noclipConn then noclipConn:Disconnect(); noclipConn = nil end
+        local char = player.Character
+        if char then
+            for _, p in ipairs(char:GetDescendants()) do
+                if p:IsA("BasePart") then p.CanCollide = true end
+            end
+        end
+        noclipBtn.Text = T("noclip")..": "..T("off")
+        noclipBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+        showNotify(T("noclip")..": "..T("off"), Color3.fromRGB(255,80,80))
+    end
+end)
+
+print("PART 3/4 LOADED")
 
 -- ===================================================================
--- ROBLOX MASTER v7.0 — ЧАСТЬ 3/3
+-- ROBLOX MASTER v7.0 — ЧАСТЬ 4/4
 -- ===================================================================
 
 local Lighting = game:GetService("Lighting")
 local VIM = game:GetService("VirtualInputManager")
+local VU = game:GetService("VirtualUser")
 
 -- ========== DRAG ==========
 local function makeDraggable(frame, dragArea)
@@ -859,52 +1282,7 @@ local function makeDraggable(frame, dragArea)
     end)
 end
 
--- ========== MISC ==========
-local miscMenu, miscTitle, miscBack = createSubmenu(T("misc"))
-
-local noclipEnabled = false
-local noclipConn = nil
-local fullbrightEnabled = false
-local origLighting = {Ambient = Lighting.Ambient, Outdoor = Lighting.OutdoorAmbient, Brightness = Lighting.Brightness}
-
--- Noclip
-local noclipBtn = Instance.new("TextButton")
-noclipBtn.Size = UDim2.new(1,-30,0,52)
-noclipBtn.Position = UDim2.fromOffset(15,60)
-noclipBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-noclipBtn.Text = T("noclip")..": "..T("off")
-noclipBtn.TextColor3 = Color3.new(1,1,1)
-noclipBtn.TextSize = 16
-noclipBtn.Font = Enum.Font.GothamBold
-noclipBtn.Parent = miscMenu
-Instance.new("UICorner",noclipBtn).CornerRadius = UDim.new(0,11)
-noclipBtn.MouseButton1Click:Connect(function()
-    noclipEnabled = not noclipEnabled
-    if noclipEnabled then
-        noclipConn = RunService.Heartbeat:Connect(function()
-            local char = player.Character
-            if char then
-                for _, p in ipairs(char:GetDescendants()) do
-                    if p:IsA("BasePart") then p.CanCollide = false end
-                end
-            end
-        end)
-        noclipBtn.Text = T("noclip")..": "..T("on")
-        noclipBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
-    else
-        if noclipConn then noclipConn:Disconnect(); noclipConn = nil end
-        local char = player.Character
-        if char then
-            for _, p in ipairs(char:GetDescendants()) do
-                if p:IsA("BasePart") then p.CanCollide = true end
-            end
-        end
-        noclipBtn.Text = T("noclip")..": "..T("off")
-        noclipBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-    end
-end)
-
--- Fullbright
+-- ========== FULLBRIGHT ==========
 local fullbrightBtn = Instance.new("TextButton")
 fullbrightBtn.Size = UDim2.new(1,-30,0,52)
 fullbrightBtn.Position = UDim2.fromOffset(15,118)
@@ -913,8 +1291,15 @@ fullbrightBtn.Text = T("fullbright")..": "..T("off")
 fullbrightBtn.TextColor3 = Color3.new(1,1,1)
 fullbrightBtn.TextSize = 16
 fullbrightBtn.Font = Enum.Font.GothamBold
+fullbrightBtn.AutoButtonColor = false
 fullbrightBtn.Parent = miscMenu
 Instance.new("UICorner",fullbrightBtn).CornerRadius = UDim.new(0,11)
+fullbrightBtn.MouseEnter:Connect(function()
+    Tween:Create(fullbrightBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(110,110,110)}):Play()
+end)
+fullbrightBtn.MouseLeave:Connect(function()
+    Tween:Create(fullbrightBtn, TweenInfo.new(.15), {BackgroundColor3 = fullbrightEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)}):Play()
+end)
 fullbrightBtn.MouseButton1Click:Connect(function()
     fullbrightEnabled = not fullbrightEnabled
     if fullbrightEnabled then
@@ -923,16 +1308,18 @@ fullbrightBtn.MouseButton1Click:Connect(function()
         Lighting.Brightness = 3
         fullbrightBtn.Text = T("fullbright")..": "..T("on")
         fullbrightBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
+        showNotify(T("fullbright")..": "..T("on"), Color3.fromRGB(0,255,100))
     else
         Lighting.Ambient = origLighting.Ambient
         Lighting.OutdoorAmbient = origLighting.Outdoor
         Lighting.Brightness = origLighting.Brightness
         fullbrightBtn.Text = T("fullbright")..": "..T("off")
         fullbrightBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+        showNotify(T("fullbright")..": "..T("off"), Color3.fromRGB(255,80,80))
     end
 end)
 
--- TP to Player
+-- ========== TP TO PLAYER ==========
 local tpPlayerBtn = Instance.new("TextButton")
 tpPlayerBtn.Size = UDim2.new(1,-30,0,52)
 tpPlayerBtn.Position = UDim2.fromOffset(15,176)
@@ -941,47 +1328,172 @@ tpPlayerBtn.Text = T("tp_player")
 tpPlayerBtn.TextColor3 = Color3.new(1,1,1)
 tpPlayerBtn.TextSize = 16
 tpPlayerBtn.Font = Enum.Font.GothamBold
+tpPlayerBtn.AutoButtonColor = false
 tpPlayerBtn.Parent = miscMenu
 Instance.new("UICorner",tpPlayerBtn).CornerRadius = UDim.new(0,11)
+tpPlayerBtn.MouseEnter:Connect(function()
+    Tween:Create(tpPlayerBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(50,50,70)}):Play()
+end)
+tpPlayerBtn.MouseLeave:Connect(function()
+    Tween:Create(tpPlayerBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(28,28,35)}):Play()
+end)
+
+-- ========== ANTI-AFK ==========
+local antiAfkEnabled = false
+local antiAfkConn = nil
+
+local antiAfkBtn = Instance.new("TextButton")
+antiAfkBtn.Size = UDim2.new(1,-30,0,48)
+antiAfkBtn.Position = UDim2.fromOffset(15,234)
+antiAfkBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+antiAfkBtn.Text = T("anti_afk")..": "..T("off")
+antiAfkBtn.TextColor3 = Color3.new(1,1,1)
+antiAfkBtn.TextSize = 15
+antiAfkBtn.Font = Enum.Font.GothamBold
+antiAfkBtn.AutoButtonColor = false
+antiAfkBtn.Parent = miscMenu
+Instance.new("UICorner",antiAfkBtn).CornerRadius = UDim.new(0,11)
+antiAfkBtn.MouseEnter:Connect(function()
+    Tween:Create(antiAfkBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(110,110,110)}):Play()
+end)
+antiAfkBtn.MouseLeave:Connect(function()
+    Tween:Create(antiAfkBtn, TweenInfo.new(.15), {BackgroundColor3 = antiAfkEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)}):Play()
+end)
+antiAfkBtn.MouseButton1Click:Connect(function()
+    antiAfkEnabled = not antiAfkEnabled
+    if antiAfkEnabled then
+        antiAfkConn = RunService.Heartbeat:Connect(function()
+            VU:CaptureController()
+            VU:ClickButton2(Vector2.new())
+        end)
+        antiAfkBtn.Text = T("anti_afk")..": "..T("on")
+        antiAfkBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
+        showNotify(T("anti_afk")..": "..T("on"), Color3.fromRGB(0,255,100))
+    else
+        if antiAfkConn then antiAfkConn:Disconnect(); antiAfkConn = nil end
+        antiAfkBtn.Text = T("anti_afk")..": "..T("off")
+        antiAfkBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+        showNotify(T("anti_afk")..": "..T("off"), Color3.fromRGB(255,80,80))
+    end
+end)
+
+-- ========== FPS BOOST ==========
+local fpsBoostEnabled = false
+local origSettings = {}
+
+local fpsBoostBtn = Instance.new("TextButton")
+fpsBoostBtn.Size = UDim2.new(1,-30,0,48)
+fpsBoostBtn.Position = UDim2.fromOffset(15,288)
+fpsBoostBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+fpsBoostBtn.Text = T("fps_boost")..": "..T("off")
+fpsBoostBtn.TextColor3 = Color3.new(1,1,1)
+fpsBoostBtn.TextSize = 15
+fpsBoostBtn.Font = Enum.Font.GothamBold
+fpsBoostBtn.AutoButtonColor = false
+fpsBoostBtn.Parent = miscMenu
+Instance.new("UICorner",fpsBoostBtn).CornerRadius = UDim.new(0,11)
+fpsBoostBtn.MouseEnter:Connect(function()
+    Tween:Create(fpsBoostBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(110,110,110)}):Play()
+end)
+fpsBoostBtn.MouseLeave:Connect(function()
+    Tween:Create(fpsBoostBtn, TweenInfo.new(.15), {BackgroundColor3 = fpsBoostEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)}):Play()
+end)
+fpsBoostBtn.MouseButton1Click:Connect(function()
+    fpsBoostEnabled = not fpsBoostEnabled
+    if fpsBoostEnabled then
+        pcall(function()
+            settings().Rendering.QualityLevel = 1
+            settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
+        end)
+        for _, obj in ipairs(game:GetDescendants()) do
+            if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+                if obj.Enabled then
+                    origSettings[obj] = true
+                    obj.Enabled = false
+                end
+            elseif obj:IsA("Decal") or obj:IsA("Texture") then
+                origSettings[obj] = obj.Transparency
+                obj.Transparency = 1
+            end
+        end
+        fpsBoostBtn.Text = T("fps_boost")..": "..T("on")
+        fpsBoostBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
+        showNotify(T("fps_boost")..": "..T("on"), Color3.fromRGB(0,255,100))
+    else
+        pcall(function()
+            settings().Rendering.QualityLevel = 7
+            settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level04
+        end)
+        for obj, val in pairs(origSettings) do
+            if obj and obj.Parent then
+                if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+                    obj.Enabled = true
+                elseif obj:IsA("Decal") or obj:IsA("Texture") then
+                    obj.Transparency = val
+                end
+            end
+        end
+        origSettings = {}
+        fpsBoostBtn.Text = T("fps_boost")..": "..T("off")
+        fpsBoostBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+        showNotify(T("fps_boost")..": "..T("off"), Color3.fromRGB(255,80,80))
+    end
+end)
 
 -- ========== FAST CLICK ==========
 local fastClickEnabled = false
 local clickDelay = 0.001
 
 local fastClickBtn = Instance.new("TextButton")
-fastClickBtn.Size = UDim2.new(1,-30,0,52)
-fastClickBtn.Position = UDim2.fromOffset(15,234)
+fastClickBtn.Size = UDim2.new(1,-30,0,48)
+fastClickBtn.Position = UDim2.fromOffset(15,342)
 fastClickBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 fastClickBtn.Text = T("fast_click_off")
 fastClickBtn.TextColor3 = Color3.new(1,1,1)
-fastClickBtn.TextSize = 16
+fastClickBtn.TextSize = 15
 fastClickBtn.Font = Enum.Font.GothamBold
+fastClickBtn.AutoButtonColor = false
 fastClickBtn.Parent = miscMenu
 Instance.new("UICorner",fastClickBtn).CornerRadius = UDim.new(0,11)
+fastClickBtn.MouseEnter:Connect(function()
+    Tween:Create(fastClickBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(110,110,110)}):Play()
+end)
+fastClickBtn.MouseLeave:Connect(function()
+    Tween:Create(fastClickBtn, TweenInfo.new(.15), {BackgroundColor3 = fastClickEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)}):Play()
+end)
 fastClickBtn.MouseButton1Click:Connect(function()
     fastClickEnabled = not fastClickEnabled
     fastClickBtn.Text = fastClickEnabled and T("fast_click_on") or T("fast_click_off")
     fastClickBtn.BackgroundColor3 = fastClickEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
+    showNotify(fastClickEnabled and T("fast_click_on") or T("fast_click_off"), fastClickEnabled and Color3.fromRGB(0,255,100) or Color3.fromRGB(255,80,80))
 end)
 
 local clickDelayBtn = Instance.new("TextButton")
 clickDelayBtn.Size = UDim2.new(1,-30,0,44)
-clickDelayBtn.Position = UDim2.fromOffset(15,292)
+clickDelayBtn.Position = UDim2.fromOffset(15,400)
 clickDelayBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
 clickDelayBtn.Text = T("click_delay")..": 0.001"
 clickDelayBtn.TextColor3 = Color3.new(1,1,1)
 clickDelayBtn.TextSize = 15
 clickDelayBtn.Font = Enum.Font.GothamBold
+clickDelayBtn.AutoButtonColor = false
 clickDelayBtn.Parent = miscMenu
 Instance.new("UICorner",clickDelayBtn).CornerRadius = UDim.new(0,11)
+clickDelayBtn.MouseEnter:Connect(function()
+    Tween:Create(clickDelayBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(50,50,70)}):Play()
+end)
+clickDelayBtn.MouseLeave:Connect(function()
+    Tween:Create(clickDelayBtn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(28,28,35)}):Play()
+end)
 clickDelayBtn.MouseButton1Click:Connect(function()
     showPopup(T("click_delay").." (1-100)", "1", function(v)
         clickDelay = math.clamp(v/1000, 0.001, 0.1)
         clickDelayBtn.Text = T("click_delay")..": "..string.format("%.3f", clickDelay)
+        showNotify(T("click_delay")..": "..string.format("%.3f", clickDelay), Color3.fromRGB(255,220,0))
     end)
 end)
 
--- ЛОГИКА FAST CLICK
+-- Логика Fast Click
 task.spawn(function()
     while true do
         if fastClickEnabled then
@@ -997,7 +1509,7 @@ task.spawn(function()
     end
 end)
 
--- ========== TP TO PLAYER ==========
+-- ========== TP TO PLAYER МЕНЮ ==========
 local tpMenu, tpTitle, tpBack = createSubmenu(T("tp_player"))
 
 local tpScroll = Instance.new("ScrollingFrame")
@@ -1027,14 +1539,22 @@ local function refreshTPList()
             btn.TextColor3 = Color3.new(1,1,1)
             btn.TextSize = 15
             btn.Font = Enum.Font.GothamSemibold
+            btn.AutoButtonColor = false
             btn.Parent = tpScroll
             Instance.new("UICorner",btn).CornerRadius = UDim.new(0,10)
+            btn.MouseEnter:Connect(function()
+                Tween:Create(btn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(60,60,90)}):Play()
+            end)
+            btn.MouseLeave:Connect(function()
+                Tween:Create(btn, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(28,28,35)}):Play()
+            end)
             btn.MouseButton1Click:Connect(function()
                 local tChar = p.Character
                 if tChar and tChar.PrimaryPart then
                     local myChar = player.Character
                     if myChar and myChar.PrimaryPart then
                         myChar.PrimaryPart.CFrame = tChar.PrimaryPart.CFrame * CFrame.new(0,3,3)
+                        showNotify("ТП к "..p.Name, Color3.fromRGB(0,255,100))
                     end
                 end
             end)
@@ -1077,6 +1597,7 @@ langENBtn.Text = "English"
 langENBtn.TextColor3 = Color3.new(1,1,1)
 langENBtn.TextSize = 18
 langENBtn.Font = Enum.Font.GothamBold
+langENBtn.AutoButtonColor = false
 langENBtn.Parent = settingsMenu
 Instance.new("UICorner",langENBtn).CornerRadius = UDim.new(0,11)
 
@@ -1088,6 +1609,7 @@ langRUBtn.Text = "Русский"
 langRUBtn.TextColor3 = Color3.new(1,1,1)
 langRUBtn.TextSize = 18
 langRUBtn.Font = Enum.Font.GothamBold
+langRUBtn.AutoButtonColor = false
 langRUBtn.Parent = settingsMenu
 Instance.new("UICorner",langRUBtn).CornerRadius = UDim.new(0,11)
 
@@ -1125,6 +1647,8 @@ local function applyLanguage()
     noclipBtn.Text = T("noclip")..": "..(noclipEnabled and T("on") or T("off"))
     fullbrightBtn.Text = T("fullbright")..": "..(fullbrightEnabled and T("on") or T("off"))
     tpPlayerBtn.Text = T("tp_player")
+    antiAfkBtn.Text = T("anti_afk")..": "..(antiAfkEnabled and T("on") or T("off"))
+    fpsBoostBtn.Text = T("fps_boost")..": "..(fpsBoostEnabled and T("on") or T("off"))
     fastClickBtn.Text = fastClickEnabled and T("fast_click_on") or T("fast_click_off")
     clickDelayBtn.Text = T("click_delay")..": "..string.format("%.3f", clickDelay)
     popupOk.Text = T("ok")
@@ -1149,6 +1673,7 @@ end
 local function setLanguage(lang)
     currentLang = lang
     applyLanguage()
+    showNotify("Language: "..lang, Color3.fromRGB(255,220,0))
 end
 
 langENBtn.MouseButton1Click:Connect(function() setLanguage("EN") end)
@@ -1190,7 +1715,7 @@ settingsBack.Activated:Connect(function() backToMain(settingsMenu) end)
 mainButtons[1].Activated:Connect(function() openSub(espMenu, 340, 260) end)
 mainButtons[2].Activated:Connect(function() openSub(playerMenu, 340, 280) end)
 mainButtons[3].Activated:Connect(function() openSub(aimbotMenu, 340, 340) end)
-mainButtons[4].Activated:Connect(function() openSub(miscMenu, 340, 350) end)
+mainButtons[4].Activated:Connect(function() openSub(miscMenu, 340, 470) end)
 mainButtons[5].Activated:Connect(function() openSub(settingsMenu, 340, 340) end)
 
 flyBtn.Activated:Connect(function()
@@ -1249,4 +1774,4 @@ end)
 updateFovCircle()
 applyLanguage()
 
-print("PART 3/3 LOADED — ALL SYSTEMS GO")
+print("PART 4/4 LOADED — ALL SYSTEMS GO")
