@@ -1033,22 +1033,33 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- ========== MISC ==========
+-- ========== MISC (СО СКРОЛЛОМ) ==========
 miscMenu, miscTitle, miscBack = createSubmenu(T("misc"))
 noclipEnabled = false
 noclipConn = nil
 fullbrightEnabled = false
 origLighting = {Ambient=Lighting.Ambient, Outdoor=Lighting.OutdoorAmbient, Brightness=Lighting.Brightness}
 
+-- Скролл-контейнер для кнопок
+miscScroll = Instance.new("ScrollingFrame")
+miscScroll.Size = UDim2.new(1,-10,1,-70)
+miscScroll.Position = UDim2.fromOffset(5,60)
+miscScroll.BackgroundTransparency = 1
+miscScroll.BorderSizePixel = 0
+miscScroll.ScrollBarThickness = 5
+miscScroll.ScrollBarImageColor3 = Color3.fromRGB(80,80,110)
+miscScroll.CanvasSize = UDim2.new(0,0,0,600)
+miscScroll.Parent = miscMenu
+
 noclipBtn = Instance.new("TextButton")
-noclipBtn.Size = UDim2.new(1,-30,0,48)
-noclipBtn.Position = UDim2.fromOffset(15,58)
+noclipBtn.Size = UDim2.new(1,-20,0,48)
+noclipBtn.Position = UDim2.fromOffset(5,0)
 noclipBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 noclipBtn.Text = T("noclip")..": "..T("off")
 noclipBtn.TextColor3 = Color3.new(1,1,1)
 noclipBtn.TextSize = 15
 noclipBtn.Font = Enum.Font.GothamBold
-noclipBtn.Parent = miscMenu
+noclipBtn.Parent = miscScroll
 Instance.new("UICorner",noclipBtn).CornerRadius = UDim.new(0,11)
 noclipBtn.MouseButton1Click:Connect(function()
     noclipEnabled = not noclipEnabled
@@ -1079,14 +1090,14 @@ noclipBtn.MouseButton1Click:Connect(function()
 end)
 
 fullbrightBtn = Instance.new("TextButton")
-fullbrightBtn.Size = UDim2.new(1,-30,0,48)
-fullbrightBtn.Position = UDim2.fromOffset(15,112)
+fullbrightBtn.Size = UDim2.new(1,-20,0,48)
+fullbrightBtn.Position = UDim2.fromOffset(5,54)
 fullbrightBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 fullbrightBtn.Text = T("fullbright")..": "..T("off")
 fullbrightBtn.TextColor3 = Color3.new(1,1,1)
 fullbrightBtn.TextSize = 15
 fullbrightBtn.Font = Enum.Font.GothamBold
-fullbrightBtn.Parent = miscMenu
+fullbrightBtn.Parent = miscScroll
 Instance.new("UICorner",fullbrightBtn).CornerRadius = UDim.new(0,11)
 fullbrightBtn.MouseButton1Click:Connect(function()
     fullbrightEnabled = not fullbrightEnabled
@@ -1108,27 +1119,27 @@ fullbrightBtn.MouseButton1Click:Connect(function()
 end)
 
 tpPlayerBtn = Instance.new("TextButton")
-tpPlayerBtn.Size = UDim2.new(1,-30,0,48)
-tpPlayerBtn.Position = UDim2.fromOffset(15,166)
+tpPlayerBtn.Size = UDim2.new(1,-20,0,48)
+tpPlayerBtn.Position = UDim2.fromOffset(5,108)
 tpPlayerBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
 tpPlayerBtn.Text = T("tp_player")
 tpPlayerBtn.TextColor3 = Color3.new(1,1,1)
 tpPlayerBtn.TextSize = 15
 tpPlayerBtn.Font = Enum.Font.GothamBold
-tpPlayerBtn.Parent = miscMenu
+tpPlayerBtn.Parent = miscScroll
 Instance.new("UICorner",tpPlayerBtn).CornerRadius = UDim.new(0,11)
 
 antiAfkEnabled = false
 antiAfkConn = nil
 antiAfkBtn = Instance.new("TextButton")
-antiAfkBtn.Size = UDim2.new(1,-30,0,48)
-antiAfkBtn.Position = UDim2.fromOffset(15,220)
+antiAfkBtn.Size = UDim2.new(1,-20,0,48)
+antiAfkBtn.Position = UDim2.fromOffset(5,162)
 antiAfkBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 antiAfkBtn.Text = T("anti_afk")..": "..T("off")
 antiAfkBtn.TextColor3 = Color3.new(1,1,1)
 antiAfkBtn.TextSize = 15
 antiAfkBtn.Font = Enum.Font.GothamBold
-antiAfkBtn.Parent = miscMenu
+antiAfkBtn.Parent = miscScroll
 Instance.new("UICorner",antiAfkBtn).CornerRadius = UDim.new(0,11)
 antiAfkBtn.MouseButton1Click:Connect(function()
     antiAfkEnabled = not antiAfkEnabled
@@ -1151,14 +1162,14 @@ end)
 fpsBoostEnabled = false
 origSettings = {}
 fpsBoostBtn = Instance.new("TextButton")
-fpsBoostBtn.Size = UDim2.new(1,-30,0,48)
-fpsBoostBtn.Position = UDim2.fromOffset(15,274)
+fpsBoostBtn.Size = UDim2.new(1,-20,0,48)
+fpsBoostBtn.Position = UDim2.fromOffset(5,216)
 fpsBoostBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 fpsBoostBtn.Text = T("fps_boost")..": "..T("off")
 fpsBoostBtn.TextColor3 = Color3.new(1,1,1)
 fpsBoostBtn.TextSize = 15
 fpsBoostBtn.Font = Enum.Font.GothamBold
-fpsBoostBtn.Parent = miscMenu
+fpsBoostBtn.Parent = miscScroll
 Instance.new("UICorner",fpsBoostBtn).CornerRadius = UDim.new(0,11)
 fpsBoostBtn.MouseButton1Click:Connect(function()
     fpsBoostEnabled = not fpsBoostEnabled
@@ -1201,14 +1212,14 @@ end)
 fastClickEnabled = false
 clickDelay = 0.001
 fastClickBtn = Instance.new("TextButton")
-fastClickBtn.Size = UDim2.new(1,-30,0,48)
-fastClickBtn.Position = UDim2.fromOffset(15,328)
+fastClickBtn.Size = UDim2.new(1,-20,0,48)
+fastClickBtn.Position = UDim2.fromOffset(5,270)
 fastClickBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 fastClickBtn.Text = T("fast_click_off")
 fastClickBtn.TextColor3 = Color3.new(1,1,1)
 fastClickBtn.TextSize = 15
 fastClickBtn.Font = Enum.Font.GothamBold
-fastClickBtn.Parent = miscMenu
+fastClickBtn.Parent = miscScroll
 Instance.new("UICorner",fastClickBtn).CornerRadius = UDim.new(0,11)
 fastClickBtn.MouseButton1Click:Connect(function()
     fastClickEnabled = not fastClickEnabled
@@ -1218,14 +1229,14 @@ fastClickBtn.MouseButton1Click:Connect(function()
 end)
 
 clickDelayBtn = Instance.new("TextButton")
-clickDelayBtn.Size = UDim2.new(1,-30,0,44)
-clickDelayBtn.Position = UDim2.fromOffset(15,382)
+clickDelayBtn.Size = UDim2.new(1,-20,0,44)
+clickDelayBtn.Position = UDim2.fromOffset(5,324)
 clickDelayBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
 clickDelayBtn.Text = T("click_delay")..": 0.001"
 clickDelayBtn.TextColor3 = Color3.new(1,1,1)
 clickDelayBtn.TextSize = 15
 clickDelayBtn.Font = Enum.Font.GothamBold
-clickDelayBtn.Parent = miscMenu
+clickDelayBtn.Parent = miscScroll
 Instance.new("UICorner",clickDelayBtn).CornerRadius = UDim.new(0,11)
 clickDelayBtn.MouseButton1Click:Connect(function()
     showPopup(T("click_delay").." (1-100)","1",function(v)
@@ -1254,14 +1265,14 @@ spinSpeed = 15
 spinConn = nil
 
 spinBotBtn = Instance.new("TextButton")
-spinBotBtn.Size = UDim2.new(1,-30,0,48)
-spinBotBtn.Position = UDim2.fromOffset(15,436)
+spinBotBtn.Size = UDim2.new(1,-20,0,48)
+spinBotBtn.Position = UDim2.fromOffset(5,378)
 spinBotBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 spinBotBtn.Text = T("spin_bot")..": "..T("off")
 spinBotBtn.TextColor3 = Color3.new(1,1,1)
 spinBotBtn.TextSize = 15
 spinBotBtn.Font = Enum.Font.GothamBold
-spinBotBtn.Parent = miscMenu
+spinBotBtn.Parent = miscScroll
 Instance.new("UICorner",spinBotBtn).CornerRadius = UDim.new(0,11)
 spinBotBtn.MouseButton1Click:Connect(function()
     spinBotEnabled = not spinBotEnabled
@@ -1296,14 +1307,14 @@ bunnyHopEnabled = false
 bunnyHopConn = nil
 
 bunnyHopBtn = Instance.new("TextButton")
-bunnyHopBtn.Size = UDim2.new(1,-30,0,48)
-bunnyHopBtn.Position = UDim2.fromOffset(15,490)
+bunnyHopBtn.Size = UDim2.new(1,-20,0,48)
+bunnyHopBtn.Position = UDim2.fromOffset(5,432)
 bunnyHopBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 bunnyHopBtn.Text = T("bunny_hop")..": "..T("off")
 bunnyHopBtn.TextColor3 = Color3.new(1,1,1)
 bunnyHopBtn.TextSize = 15
 bunnyHopBtn.Font = Enum.Font.GothamBold
-bunnyHopBtn.Parent = miscMenu
+bunnyHopBtn.Parent = miscScroll
 Instance.new("UICorner",bunnyHopBtn).CornerRadius = UDim.new(0,11)
 bunnyHopBtn.MouseButton1Click:Connect(function()
     bunnyHopEnabled = not bunnyHopEnabled
@@ -1518,7 +1529,7 @@ close.Activated:Connect(hideMain)
 mainButtons[1].Activated:Connect(function() openSub(espMenu,340,290) end)
 mainButtons[2].Activated:Connect(function() openSub(playerMenu,340,280) end)
 mainButtons[3].Activated:Connect(function() openSub(aimbotMenu,340,370) end)
-mainButtons[4].Activated:Connect(function() openSub(miscMenu,340,555) end)
+mainButtons[4].Activated:Connect(function() openSub(miscMenu,340,340) end)
 mainButtons[5].Activated:Connect(function() openSub(settingsMenu,340,340) end)
 
 flyBtn.Activated:Connect(function()
