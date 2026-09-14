@@ -784,7 +784,7 @@ flySpeedBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- ========== AIMBOT ==========
+-- ========== AIMBOT (мгновенный + visible check + поворот) ==========
 aimbotMenu, aimbotTitle, aimbotBack = createSubmenu(T("aimbot"))
 aimbotEnabled = false
 aimbotRadius = 200
@@ -1021,7 +1021,9 @@ RunService.RenderStepped:Connect(function()
 
     if targetPart then
         fovStroke.Color = Color3.fromRGB(0,255,100)
+        -- МГНОВЕННАЯ камера в голову
         Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, targetPart.Position)
+        -- МГНОВЕННЫЙ поворот тела (только по горизонтали)
         local myPos2 = myHRP.Position
         local tPos = targetPart.Position
         local flatTarget = Vector3.new(tPos.X, myPos2.Y, tPos.Z)
@@ -1032,7 +1034,6 @@ RunService.RenderStepped:Connect(function()
         fovStroke.Color = Color3.new(1,1,1)
     end
 end)
-
 -- ========== MISC (СО СКРОЛЛОМ) ==========
 miscMenu, miscTitle, miscBack = createSubmenu(T("misc"))
 noclipEnabled = false
