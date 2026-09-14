@@ -1,5 +1,5 @@
 -- ===================================================================
--- ROBLOX MASTER v7.0 — ЧАСТЬ 1/2
+-- ROBLOX MASTER v7.0 — ЧАСТЬ 1/4
 -- ===================================================================
 
 local Players = game:GetService("Players")
@@ -18,22 +18,28 @@ local LANG = {
     EN = {
         title="AD MENU", esp="ESP", player="PLAYER", aimbot="AIMBOT", misc="MISC", settings="SETTINGS",
         enable_esp="Enable ESP", boxes="Boxes", names="Names", health="Health", distance="Distance",
+        highlight="Highlight",
         speed="Speed", infinite_jump="Infinite Jump", fly="Fly", fly_on="Fly: ON", fly_off="Fly: OFF",
         fly_speed="Fly Speed", on="ON", off="OFF", aimbot_on="Aimbot: ON", aimbot_off="Aimbot: OFF",
         fov="FOV", range="Range", fov_circle="FOV Circle", noclip="Noclip", fullbright="Fullbright",
         tp_player="TP to Player", anti_afk="Anti-AFK", fps_boost="FPS Boost",
         fast_click_on="Fast Click: ON", fast_click_off="Fast Click: OFF", click_delay="Click Delay",
-        team_check="Team Check", no_players="No players", ok="OK", enter_value="Enter value...", not_number="Not a number!",
+        team_check="Team Check", visible_check="Visible Check",
+        spin_bot="Spin Bot", bunny_hop="Bunny Hop",
+        no_players="No players", ok="OK", enter_value="Enter value...", not_number="Not a number!",
     },
     RU = {
         title="AD МЕНЮ", esp="ESP", player="ИГРОК", aimbot="АИМБОТ", misc="РАЗНОЕ", settings="НАСТРОЙКИ",
         enable_esp="Включить ESP", boxes="Рамки", names="Имена", health="Здоровье", distance="Дистанция",
+        highlight="Обводка",
         speed="Скорость", infinite_jump="Беск. прыжок", fly="Полёт", fly_on="Полёт: ВКЛ", fly_off="Полёт: ВЫКЛ",
         fly_speed="Скорость полёта", on="ВКЛ", off="ВЫКЛ", aimbot_on="Аимбот: ВКЛ", aimbot_off="Аимбот: ВЫКЛ",
         fov="ФОВ", range="Дальность", fov_circle="Круг ФОВ", noclip="Сквозь стены", fullbright="Яркость",
         tp_player="ТП к игроку", anti_afk="Анти-АФК", fps_boost="Буст ФПС",
         fast_click_on="Фаст клик: ВКЛ", fast_click_off="Фаст клик: ВЫКЛ", click_delay="Задержка клика",
-        team_check="Проверка команды", no_players="Нет игроков", ok="ОК", enter_value="Введи число...", not_number="Не число!",
+        team_check="Проверка команды", visible_check="Видно цель",
+        spin_bot="Крутилка", bunny_hop="Банихоп",
+        no_players="Нет игроков", ok="ОК", enter_value="Введи число...", not_number="Не число!",
     }
 }
 local function T(k) return LANG[currentLang][k] or k end
@@ -250,6 +256,12 @@ local function hideMain()
     menu.Visible = false
 end
 
+print("PART 1/4 LOADED")
+
+-- ===================================================================
+-- ROBLOX MASTER v7.0 — ЧАСТЬ 2/4
+-- ===================================================================
+
 -- ========== ОКНО ВВОДА ==========
 local inputPopup = Instance.new("Frame")
 inputPopup.Size = UDim2.fromOffset(0,0)
@@ -382,10 +394,6 @@ createSwitch(espMenu,88,"boxes",function() return espSettings.boxes end,function
 createSwitch(espMenu,124,"names",function() return espSettings.names end,function(v) espSettings.names=v end)
 createSwitch(espMenu,160,"health",function() return espSettings.health end,function(v) espSettings.health=v end)
 createSwitch(espMenu,196,"distance",function() return espSettings.distance end,function(v) espSettings.distance=v end)
-
--- 6-я кнопка Highlight
-LANG.EN.highlight = "Highlight"
-LANG.RU.highlight = "Обводка"
 createSwitch(espMenu,232,"highlight",function() return espSettings.highlight end,function(v) espSettings.highlight=v end)
 
 local espObjects = {}
@@ -393,10 +401,6 @@ local espHighlights = {}
 
 clearESP = function()
     for _,d in pairs(espObjects) do
-        if d.box then d.box:Destroy() end
-        if d.name then d.name:Destroy() end
-        if d.health then d.health:Destroy() end
-        if d.dist then d.dist:Destroy() end
         if d.topLeft then d.topLeft:Destroy() end
         if d.topRight then d.topRight:Destroy() end
         if d.botLeft then d.botLeft:Destroy() end
@@ -405,6 +409,9 @@ clearESP = function()
         if d.botLine then d.botLine:Destroy() end
         if d.leftLine then d.leftLine:Destroy() end
         if d.rightLine then d.rightLine:Destroy() end
+        if d.name then d.name:Destroy() end
+        if d.health then d.health:Destroy() end
+        if d.dist then d.dist:Destroy() end
     end
     for _,h in pairs(espHighlights) do
         if h then h:Destroy() end
@@ -416,57 +423,24 @@ end
 local function createESP(target)
     if espObjects[target] then return end
     local data = {}
-    
-    -- 4 УГЛА (как в CS)
-    local topLeft = Instance.new("Frame")
-    topLeft.BackgroundColor3 = Color3.new(1,1,1)
-    topLeft.BorderSizePixel = 0
-    topLeft.ZIndex = 3
-    topLeft.Parent = gui
-    
-    local topRight = Instance.new("Frame")
-    topRight.BackgroundColor3 = Color3.new(1,1,1)
-    topRight.BorderSizePixel = 0
-    topRight.ZIndex = 3
-    topRight.Parent = gui
-    
-    local botLeft = Instance.new("Frame")
-    botLeft.BackgroundColor3 = Color3.new(1,1,1)
-    botLeft.BorderSizePixel = 0
-    botLeft.ZIndex = 3
-    botLeft.Parent = gui
-    
-    local botRight = Instance.new("Frame")
-    botRight.BackgroundColor3 = Color3.new(1,1,1)
-    botRight.BorderSizePixel = 0
-    botRight.ZIndex = 3
-    botRight.Parent = gui
-    
-    -- Тонкие линии между углами
-    local topLine = Instance.new("Frame")
-    topLine.BackgroundColor3 = Color3.new(1,1,1)
-    topLine.BorderSizePixel = 0
-    topLine.ZIndex = 3
-    topLine.Parent = gui
-    
-    local botLine = Instance.new("Frame")
-    botLine.BackgroundColor3 = Color3.new(1,1,1)
-    botLine.BorderSizePixel = 0
-    botLine.ZIndex = 3
-    botLine.Parent = gui
-    
-    local leftLine = Instance.new("Frame")
-    leftLine.BackgroundColor3 = Color3.new(1,1,1)
-    leftLine.BorderSizePixel = 0
-    leftLine.ZIndex = 3
-    leftLine.Parent = gui
-    
-    local rightLine = Instance.new("Frame")
-    rightLine.BackgroundColor3 = Color3.new(1,1,1)
-    rightLine.BorderSizePixel = 0
-    rightLine.ZIndex = 3
-    rightLine.Parent = gui
-    
+    local function mkFrame()
+        local f = Instance.new("Frame")
+        f.BackgroundColor3 = Color3.new(1,1,1)
+        f.BorderSizePixel = 0
+        f.ZIndex = 3
+        f.Visible = false
+        f.Parent = gui
+        return f
+    end
+    data.topLeft = mkFrame()
+    data.topRight = mkFrame()
+    data.botLeft = mkFrame()
+    data.botRight = mkFrame()
+    data.topLine = mkFrame()
+    data.botLine = mkFrame()
+    data.leftLine = mkFrame()
+    data.rightLine = mkFrame()
+
     local name = Instance.new("TextLabel")
     name.BackgroundTransparency = 1
     name.TextColor3 = Color3.new(1,1,1)
@@ -475,8 +449,9 @@ local function createESP(target)
     name.TextStrokeTransparency = 0
     name.TextStrokeColor3 = Color3.new(0,0,0)
     name.ZIndex = 4
+    name.Visible = false
     name.Parent = gui
-    
+
     local health = Instance.new("TextLabel")
     health.BackgroundTransparency = 1
     health.TextColor3 = Color3.new(1,1,1)
@@ -485,8 +460,9 @@ local function createESP(target)
     health.TextStrokeTransparency = 0
     health.TextStrokeColor3 = Color3.new(0,0,0)
     health.ZIndex = 4
+    health.Visible = false
     health.Parent = gui
-    
+
     local dist = Instance.new("TextLabel")
     dist.BackgroundTransparency = 1
     dist.TextColor3 = Color3.fromRGB(200,200,200)
@@ -495,24 +471,15 @@ local function createESP(target)
     dist.TextStrokeTransparency = 0
     dist.TextStrokeColor3 = Color3.new(0,0,0)
     dist.ZIndex = 4
+    dist.Visible = false
     dist.Parent = gui
-    
-    data.box = topLeft  -- для совместимости с clearESP
-    data.topLeft = topLeft
-    data.topRight = topRight
-    data.botLeft = botLeft
-    data.botRight = botRight
-    data.topLine = topLine
-    data.botLine = botLine
-    data.leftLine = leftLine
-    data.rightLine = rightLine
+
     data.name = name
     data.health = health
     data.dist = dist
     espObjects[target] = data
 end
 
--- Функция обновления Highlight
 local function updateHighlight(target)
     local char = target.Character
     if not char then
@@ -522,7 +489,6 @@ local function updateHighlight(target)
         end
         return
     end
-    
     if espSettings.highlight then
         if not espHighlights[target] or not espHighlights[target].Parent then
             local h = Instance.new("Highlight")
@@ -535,7 +501,6 @@ local function updateHighlight(target)
             h.Parent = gui
             espHighlights[target] = h
         else
-            -- Обновляем Adornee если персонаж изменился
             espHighlights[target].Adornee = char
         end
     else
@@ -554,7 +519,6 @@ RunService.RenderStepped:Connect(function()
     local myChar = player.Character
     if not myChar or not myChar.PrimaryPart then return end
     local myPos = myChar.PrimaryPart.Position
-    local camPos = Camera.CFrame.Position
     local vx, vy = Camera.ViewportSize.X, Camera.ViewportSize.Y
     
     for _,target in ipairs(Players:GetPlayers()) do
@@ -563,8 +527,7 @@ RunService.RenderStepped:Connect(function()
             local head = char and char:FindFirstChild("Head")
             local hrp = char and char:FindFirstChild("HumanoidRootPart")
             if head and hrp then
-                local pos = head.Position
-                local sp, onScreen = Camera:WorldToViewportPoint(pos)
+                local sp, onScreen = Camera:WorldToViewportPoint(head.Position)
                 local footPos = hrp.Position - Vector3.new(0, hrp.Size.Y/2 + 2.5, 0)
                 local spFoot, onFoot = Camera:WorldToViewportPoint(footPos)
                 
@@ -572,7 +535,6 @@ RunService.RenderStepped:Connect(function()
                     if not espObjects[target] then createESP(target) end
                     local d = espObjects[target]
                     if d then
-                        -- РАЗМЕР бокса (от головы до ног)
                         local boxTop = sp.Y
                         local boxBot = spFoot.Y
                         local boxHeight = math.abs(boxBot - boxTop)
@@ -583,11 +545,10 @@ RunService.RenderStepped:Connect(function()
                         local isEnemy = target.Team and player.Team and target.Team ~= player.Team
                         local col = isEnemy and Color3.fromRGB(255,80,80) or Color3.fromRGB(80,255,80)
                         
-                        -- Длина углов (25% от ширины)
                         local cornerLen = math.max(boxWidth * 0.25, 8)
                         local thick = 2
                         
-                        -- TOP LEFT (горизонт + вертикаль)
+                        -- TOP LEFT угол
                         d.topLeft.Visible = espSettings.boxes
                         d.topLeft.BackgroundColor3 = col
                         d.topLeft.Size = UDim2.fromOffset(cornerLen, thick)
@@ -649,7 +610,7 @@ RunService.RenderStepped:Connect(function()
                         end
                         
                         -- DIST
-                        local dv = math.floor((pos-myPos).Magnitude)
+                        local dv = math.floor((head.Position-myPos).Magnitude)
                         d.dist.Position = UDim2.new(0, sp.X-40, 0, boxBot+4)
                         d.dist.Text = dv.."m"
                         d.dist.Visible = espSettings.distance
@@ -663,8 +624,6 @@ RunService.RenderStepped:Connect(function()
                         espObjects[target] = nil
                     end
                 end
-                
-                -- Обновляем Highlight
                 updateHighlight(target)
             end
         end
@@ -684,6 +643,12 @@ Players.PlayerRemoving:Connect(function(p)
         espHighlights[p] = nil
     end
 end)
+
+print("PART 2/4 LOADED")
+
+-- ===================================================================
+-- ROBLOX MASTER v7.0 — ЧАСТЬ 3/4
+-- ===================================================================
 
 -- ========== PLAYER ==========
 local playerMenu, playerTitle, playerBack = createSubmenu(T("player"))
@@ -833,18 +798,13 @@ flySpeedBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
-print("PART 1/2 LOADED")
-
--- ===================================================================
--- ROBLOX MASTER v7.0 — ЧАСТЬ 2/2
--- ===================================================================
-
--- ========== AIMBOT ==========
+-- ========== AIMBOT (мгновенный + visible check + поворот) ==========
 local aimbotMenu, aimbotTitle, aimbotBack = createSubmenu(T("aimbot"))
 local aimbotEnabled = false
 local aimbotRadius = 200
 local aimbotRange = 500
 local aimbotTeamCheck = true
+local aimbotVisibleCheck = true
 local fovCircleEnabled = true
 
 local fovCircle = Instance.new("Frame")
@@ -904,8 +864,8 @@ RunService.RenderStepped:Connect(function()
 end)
 
 local aimbotToggle = Instance.new("TextButton")
-aimbotToggle.Size = UDim2.new(1,-30,0,48)
-aimbotToggle.Position = UDim2.fromOffset(15,58)
+aimbotToggle.Size = UDim2.new(1,-30,0,46)
+aimbotToggle.Position = UDim2.fromOffset(15,55)
 aimbotToggle.BackgroundColor3 = Color3.fromRGB(80,80,80)
 aimbotToggle.Text = T("aimbot_off")
 aimbotToggle.TextColor3 = Color3.new(1,1,1)
@@ -922,12 +882,12 @@ aimbotToggle.MouseButton1Click:Connect(function()
 end)
 
 local aimbotRadiusBtn = Instance.new("TextButton")
-aimbotRadiusBtn.Size = UDim2.new(1,-30,0,48)
-aimbotRadiusBtn.Position = UDim2.fromOffset(15,112)
+aimbotRadiusBtn.Size = UDim2.new(1,-30,0,46)
+aimbotRadiusBtn.Position = UDim2.fromOffset(15,105)
 aimbotRadiusBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
 aimbotRadiusBtn.Text = T("fov")..": "..aimbotRadius.."px"
 aimbotRadiusBtn.TextColor3 = Color3.new(1,1,1)
-aimbotRadiusBtn.TextSize = 16
+aimbotRadiusBtn.TextSize = 15
 aimbotRadiusBtn.Font = Enum.Font.GothamBold
 aimbotRadiusBtn.Parent = aimbotMenu
 Instance.new("UICorner",aimbotRadiusBtn).CornerRadius = UDim.new(0,11)
@@ -940,12 +900,12 @@ aimbotRadiusBtn.MouseButton1Click:Connect(function()
 end)
 
 local fovCircleBtn = Instance.new("TextButton")
-fovCircleBtn.Size = UDim2.new(1,-30,0,48)
-fovCircleBtn.Position = UDim2.fromOffset(15,166)
+fovCircleBtn.Size = UDim2.new(1,-30,0,46)
+fovCircleBtn.Position = UDim2.fromOffset(15,155)
 fovCircleBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
 fovCircleBtn.Text = T("fov_circle")..": "..T("on")
 fovCircleBtn.TextColor3 = Color3.new(1,1,1)
-fovCircleBtn.TextSize = 16
+fovCircleBtn.TextSize = 15
 fovCircleBtn.Font = Enum.Font.GothamBold
 fovCircleBtn.Parent = aimbotMenu
 Instance.new("UICorner",fovCircleBtn).CornerRadius = UDim.new(0,11)
@@ -954,16 +914,15 @@ fovCircleBtn.MouseButton1Click:Connect(function()
     fovCircleBtn.Text = T("fov_circle")..": "..(fovCircleEnabled and T("on") or T("off"))
     fovCircleBtn.BackgroundColor3 = fovCircleEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
     updateFovCircle()
-    showNotify(T("fov_circle")..": "..(fovCircleEnabled and T("on") or T("off")), fovCircleEnabled and Color3.fromRGB(0,255,100) or Color3.fromRGB(255,80,80))
 end)
 
 local aimbotRangeBtn = Instance.new("TextButton")
-aimbotRangeBtn.Size = UDim2.new(1,-30,0,48)
-aimbotRangeBtn.Position = UDim2.fromOffset(15,220)
+aimbotRangeBtn.Size = UDim2.new(1,-30,0,46)
+aimbotRangeBtn.Position = UDim2.fromOffset(15,205)
 aimbotRangeBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
 aimbotRangeBtn.Text = T("range")..": "..aimbotRange.." studs"
 aimbotRangeBtn.TextColor3 = Color3.new(1,1,1)
-aimbotRangeBtn.TextSize = 16
+aimbotRangeBtn.TextSize = 15
 aimbotRangeBtn.Font = Enum.Font.GothamBold
 aimbotRangeBtn.Parent = aimbotMenu
 Instance.new("UICorner",aimbotRangeBtn).CornerRadius = UDim.new(0,11)
@@ -975,12 +934,12 @@ aimbotRangeBtn.MouseButton1Click:Connect(function()
 end)
 
 local aimbotTeamBtn = Instance.new("TextButton")
-aimbotTeamBtn.Size = UDim2.new(1,-30,0,48)
-aimbotTeamBtn.Position = UDim2.fromOffset(15,274)
+aimbotTeamBtn.Size = UDim2.new(1,-30,0,46)
+aimbotTeamBtn.Position = UDim2.fromOffset(15,255)
 aimbotTeamBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
 aimbotTeamBtn.Text = T("team_check")..": "..T("on")
 aimbotTeamBtn.TextColor3 = Color3.new(1,1,1)
-aimbotTeamBtn.TextSize = 16
+aimbotTeamBtn.TextSize = 15
 aimbotTeamBtn.Font = Enum.Font.GothamBold
 aimbotTeamBtn.Parent = aimbotMenu
 Instance.new("UICorner",aimbotTeamBtn).CornerRadius = UDim.new(0,11)
@@ -990,15 +949,42 @@ aimbotTeamBtn.MouseButton1Click:Connect(function()
     aimbotTeamBtn.BackgroundColor3 = aimbotTeamCheck and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
 end)
 
+local visibleBtn = Instance.new("TextButton")
+visibleBtn.Size = UDim2.new(1,-30,0,46)
+visibleBtn.Position = UDim2.fromOffset(15,305)
+visibleBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
+visibleBtn.Text = T("visible_check")..": "..T("on")
+visibleBtn.TextColor3 = Color3.new(1,1,1)
+visibleBtn.TextSize = 15
+visibleBtn.Font = Enum.Font.GothamBold
+visibleBtn.Parent = aimbotMenu
+Instance.new("UICorner",visibleBtn).CornerRadius = UDim.new(0,11)
+visibleBtn.MouseButton1Click:Connect(function()
+    aimbotVisibleCheck = not aimbotVisibleCheck
+    visibleBtn.Text = T("visible_check")..": "..(aimbotVisibleCheck and T("on") or T("off"))
+    visibleBtn.BackgroundColor3 = aimbotVisibleCheck and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
+end)
+
+local function isVisible(targetPart, myHead)
+    local origin = myHead.Position
+    local dir = targetPart.Position - origin
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    rayParams.FilterDescendantsInstances = {player.Character, targetPart.Parent}
+    local result = workspace:Raycast(origin, dir, rayParams)
+    return result == nil
+end
+
 local currentTarget = nil
 RunService.RenderStepped:Connect(function()
     if not aimbotEnabled then return end
     local myChar = player.Character
     if not myChar or not myChar:FindFirstChild("Head") then return end
     local myHRP = myChar:FindFirstChild("HumanoidRootPart")
-    if not myHRP then return end
+    local myHead = myChar:FindFirstChild("Head")
+    if not myHRP or not myHead then return end
     local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-    local myPos = myChar.Head.Position
+    local myPos = myHead.Position
 
     if currentTarget then
         local tChar = currentTarget.Character
@@ -1007,6 +993,7 @@ RunService.RenderStepped:Connect(function()
         else
             local dist = (tChar.Head.Position - myPos).Magnitude
             if dist > aimbotRange then currentTarget = nil end
+            if aimbotVisibleCheck and not isVisible(tChar.Head, myHead) then currentTarget = nil end
         end
     end
 
@@ -1027,13 +1014,15 @@ RunService.RenderStepped:Connect(function()
                     if head then
                         local distS = (head.Position - myPos).Magnitude
                         if distS <= aimbotRange then
-                            local sp, onScreen = Camera:WorldToViewportPoint(head.Position)
-                            if onScreen then
-                                local screenD = (Vector2.new(sp.X,sp.Y) - center).Magnitude
-                                if screenD <= aimbotRadius and screenD < closestDist then
-                                    closestDist = screenD
-                                    targetPart = head
-                                    targetPlayer = target
+                            if not aimbotVisibleCheck or isVisible(head, myHead) then
+                                local sp, onScreen = Camera:WorldToViewportPoint(head.Position)
+                                if onScreen then
+                                    local screenD = (Vector2.new(sp.X,sp.Y) - center).Magnitude
+                                    if screenD <= aimbotRadius and screenD < closestDist then
+                                        closestDist = screenD
+                                        targetPart = head
+                                        targetPlayer = target
+                                    end
                                 end
                             end
                         end
@@ -1049,11 +1038,20 @@ RunService.RenderStepped:Connect(function()
         Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, targetPart.Position)
         local myPos2 = myHRP.Position
         local tPos = targetPart.Position
-        myHRP.CFrame = CFrame.lookAt(myPos2, Vector3.new(tPos.X, myPos2.Y, tPos.Z))
+        local flatTarget = Vector3.new(tPos.X, myPos2.Y, tPos.Z)
+        if (flatTarget - myPos2).Magnitude > 0.1 then
+            myHRP.CFrame = CFrame.lookAt(myPos2, flatTarget)
+        end
     else
         fovStroke.Color = Color3.new(1,1,1)
     end
 end)
+
+print("PART 3/4 LOADED")
+
+-- ===================================================================
+-- ROBLOX MASTER v7.0 — ЧАСТЬ 4/4
+-- ===================================================================
 
 -- ========== MISC ==========
 local miscMenu, miscTitle, miscBack = createSubmenu(T("misc"))
@@ -1063,12 +1061,12 @@ local fullbrightEnabled = false
 local origLighting = {Ambient=Lighting.Ambient, Outdoor=Lighting.OutdoorAmbient, Brightness=Lighting.Brightness}
 
 local noclipBtn = Instance.new("TextButton")
-noclipBtn.Size = UDim2.new(1,-30,0,52)
-noclipBtn.Position = UDim2.fromOffset(15,60)
+noclipBtn.Size = UDim2.new(1,-30,0,48)
+noclipBtn.Position = UDim2.fromOffset(15,58)
 noclipBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 noclipBtn.Text = T("noclip")..": "..T("off")
 noclipBtn.TextColor3 = Color3.new(1,1,1)
-noclipBtn.TextSize = 16
+noclipBtn.TextSize = 15
 noclipBtn.Font = Enum.Font.GothamBold
 noclipBtn.Parent = miscMenu
 Instance.new("UICorner",noclipBtn).CornerRadius = UDim.new(0,11)
@@ -1101,12 +1099,12 @@ noclipBtn.MouseButton1Click:Connect(function()
 end)
 
 local fullbrightBtn = Instance.new("TextButton")
-fullbrightBtn.Size = UDim2.new(1,-30,0,52)
-fullbrightBtn.Position = UDim2.fromOffset(15,118)
+fullbrightBtn.Size = UDim2.new(1,-30,0,48)
+fullbrightBtn.Position = UDim2.fromOffset(15,112)
 fullbrightBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 fullbrightBtn.Text = T("fullbright")..": "..T("off")
 fullbrightBtn.TextColor3 = Color3.new(1,1,1)
-fullbrightBtn.TextSize = 16
+fullbrightBtn.TextSize = 15
 fullbrightBtn.Font = Enum.Font.GothamBold
 fullbrightBtn.Parent = miscMenu
 Instance.new("UICorner",fullbrightBtn).CornerRadius = UDim.new(0,11)
@@ -1130,12 +1128,12 @@ fullbrightBtn.MouseButton1Click:Connect(function()
 end)
 
 local tpPlayerBtn = Instance.new("TextButton")
-tpPlayerBtn.Size = UDim2.new(1,-30,0,52)
-tpPlayerBtn.Position = UDim2.fromOffset(15,176)
+tpPlayerBtn.Size = UDim2.new(1,-30,0,48)
+tpPlayerBtn.Position = UDim2.fromOffset(15,166)
 tpPlayerBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
 tpPlayerBtn.Text = T("tp_player")
 tpPlayerBtn.TextColor3 = Color3.new(1,1,1)
-tpPlayerBtn.TextSize = 16
+tpPlayerBtn.TextSize = 15
 tpPlayerBtn.Font = Enum.Font.GothamBold
 tpPlayerBtn.Parent = miscMenu
 Instance.new("UICorner",tpPlayerBtn).CornerRadius = UDim.new(0,11)
@@ -1144,7 +1142,7 @@ local antiAfkEnabled = false
 local antiAfkConn = nil
 local antiAfkBtn = Instance.new("TextButton")
 antiAfkBtn.Size = UDim2.new(1,-30,0,48)
-antiAfkBtn.Position = UDim2.fromOffset(15,234)
+antiAfkBtn.Position = UDim2.fromOffset(15,220)
 antiAfkBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 antiAfkBtn.Text = T("anti_afk")..": "..T("off")
 antiAfkBtn.TextColor3 = Color3.new(1,1,1)
@@ -1174,7 +1172,7 @@ local fpsBoostEnabled = false
 local origSettings = {}
 local fpsBoostBtn = Instance.new("TextButton")
 fpsBoostBtn.Size = UDim2.new(1,-30,0,48)
-fpsBoostBtn.Position = UDim2.fromOffset(15,288)
+fpsBoostBtn.Position = UDim2.fromOffset(15,274)
 fpsBoostBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 fpsBoostBtn.Text = T("fps_boost")..": "..T("off")
 fpsBoostBtn.TextColor3 = Color3.new(1,1,1)
@@ -1224,7 +1222,7 @@ local fastClickEnabled = false
 local clickDelay = 0.001
 local fastClickBtn = Instance.new("TextButton")
 fastClickBtn.Size = UDim2.new(1,-30,0,48)
-fastClickBtn.Position = UDim2.fromOffset(15,342)
+fastClickBtn.Position = UDim2.fromOffset(15,328)
 fastClickBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 fastClickBtn.Text = T("fast_click_off")
 fastClickBtn.TextColor3 = Color3.new(1,1,1)
@@ -1241,7 +1239,7 @@ end)
 
 local clickDelayBtn = Instance.new("TextButton")
 clickDelayBtn.Size = UDim2.new(1,-30,0,44)
-clickDelayBtn.Position = UDim2.fromOffset(15,400)
+clickDelayBtn.Position = UDim2.fromOffset(15,382)
 clickDelayBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
 clickDelayBtn.Text = T("click_delay")..": 0.001"
 clickDelayBtn.TextColor3 = Color3.new(1,1,1)
@@ -1268,6 +1266,95 @@ task.spawn(function()
         else
             task.wait(0.1)
         end
+    end
+end)
+
+-- ========== SPIN BOT ==========
+local spinBotEnabled = false
+local spinSpeed = 15
+local spinConn = nil
+
+local spinBotBtn = Instance.new("TextButton")
+spinBotBtn.Size = UDim2.new(1,-30,0,48)
+spinBotBtn.Position = UDim2.fromOffset(15,436)
+spinBotBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+spinBotBtn.Text = T("spin_bot")..": "..T("off")
+spinBotBtn.TextColor3 = Color3.new(1,1,1)
+spinBotBtn.TextSize = 15
+spinBotBtn.Font = Enum.Font.GothamBold
+spinBotBtn.Parent = miscMenu
+Instance.new("UICorner",spinBotBtn).CornerRadius = UDim.new(0,11)
+spinBotBtn.MouseButton1Click:Connect(function()
+    spinBotEnabled = not spinBotEnabled
+    if spinBotEnabled then
+        local char = player.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if hum then hum.AutoRotate = false end
+        spinConn = RunService.Heartbeat:Connect(function()
+            local c = player.Character
+            if not c then return end
+            local hrp = c:FindFirstChild("HumanoidRootPart")
+            if not hrp then return end
+            local h = c:FindFirstChildOfClass("Humanoid")
+            if h then h.AutoRotate = false end
+            hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(spinSpeed), 0)
+        end)
+        spinBotBtn.Text = T("spin_bot")..": "..T("on")
+        spinBotBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
+        showNotify(T("spin_bot")..": "..T("on"), Color3.fromRGB(0,255,100))
+    else
+        if spinConn then spinConn:Disconnect(); spinConn = nil end
+        local char = player.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if hum then hum.AutoRotate = true end
+        spinBotBtn.Text = T("spin_bot")..": "..T("off")
+        spinBotBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+        showNotify(T("spin_bot")..": "..T("off"), Color3.fromRGB(255,80,80))
+    end
+end)
+
+-- ========== BUNNY HOP ==========
+local bunnyHopEnabled = false
+local bunnyHopConn = nil
+
+local bunnyHopBtn = Instance.new("TextButton")
+bunnyHopBtn.Size = UDim2.new(1,-30,0,48)
+bunnyHopBtn.Position = UDim2.fromOffset(15,490)
+bunnyHopBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+bunnyHopBtn.Text = T("bunny_hop")..": "..T("off")
+bunnyHopBtn.TextColor3 = Color3.new(1,1,1)
+bunnyHopBtn.TextSize = 15
+bunnyHopBtn.Font = Enum.Font.GothamBold
+bunnyHopBtn.Parent = miscMenu
+Instance.new("UICorner",bunnyHopBtn).CornerRadius = UDim.new(0,11)
+bunnyHopBtn.MouseButton1Click:Connect(function()
+    bunnyHopEnabled = not bunnyHopEnabled
+    if bunnyHopEnabled then
+        bunnyHopConn = RunService.Heartbeat:Connect(function()
+            local char = player.Character
+            if not char then return end
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hum or not hrp then return end
+            local state = hum:GetState()
+            if state == Enum.HumanoidStateType.Running or state == Enum.HumanoidStateType.Landed then
+                hum:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+            if state == Enum.HumanoidStateType.Freefall then
+                local moveDir = hum.MoveDirection
+                if moveDir.Magnitude > 0.1 then
+                    hrp.Velocity = Vector3.new(moveDir.X * 25, hrp.Velocity.Y, moveDir.Z * 25)
+                end
+            end
+        end)
+        bunnyHopBtn.Text = T("bunny_hop")..": "..T("on")
+        bunnyHopBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
+        showNotify(T("bunny_hop")..": "..T("on"), Color3.fromRGB(0,255,100))
+    else
+        if bunnyHopConn then bunnyHopConn:Disconnect(); bunnyHopConn = nil end
+        bunnyHopBtn.Text = T("bunny_hop")..": "..T("off")
+        bunnyHopBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+        showNotify(T("bunny_hop")..": "..T("off"), Color3.fromRGB(255,80,80))
     end
 end)
 
@@ -1394,6 +1481,7 @@ local function applyLanguage()
     fovCircleBtn.Text = T("fov_circle")..": "..(fovCircleEnabled and T("on") or T("off"))
     aimbotRangeBtn.Text = T("range")..": "..aimbotRange.." studs"
     aimbotTeamBtn.Text = T("team_check")..": "..(aimbotTeamCheck and T("on") or T("off"))
+    visibleBtn.Text = T("visible_check")..": "..(aimbotVisibleCheck and T("on") or T("off"))
     noclipBtn.Text = T("noclip")..": "..(noclipEnabled and T("on") or T("off"))
     fullbrightBtn.Text = T("fullbright")..": "..(fullbrightEnabled and T("on") or T("off"))
     tpPlayerBtn.Text = T("tp_player")
@@ -1401,6 +1489,8 @@ local function applyLanguage()
     fpsBoostBtn.Text = T("fps_boost")..": "..(fpsBoostEnabled and T("on") or T("off"))
     fastClickBtn.Text = fastClickEnabled and T("fast_click_on") or T("fast_click_off")
     clickDelayBtn.Text = T("click_delay")..": "..string.format("%.3f", clickDelay)
+    spinBotBtn.Text = T("spin_bot")..": "..(spinBotEnabled and T("on") or T("off"))
+    bunnyHopBtn.Text = T("bunny_hop")..": "..(bunnyHopEnabled and T("on") or T("off"))
     popupOk.Text = T("ok")
     popupBox.PlaceholderText = T("enter_value")
     title.Text = T("title")
@@ -1415,128 +1505,4 @@ local function applyLanguage()
     if langENBtn then langENBtn.BackgroundColor3 = (currentLang=="EN") and Color3.fromRGB(0,150,80) or Color3.fromRGB(35,35,45) end
     if langRUBtn then langRUBtn.BackgroundColor3 = (currentLang=="RU") and Color3.fromRGB(0,150,80) or Color3.fromRGB(35,35,45) end
 end
-langENBtn.MouseButton1Click:Connect(function() currentLang="EN"; applyLanguage(); showNotify("Language: EN", Color3.fromRGB(255,220,0)) end)
-langRUBtn.MouseButton1Click:Connect(function() currentLang="RU"; applyLanguage(); showNotify("Язык: RU", Color3.fromRGB(255,220,0)) end)
-
--- ========== SPEED FIX ==========
-RunService.Heartbeat:Connect(function()
-    local char = player.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-    if hum.WalkSpeed ~= currentSpeed then hum.WalkSpeed = currentSpeed end
-end)
-
--- ========== НАВИГАЦИЯ ==========
-local function backToMain(f)
-    closeFrame(f)
-    task.wait(.05)
-    openMain()
-end
-local function openSub(f,w,h)
-    menu.Visible = false
-    openFrame(f,w,h)
-end
-
-espBack.Activated:Connect(function() backToMain(espMenu) end)
-playerBack.Activated:Connect(function() backToMain(playerMenu) end)
-flyBack.Activated:Connect(function() setFly(false); backToMain(flyMenu) end)
-aimbotBack.Activated:Connect(function() backToMain(aimbotMenu) end)
-miscBack.Activated:Connect(function() backToMain(miscMenu) end)
-tpBack.Activated:Connect(function() backToMain(tpMenu) end)
-settingsBack.Activated:Connect(function() backToMain(settingsMenu) end)
-close.Activated:Connect(hideMain)
-
-mainButtons[1].Activated:Connect(function() openSub(espMenu,340,260) end)
-mainButtons[2].Activated:Connect(function() openSub(playerMenu,340,280) end)
-mainButtons[3].Activated:Connect(function() openSub(aimbotMenu,340,340) end)
-mainButtons[4].Activated:Connect(function() openSub(miscMenu,340,470) end)
-mainButtons[5].Activated:Connect(function() openSub(settingsMenu,340,340) end)
-
-flyBtn.Activated:Connect(function()
-    closeFrame(playerMenu)
-    task.wait(.05)
-    openFrame(flyMenu,340,200)
-end)
-tpPlayerBtn.Activated:Connect(function()
-    refreshTPList()
-    closeFrame(miscMenu)
-    task.wait(.05)
-    openFrame(tpMenu,260,340)
-end)
-
--- ========== DRAG ==========
-local function makeDraggable(frame, dragArea)
-    local dragging, startPos, startAbs = false,nil,nil
-    dragArea.InputBegan:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.Touch or inp.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            startPos = inp.Position
-            startAbs = frame.AbsolutePosition
-            frame.AnchorPoint = Vector2.new(0,0)
-            frame.Position = UDim2.fromOffset(startAbs.X, startAbs.Y)
-        end
-    end)
-    UIS.InputChanged:Connect(function(inp)
-        if dragging and (inp.UserInputType == Enum.UserInputType.Touch or inp.UserInputType == Enum.UserInputType.MouseMovement) then
-            local d = inp.Position - startPos
-            frame.Position = UDim2.fromOffset(startAbs.X+d.X, startAbs.Y+d.Y)
-        end
-    end)
-    UIS.InputEnded:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.Touch or inp.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-end
-
-makeDraggable(menu,title)
-makeDraggable(espMenu,espTitle)
-makeDraggable(playerMenu,playerTitle)
-makeDraggable(flyMenu,flyTitle)
-makeDraggable(aimbotMenu,aimbotTitle)
-makeDraggable(miscMenu,miscTitle)
-makeDraggable(tpMenu,tpTitle)
-makeDraggable(settingsMenu,settingsTitle)
-makeDraggable(inputPopup,popupTitle)
-
--- ========== DRAG ИКОНКИ + ОТКРЫТИЕ ==========
-local iDrag, iStartPos, iStartPosPos = false,nil,nil
-local iMoved = false
-local iDownTime = 0
-icon.InputBegan:Connect(function(inp)
-    if inp.UserInputType == Enum.UserInputType.Touch or inp.UserInputType == Enum.UserInputType.MouseButton1 then
-        iDrag = true
-        iMoved = false
-        iStartPos = inp.Position
-        iStartPosPos = icon.Position
-        iDownTime = tick()
-    end
-end)
-UIS.InputChanged:Connect(function(inp)
-    if iDrag and (inp.UserInputType == Enum.UserInputType.Touch or inp.UserInputType == Enum.UserInputType.MouseMovement) then
-        local d = inp.Position - iStartPos
-        if d.Magnitude > 5 then iMoved = true end
-        icon.Position = UDim2.new(iStartPosPos.X.Scale, iStartPosPos.X.Offset+d.X, iStartPosPos.Y.Scale, iStartPosPos.Y.Offset+d.Y)
-    end
-end)
-UIS.InputEnded:Connect(function(inp)
-    if inp.UserInputType == Enum.UserInputType.Touch or inp.UserInputType == Enum.UserInputType.MouseButton1 then
-        iDrag = false
-        if not iMoved and (tick()-iDownTime) < 0.5 then
-            if menu.Visible then hideMain() else openMain() end
-        end
-    end
-end)
-
--- ========== РЕСПАВН ==========
-player.CharacterAdded:Connect(function(char)
-    task.wait(.5)
-    local hum = char:FindFirstChild("Humanoid")
-    if hum then hum.WalkSpeed = currentSpeed end
-end)
-
--- ========== СТАРТ ==========
-updateFovCircle()
-applyLanguage()
-print("† PART 2/2 LOADED — ALL SYSTEMS GO †")
+langENBtn.MouseButton1Click:Connect(func
