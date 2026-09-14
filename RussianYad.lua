@@ -1,4 +1,4 @@
--- ===================================================================
+,-- ===================================================================
 -- ROBLOX MASTER v7.0 — ЧАСТЬ 1/2
 -- ===================================================================
 
@@ -784,256 +784,871 @@ flySpeedBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- ========== AIMBOT (мгновенный + visible check + поворот) ==========
-aimbotMenu, aimbotTitle, aimbotBack = createSubmenu(T("aimbot"))
-aimbotEnabled = false
-aimbotRadius = 200
-aimbotRange = 500
-aimbotTeamCheck = true
-aimbotVisibleCheck = true
-fovCircleEnabled = true
+-- =========================================================
+-- AIM ASSIST / FOV
+-- Для собственного Roblox-проекта
+-- =========================================================
 
-fovCircle = Instance.new("Frame")
-fovCircle.Size = UDim2.fromOffset(aimbotRadius*2,aimbotRadius*2)
-fovCircle.Position = UDim2.fromScale(0.5,0.5)
-fovCircle.AnchorPoint = Vector2.new(0.5,0.5)
-fovCircle.BackgroundColor3 = Color3.new(1,1,1)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- =========================================================
+-- НАСТРОЙКИ
+-- =========================================================
+
+local Aimbot = {
+    Enabled = false,
+
+    Radius = 200,
+    Range = 500,
+
+    TeamCheck = true,
+    VisibleCheck = true,
+
+    FOVCircle = true,
+
+    Target = nil
+}
+
+-- =========================================================
+-- FOV CIRCLE
+-- =========================================================
+
+local fovCircle = Instance.new("Frame")
+fovCircle.Name = "AimbotFOV"
+fovCircle.Size = UDim2.fromOffset(
+    Aimbot.Radius * 2,
+    Aimbot.Radius * 2
+)
+
+fovCircle.Position = UDim2.fromScale(0.5, 0.5)
+fovCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+
 fovCircle.BackgroundTransparency = 1
 fovCircle.BorderSizePixel = 0
+
 fovCircle.Visible = false
 fovCircle.ZIndex = 999
 fovCircle.Parent = gui
-Instance.new("UICorner",fovCircle).CornerRadius = UDim.new(1,0)
-fovStroke = Instance.new("UIStroke",fovCircle)
+
+local fovCorner = Instance.new("UICorner")
+fovCorner.CornerRadius = UDim.new(1, 0)
+fovCorner.Parent = fovCircle
+
+local fovStroke = Instance.new("UIStroke")
 fovStroke.Thickness = 3
-fovStroke.Color = Color3.new(1,1,1)
+fovStroke.Color = Color3.fromRGB(255, 255, 255)
 fovStroke.Parent = fovCircle
 
-fovLabel = Instance.new("TextLabel")
-fovLabel.Size = UDim2.fromOffset(220,22)
-fovLabel.Position = UDim2.new(0.5,-110,0.5,aimbotRadius+15)
+-- =========================================================
+-- FOV LABEL
+-- =========================================================
+
+local fovLabel = Instance.new("TextLabel")
+
+fovLabel.Name = "FOVLabel"
+fovLabel.Size = UDim2.fromOffset(220, 22)
+
+fovLabel.AnchorPoint = Vector2.new(0.5, 0)
+fovLabel.Position = UDim2.new(
+    0.5,
+    0,
+    0.5,
+    Aimbot.Radius + 15
+)
+
 fovLabel.BackgroundTransparency = 1
+
 fovLabel.Text = ""
-fovLabel.TextColor3 = Color3.new(1,1,1)
+fovLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
 fovLabel.TextSize = 14
 fovLabel.Font = Enum.Font.GothamBold
+
 fovLabel.TextStrokeTransparency = 0
-fovLabel.TextStrokeColor3 = Color3.new(0,0,0)
+fovLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+
 fovLabel.Visible = false
 fovLabel.ZIndex = 1000
 fovLabel.Parent = gui
 
-function pxToStuds(px)
-    local cam = workspace.CurrentCamera
-    if not cam then return 0 end
-    local pps = cam.ViewportSize.Y / (2 * math.tan(math.rad(cam.FieldOfView)/2) * 50)
-    if pps <= 0 then return 0 end
-    return math.floor(px / pps)
+-- =========================================================
+-- PIXELS -> STUDS
+-- =========================================================
+
+local function pixelsToStuds(pixels)
+    local camera = workspace.CurrentCamera
+
+    if not camera then
+        return 0
+    end
+
+    local viewport = camera.ViewportSize
+
+    if viewport.Y <= 0 then
+        return 0
+    end
+
+    local fov = math.rad(camera.FieldOfView)
+
+    local pixelsPerStud =
+        viewport.Y /
+        (2 * math.tan(fov / 2) * 50)
+
+    if pixelsPerStud <= 0 then
+        return 0
+    end
+
+    return math.floor(pixels / pixelsPerStud)
 end
 
-function updateFovCircle()
-    fovCircle.Size = UDim2.fromOffset(aimbotRadius*2,aimbotRadius*2)
-    fovCircle.Visible = aimbotEnabled and fovCircleEnabled
-    fovLabel.Position = UDim2.new(0.5,-110,0.5,aimbotRadius+15)
-    fovLabel.Text = aimbotRadius.."px (~"..pxToStuds(aimbotRadius).." studs)"
-    fovLabel.Visible = aimbotEnabled and fovCircleEnabled
+-- =========================================================
+-- UPDATE FOV
+-- =========================================================
+
+local function updateFOV()
+    fovCircle.Size = UDim2.fromOffset(
+        Aimbot.Radius * 2,
+        Aimbot.Radius * 2
+    )
+
+    fovCircle.Position = UDim2.fromScale(0.5, 0.5)
+
+    fovLabel.Position = UDim2.new(
+        0.5,
+        0,
+        0.5,
+        Aimbot.Radius + 15
+    )
+
+    fovLabel.Text =
+        tostring(Aimbot.Radius) ..
+        "px (~" ..
+        tostring(pixelsToStuds(Aimbot.Radius)) ..
+        " studs)"
+
+    fovCircle.Visible =
+        Aimbot.Enabled and Aimbot.FOVCircle
+
+    fovLabel.Visible =
+        Aimbot.Enabled and Aimbot.FOVCircle
 end
+
+-- =========================================================
+-- RAYCAST
+-- =========================================================
+
+local rayParams = RaycastParams.new()
+
+rayParams.FilterType = Enum.RaycastFilterType.Exclude
+rayParams.IgnoreWater = true
+
+local function isVisible(targetPart, character)
+    local myCharacter = player.Character
+
+    if not myCharacter then
+        return false
+    end
+
+    local myHead = myCharacter:FindFirstChild("Head")
+
+    if not myHead or not targetPart then
+        return false
+    end
+
+    rayParams.FilterDescendantsInstances = {
+        myCharacter,
+        character
+    }
+
+    local origin = myHead.Position
+    local direction = targetPart.Position - origin
+
+    local result = workspace:Raycast(
+        origin,
+        direction,
+        rayParams
+    )
+
+    return result == nil
+end
+
+-- =========================================================
+-- CHARACTER VALIDATION
+-- =========================================================
+
+local function getCharacterInfo(target)
+    if not target then
+        return nil
+    end
+
+    local character = target.Character
+
+    if not character then
+        return nil
+    end
+
+    local humanoid =
+        character:FindFirstChildOfClass("Humanoid")
+
+    local head =
+        character:FindFirstChild("Head")
+
+    local root =
+        character:FindFirstChild("HumanoidRootPart")
+
+    if not humanoid or humanoid.Health <= 0 then
+        return nil
+    end
+
+    if not head or not root then
+        return nil
+    end
+
+    return {
+        Character = character,
+        Humanoid = humanoid,
+        Head = head,
+        Root = root
+    }
+end
+
+-- =========================================================
+-- TEAM CHECK
+-- =========================================================
+
+local function isEnemy(target)
+    if target == player then
+        return false
+    end
+
+    if not Aimbot.TeamCheck then
+        return true
+    end
+
+    if not player.Team or not target.Team then
+        return true
+    end
+
+    return player.Team ~= target.Team
+end
+
+-- =========================================================
+-- SCREEN DISTANCE
+-- =========================================================
+
+local function getScreenDistance(part)
+    local camera = workspace.CurrentCamera
+
+    if not camera then
+        return math.huge, false
+    end
+
+    local screenPosition, onScreen =
+        camera:WorldToViewportPoint(part.Position)
+
+    if not onScreen then
+        return math.huge, false
+    end
+
+    local center = Vector2.new(
+        camera.ViewportSize.X / 2,
+        camera.ViewportSize.Y / 2
+    )
+
+    local point = Vector2.new(
+        screenPosition.X,
+        screenPosition.Y
+    )
+
+    return (point - center).Magnitude, true
+end
+
+-- =========================================================
+-- VALIDATE CURRENT TARGET
+-- =========================================================
+
+local function isTargetValid(target)
+    if not target then
+        return false
+    end
+
+    local info = getCharacterInfo(target)
+
+    if not info then
+        return false
+    end
+
+    if not isEnemy(target) then
+        return false
+    end
+
+    local myCharacter = player.Character
+
+    if not myCharacter then
+        return false
+    end
+
+    local myRoot =
+        myCharacter:FindFirstChild("HumanoidRootPart")
+
+    if not myRoot then
+        return false
+    end
+
+    -- Дальность
+    local distance =
+        (info.Head.Position - myRoot.Position).Magnitude
+
+    if distance > Aimbot.Range then
+        return false
+    end
+
+    -- FOV
+    local screenDistance, onScreen =
+        getScreenDistance(info.Head)
+
+    if not onScreen then
+        return false
+    end
+
+    if screenDistance > Aimbot.Radius then
+        return false
+    end
+
+    -- Видимость
+    if Aimbot.VisibleCheck then
+        if not isVisible(info.Head, info.Character) then
+            return false
+        end
+    end
+
+    return true
+end
+
+-- =========================================================
+-- FIND BEST TARGET
+-- =========================================================
+
+local function findBestTarget()
+    local myCharacter = player.Character
+
+    if not myCharacter then
+        return nil
+    end
+
+    local myHead =
+        myCharacter:FindFirstChild("Head")
+
+    local myRoot =
+        myCharacter:FindFirstChild("HumanoidRootPart")
+
+    if not myHead or not myRoot then
+        return nil
+    end
+
+    local bestTarget = nil
+    local bestScreenDistance = Aimbot.Radius
+
+    for _, target in ipairs(Players:GetPlayers()) do
+
+        if target ~= player and isEnemy(target) then
+
+            local info = getCharacterInfo(target)
+
+            if info then
+
+                local distance =
+                    (info.Head.Position - myHead.Position).Magnitude
+
+                if distance <= Aimbot.Range then
+
+                    local screenDistance, onScreen =
+                        getScreenDistance(info.Head)
+
+                    if onScreen and
+                       screenDistance <= bestScreenDistance then
+
+                        local visible = true
+
+                        if Aimbot.VisibleCheck then
+                            visible =
+                                isVisible(
+                                    info.Head,
+                                    info.Character
+                                )
+                        end
+
+                        if visible then
+                            bestScreenDistance = screenDistance
+                            bestTarget = target
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return bestTarget
+end
+
+-- =========================================================
+-- AIM
+-- =========================================================
+
+local function aimAt(target)
+    local camera = workspace.CurrentCamera
+
+    if not camera then
+        return
+    end
+
+    local info = getCharacterInfo(target)
+
+    if not info then
+        return
+    end
+
+    -- Камера смотрит на голову цели
+    camera.CFrame = CFrame.lookAt(
+        camera.CFrame.Position,
+        info.Head.Position
+    )
+
+    -- Поворот персонажа по горизонтали
+    local myCharacter = player.Character
+
+    if not myCharacter then
+        return
+    end
+
+    local root =
+        myCharacter:FindFirstChild("HumanoidRootPart")
+
+    if not root then
+        return
+    end
+
+    local myPosition = root.Position
+
+    local targetPosition = Vector3.new(
+        info.Head.Position.X,
+        myPosition.Y,
+        info.Head.Position.Z
+    )
+
+    local direction =
+        targetPosition - myPosition
+
+    if direction.Magnitude > 0.05 then
+        root.CFrame =
+            CFrame.lookAt(
+                myPosition,
+                targetPosition
+            )
+    end
+end
+
+-- =========================================================
+-- UI
+-- =========================================================
+
+aimbotToggle = Instance.new("TextButton")
+
+aimbotToggle.Size = UDim2.new(1, -30, 0, 46)
+aimbotToggle.Position = UDim2.fromOffset(15, 55)
+
+aimbotToggle.BackgroundColor3 =
+    Color3.fromRGB(80, 80, 80)
+
+aimbotToggle.Text =
+    T("aimbot_off")
+
+aimbotToggle.TextColor3 =
+    Color3.fromRGB(255, 255, 255)
+
+aimbotToggle.TextSize = 16
+aimbotToggle.Font = Enum.Font.GothamBold
+
+aimbotToggle.Parent = aimbotMenu
+
+Instance.new(
+    "UICorner",
+    aimbotToggle
+).CornerRadius = UDim.new(0, 11)
+
+aimbotToggle.MouseButton1Click:Connect(function()
+
+    Aimbot.Enabled = not Aimbot.Enabled
+
+    if not Aimbot.Enabled then
+        Aimbot.Target = nil
+    end
+
+    aimbotToggle.Text =
+        Aimbot.Enabled
+        and T("aimbot_on")
+        or T("aimbot_off")
+
+    aimbotToggle.BackgroundColor3 =
+        Aimbot.Enabled
+        and Color3.fromRGB(0, 200, 80)
+        or Color3.fromRGB(80, 80, 80)
+
+    updateFOV()
+
+    showNotify(
+        Aimbot.Enabled
+        and T("aimbot_on")
+        or T("aimbot_off"),
+
+        Aimbot.Enabled
+        and Color3.fromRGB(0, 255, 100)
+        or Color3.fromRGB(255, 80, 80)
+    )
+end)
+
+-- =========================================================
+-- FOV SIZE
+-- =========================================================
+
+aimbotRadiusBtn = Instance.new("TextButton")
+
+aimbotRadiusBtn.Size =
+    UDim2.new(1, -30, 0, 46)
+
+aimbotRadiusBtn.Position =
+    UDim2.fromOffset(15, 105)
+
+aimbotRadiusBtn.BackgroundColor3 =
+    Color3.fromRGB(28, 28, 35)
+
+aimbotRadiusBtn.Text =
+    T("fov") .. ": " ..
+    Aimbot.Radius .. "px"
+
+aimbotRadiusBtn.TextColor3 =
+    Color3.fromRGB(255, 255, 255)
+
+aimbotRadiusBtn.TextSize = 15
+aimbotRadiusBtn.Font = Enum.Font.GothamBold
+
+aimbotRadiusBtn.Parent = aimbotMenu
+
+Instance.new(
+    "UICorner",
+    aimbotRadiusBtn
+).CornerRadius = UDim.new(0, 11)
+
+aimbotRadiusBtn.MouseButton1Click:Connect(function()
+
+    showPopup(
+        T("fov") .. " (50-500px)",
+        "50-500",
+
+        function(value)
+
+            value = math.clamp(
+                tonumber(value) or Aimbot.Radius,
+                50,
+                500
+            )
+
+            Aimbot.Radius = value
+
+            aimbotRadiusBtn.Text =
+                T("fov") ..
+                ": " ..
+                math.floor(value) ..
+                "px"
+
+            updateFOV()
+        end
+    )
+end)
+
+-- =========================================================
+-- FOV CIRCLE TOGGLE
+-- =========================================================
+
+fovCircleBtn = Instance.new("TextButton")
+
+fovCircleBtn.Size =
+    UDim2.new(1, -30, 0, 46)
+
+fovCircleBtn.Position =
+    UDim2.fromOffset(15, 155)
+
+fovCircleBtn.BackgroundColor3 =
+    Color3.fromRGB(0, 200, 80)
+
+fovCircleBtn.Text =
+    T("fov_circle") ..
+    ": " ..
+    T("on")
+
+fovCircleBtn.TextColor3 =
+    Color3.fromRGB(255, 255, 255)
+
+fovCircleBtn.TextSize = 15
+fovCircleBtn.Font = Enum.Font.GothamBold
+
+fovCircleBtn.Parent = aimbotMenu
+
+Instance.new(
+    "UICorner",
+    fovCircleBtn
+).CornerRadius = UDim.new(0, 11)
+
+fovCircleBtn.MouseButton1Click:Connect(function()
+
+    Aimbot.FOVCircle =
+        not Aimbot.FOVCircle
+
+    fovCircleBtn.Text =
+        T("fov_circle") ..
+        ": " ..
+        (
+            Aimbot.FOVCircle
+            and T("on")
+            or T("off")
+        )
+
+    fovCircleBtn.BackgroundColor3 =
+        Aimbot.FOVCircle
+        and Color3.fromRGB(0, 200, 80)
+        or Color3.fromRGB(80, 80, 80)
+
+    updateFOV()
+end)
+
+-- =========================================================
+-- RANGE
+-- =========================================================
+
+aimbotRangeBtn = Instance.new("TextButton")
+
+aimbotRangeBtn.Size =
+    UDim2.new(1, -30, 0, 46)
+
+aimbotRangeBtn.Position =
+    UDim2.fromOffset(15, 205)
+
+aimbotRangeBtn.BackgroundColor3 =
+    Color3.fromRGB(28, 28, 35)
+
+aimbotRangeBtn.Text =
+    T("range") ..
+    ": " ..
+    Aimbot.Range ..
+    " studs"
+
+aimbotRangeBtn.TextColor3 =
+    Color3.fromRGB(255, 255, 255)
+
+aimbotRangeBtn.TextSize = 15
+aimbotRangeBtn.Font = Enum.Font.GothamBold
+
+aimbotRangeBtn.Parent = aimbotMenu
+
+Instance.new(
+    "UICorner",
+    aimbotRangeBtn
+).CornerRadius = UDim.new(0, 11)
+
+aimbotRangeBtn.MouseButton1Click:Connect(function()
+
+    showPopup(
+        T("range") .. " (10-2000)",
+        "10-2000",
+
+        function(value)
+
+            value = math.clamp(
+                tonumber(value) or Aimbot.Range,
+                10,
+                2000
+            )
+
+            Aimbot.Range = value
+
+            aimbotRangeBtn.Text =
+                T("range") ..
+                ": " ..
+                math.floor(value) ..
+                " studs"
+        end
+    )
+end)
+
+-- =========================================================
+-- TEAM CHECK
+-- =========================================================
+
+aimbotTeamBtn = Instance.new("TextButton")
+
+aimbotTeamBtn.Size =
+    UDim2.new(1, -30, 0, 46)
+
+aimbotTeamBtn.Position =
+    UDim2.fromOffset(15, 255)
+
+aimbotTeamBtn.BackgroundColor3 =
+    Color3.fromRGB(0, 200, 80)
+
+aimbotTeamBtn.Text =
+    T("team_check") ..
+    ": " ..
+    T("on")
+
+aimbotTeamBtn.TextColor3 =
+    Color3.fromRGB(255, 255, 255)
+
+aimbotTeamBtn.TextSize = 15
+aimbotTeamBtn.Font = Enum.Font.GothamBold
+
+aimbotTeamBtn.Parent = aimbotMenu
+
+Instance.new(
+    "UICorner",
+    aimbotTeamBtn
+).CornerRadius = UDim.new(0, 11)
+
+aimbotTeamBtn.MouseButton1Click:Connect(function()
+
+    Aimbot.TeamCheck =
+        not Aimbot.TeamCheck
+
+    aimbotTeamBtn.Text =
+        T("team_check") ..
+        ": " ..
+        (
+            Aimbot.TeamCheck
+            and T("on")
+            or T("off")
+        )
+
+    aimbotTeamBtn.BackgroundColor3 =
+        Aimbot.TeamCheck
+        and Color3.fromRGB(0, 200, 80)
+        or Color3.fromRGB(80, 80, 80)
+end)
+
+-- =========================================================
+-- VISIBLE CHECK
+-- =========================================================
+
+visibleBtn = Instance.new("TextButton")
+
+visibleBtn.Size =
+    UDim2.new(1, -30, 0, 46)
+
+visibleBtn.Position =
+    UDim2.fromOffset(15, 305)
+
+visibleBtn.BackgroundColor3 =
+    Color3.fromRGB(0, 200, 80)
+
+visibleBtn.Text =
+    T("visible_check") ..
+    ": " ..
+    T("on")
+
+visibleBtn.TextColor3 =
+    Color3.fromRGB(255, 255, 255)
+
+visibleBtn.TextSize = 15
+visibleBtn.Font = Enum.Font.GothamBold
+
+visibleBtn.Parent = aimbotMenu
+
+Instance.new(
+    "UICorner",
+    visibleBtn
+).CornerRadius = UDim.new(0, 11)
+
+visibleBtn.MouseButton1Click:Connect(function()
+
+    Aimbot.VisibleCheck =
+        not Aimbot.VisibleCheck
+
+    visibleBtn.Text =
+        T("visible_check") ..
+        ": " ..
+        (
+            Aimbot.VisibleCheck
+            and T("on")
+            or T("off")
+        )
+
+    visibleBtn.BackgroundColor3 =
+        Aimbot.VisibleCheck
+        and Color3.fromRGB(0, 200, 80)
+        or Color3.fromRGB(80, 80, 80)
+end)
+
+-- =========================================================
+-- MAIN LOOP
+-- =========================================================
 
 RunService.RenderStepped:Connect(function()
-    if aimbotEnabled and fovCircleEnabled then
+
+    local camera = workspace.CurrentCamera
+
+    if not camera then
+        return
+    end
+
+    -- FOV
+    if Aimbot.Enabled and Aimbot.FOVCircle then
         fovCircle.Visible = true
         fovLabel.Visible = true
     else
         fovCircle.Visible = false
         fovLabel.Visible = false
     end
-end)
 
-aimbotToggle = Instance.new("TextButton")
-aimbotToggle.Size = UDim2.new(1,-30,0,46)
-aimbotToggle.Position = UDim2.fromOffset(15,55)
-aimbotToggle.BackgroundColor3 = Color3.fromRGB(80,80,80)
-aimbotToggle.Text = T("aimbot_off")
-aimbotToggle.TextColor3 = Color3.new(1,1,1)
-aimbotToggle.TextSize = 16
-aimbotToggle.Font = Enum.Font.GothamBold
-aimbotToggle.Parent = aimbotMenu
-Instance.new("UICorner",aimbotToggle).CornerRadius = UDim.new(0,11)
-aimbotToggle.MouseButton1Click:Connect(function()
-    aimbotEnabled = not aimbotEnabled
-    aimbotToggle.Text = aimbotEnabled and T("aimbot_on") or T("aimbot_off")
-    aimbotToggle.BackgroundColor3 = aimbotEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
-    updateFovCircle()
-    showNotify(aimbotEnabled and T("aimbot_on") or T("aimbot_off"), aimbotEnabled and Color3.fromRGB(0,255,100) or Color3.fromRGB(255,80,80))
-end)
+    if not Aimbot.Enabled then
+        Aimbot.Target = nil
+        return
+    end
 
-aimbotRadiusBtn = Instance.new("TextButton")
-aimbotRadiusBtn.Size = UDim2.new(1,-30,0,46)
-aimbotRadiusBtn.Position = UDim2.fromOffset(15,105)
-aimbotRadiusBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
-aimbotRadiusBtn.Text = T("fov")..": "..aimbotRadius.."px"
-aimbotRadiusBtn.TextColor3 = Color3.new(1,1,1)
-aimbotRadiusBtn.TextSize = 15
-aimbotRadiusBtn.Font = Enum.Font.GothamBold
-aimbotRadiusBtn.Parent = aimbotMenu
-Instance.new("UICorner",aimbotRadiusBtn).CornerRadius = UDim.new(0,11)
-aimbotRadiusBtn.MouseButton1Click:Connect(function()
-    showPopup(T("fov").." (50-500px)","50-500",function(v)
-        aimbotRadius = v
-        aimbotRadiusBtn.Text = T("fov")..": "..math.floor(v).."px"
-        updateFovCircle()
-    end)
-end)
+    -- Проверяем существующую цель
+    if Aimbot.Target then
 
-fovCircleBtn = Instance.new("TextButton")
-fovCircleBtn.Size = UDim2.new(1,-30,0,46)
-fovCircleBtn.Position = UDim2.fromOffset(15,155)
-fovCircleBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
-fovCircleBtn.Text = T("fov_circle")..": "..T("on")
-fovCircleBtn.TextColor3 = Color3.new(1,1,1)
-fovCircleBtn.TextSize = 15
-fovCircleBtn.Font = Enum.Font.GothamBold
-fovCircleBtn.Parent = aimbotMenu
-Instance.new("UICorner",fovCircleBtn).CornerRadius = UDim.new(0,11)
-fovCircleBtn.MouseButton1Click:Connect(function()
-    fovCircleEnabled = not fovCircleEnabled
-    fovCircleBtn.Text = T("fov_circle")..": "..(fovCircleEnabled and T("on") or T("off"))
-    fovCircleBtn.BackgroundColor3 = fovCircleEnabled and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
-    updateFovCircle()
-end)
-
-aimbotRangeBtn = Instance.new("TextButton")
-aimbotRangeBtn.Size = UDim2.new(1,-30,0,46)
-aimbotRangeBtn.Position = UDim2.fromOffset(15,205)
-aimbotRangeBtn.BackgroundColor3 = Color3.fromRGB(28,28,35)
-aimbotRangeBtn.Text = T("range")..": "..aimbotRange.." studs"
-aimbotRangeBtn.TextColor3 = Color3.new(1,1,1)
-aimbotRangeBtn.TextSize = 15
-aimbotRangeBtn.Font = Enum.Font.GothamBold
-aimbotRangeBtn.Parent = aimbotMenu
-Instance.new("UICorner",aimbotRangeBtn).CornerRadius = UDim.new(0,11)
-aimbotRangeBtn.MouseButton1Click:Connect(function()
-    showPopup(T("range").." (10-2000)","10-2000",function(v)
-        aimbotRange = v
-        aimbotRangeBtn.Text = T("range")..": "..math.floor(v).." studs"
-    end)
-end)
-
-aimbotTeamBtn = Instance.new("TextButton")
-aimbotTeamBtn.Size = UDim2.new(1,-30,0,46)
-aimbotTeamBtn.Position = UDim2.fromOffset(15,255)
-aimbotTeamBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
-aimbotTeamBtn.Text = T("team_check")..": "..T("on")
-aimbotTeamBtn.TextColor3 = Color3.new(1,1,1)
-aimbotTeamBtn.TextSize = 15
-aimbotTeamBtn.Font = Enum.Font.GothamBold
-aimbotTeamBtn.Parent = aimbotMenu
-Instance.new("UICorner",aimbotTeamBtn).CornerRadius = UDim.new(0,11)
-aimbotTeamBtn.MouseButton1Click:Connect(function()
-    aimbotTeamCheck = not aimbotTeamCheck
-    aimbotTeamBtn.Text = T("team_check")..": "..(aimbotTeamCheck and T("on") or T("off"))
-    aimbotTeamBtn.BackgroundColor3 = aimbotTeamCheck and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
-end)
-
-visibleBtn = Instance.new("TextButton")
-visibleBtn.Size = UDim2.new(1,-30,0,46)
-visibleBtn.Position = UDim2.fromOffset(15,305)
-visibleBtn.BackgroundColor3 = Color3.fromRGB(0,200,80)
-visibleBtn.Text = T("visible_check")..": "..T("on")
-visibleBtn.TextColor3 = Color3.new(1,1,1)
-visibleBtn.TextSize = 15
-visibleBtn.Font = Enum.Font.GothamBold
-visibleBtn.Parent = aimbotMenu
-Instance.new("UICorner",visibleBtn).CornerRadius = UDim.new(0,11)
-visibleBtn.MouseButton1Click:Connect(function()
-    aimbotVisibleCheck = not aimbotVisibleCheck
-    visibleBtn.Text = T("visible_check")..": "..(aimbotVisibleCheck and T("on") or T("off"))
-    visibleBtn.BackgroundColor3 = aimbotVisibleCheck and Color3.fromRGB(0,200,80) or Color3.fromRGB(80,80,80)
-end)
-
-function isVisible(targetPart, myHead)
-    local origin = myHead.Position
-    local dir = targetPart.Position - origin
-    local rayParams = RaycastParams.new()
-    rayParams.FilterType = Enum.RaycastFilterType.Exclude
-    rayParams.FilterDescendantsInstances = {player.Character, targetPart.Parent}
-    local result = workspace:Raycast(origin, dir, rayParams)
-    return result == nil
-end
-
-currentTarget = nil
-RunService.RenderStepped:Connect(function()
-    if not aimbotEnabled then return end
-    local myChar = player.Character
-    if not myChar or not myChar:FindFirstChild("Head") then return end
-    local myHRP = myChar:FindFirstChild("HumanoidRootPart")
-    local myHead = myChar:FindFirstChild("Head")
-    if not myHRP or not myHead then return end
-    local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-    local myPos = myHead.Position
-
-    if currentTarget then
-        local tChar = currentTarget.Character
-        if not tChar or not tChar:FindFirstChild("Head") or not tChar:FindFirstChildOfClass("Humanoid") or tChar.Humanoid.Health<=0 then
-            currentTarget = nil
-        else
-            local dist = (tChar.Head.Position - myPos).Magnitude
-            if dist > aimbotRange then currentTarget = nil end
-            if aimbotVisibleCheck and not isVisible(tChar.Head, myHead) then currentTarget = nil end
+        if not isTargetValid(Aimbot.Target) then
+            Aimbot.Target = nil
         end
     end
 
-    local targetPart, targetPlayer, closestDist = nil, nil, aimbotRadius
-    if currentTarget and currentTarget.Character then
-        local head = currentTarget.Character:FindFirstChild("Head")
-        if head then
-            local sp, onScreen = Camera:WorldToViewportPoint(head.Position)
-            if onScreen then targetPart=head; targetPlayer=currentTarget end
-        end
+    -- Если цели нет — ищем новую
+    if not Aimbot.Target then
+        Aimbot.Target = findBestTarget()
     end
 
-    if not targetPart then
-        for _,target in ipairs(Players:GetPlayers()) do
-            if target ~= player and target.Character then
-                if not (aimbotTeamCheck and target.Team and player.Team and target.Team == player.Team) then
-                    local head = target.Character:FindFirstChild("Head")
-                    if head then
-                        local distS = (head.Position - myPos).Magnitude
-                        if distS <= aimbotRange then
-                            if not aimbotVisibleCheck or isVisible(head, myHead) then
-                                local sp, onScreen = Camera:WorldToViewportPoint(head.Position)
-                                if onScreen then
-                                    local screenD = (Vector2.new(sp.X,sp.Y) - center).Magnitude
-                                    if screenD <= aimbotRadius and screenD < closestDist then
-                                        closestDist = screenD
-                                        targetPart = head
-                                        targetPlayer = target
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
-        if targetPart then currentTarget = targetPlayer end
-    end
+    -- Наведение
+    if Aimbot.Target then
 
-    if targetPart then
-        fovStroke.Color = Color3.fromRGB(0,255,100)
-        -- МГНОВЕННАЯ камера в голову
-        Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, targetPart.Position)
-        -- МГНОВЕННЫЙ поворот тела (только по горизонтали)
-        local myPos2 = myHRP.Position
-        local tPos = targetPart.Position
-        local flatTarget = Vector3.new(tPos.X, myPos2.Y, tPos.Z)
-        if (flatTarget - myPos2).Magnitude > 0.1 then
-            myHRP.CFrame = CFrame.lookAt(myPos2, flatTarget)
-        end
+        fovStroke.Color =
+            Color3.fromRGB(0, 255, 100)
+
+        aimAt(Aimbot.Target)
+
     else
-        fovStroke.Color = Color3.new(1,1,1)
+
+        fovStroke.Color =
+            Color3.fromRGB(255, 255, 255)
     end
 end)
+
+-- =========================================================
+-- INITIAL UPDATE
+-- =========================================================
+
+updateFOV()
 -- ========== MISC (СО СКРОЛЛОМ) ==========
 miscMenu, miscTitle, miscBack = createSubmenu(T("misc"))
 noclipEnabled = false
